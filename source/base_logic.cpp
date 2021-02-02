@@ -46,3 +46,7 @@ void BL::Game_session::nullify_score() {
 unsigned long long BL::Game_session::get_score() const {
     return score;
 }
+
+void BL::Game_session::pause_session() {
+    game_status = Game_status::PAUSE;
+}

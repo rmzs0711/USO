@@ -46,6 +46,7 @@ public:
         //        }
         return game_status;
     }
+    void pause_session();
 };
 
 [[maybe_unused]] void play_beat_sound(sf::SoundBuffer &);

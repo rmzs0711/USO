@@ -17,7 +17,7 @@ int main() {
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
     Music buffer;
 
-    buffer.openFromFile("..\\source\\helltaker_rem.ogg");
+    buffer.openFromFile(R"(..\data\helltaker_rem.ogg)");
 
     buffer.play();
 
@@ -39,7 +39,7 @@ int main() {
             }
         }
 
-        img.loadFromFile("..\\source\\lucifer.png");
+        img.loadFromFile("..\\data\\lucifer.png");
 
         RectangleShape rect(Vector2f(WIDTH, HEIGHT));
         //        rect.setFillColor(Color(230, 0, 230));
