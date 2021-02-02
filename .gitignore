@@ -2,7 +2,7 @@
 *.d
 *.idea
 *.clang-format
-
+*.mp3
 cmake-build-debug
 
 # Compiled Object files

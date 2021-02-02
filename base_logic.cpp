@@ -6,29 +6,43 @@
 #include "SFML/Audio.hpp"
 
 [[maybe_unused]] void BL::play_beat_sound(sf::SoundBuffer &buffer) {
-    //    buffer.loadFromFile(R"(..\source\sounds\click.ogg)");
     sf::Sound sound;
     sound.setBuffer(buffer);
     sound.play();
 }
 
-void BL::Health_bar::increase_health(int bonus) {
-    health = (health + bonus) % MAX_HEALTH;
+void BL::Game_session::increase_health(int bonus) {
+    health += bonus;
+    health = health - (health % MAX_HEALTH);
 }
 
-void BL::Health_bar::decrease_health(int damage) {
+void BL::Game_session::decrease_health(int damage) {
     health -= damage;
+    if (game_status == Game_status::ACTION && health < 0) {
+        game_status = Game_status::DEFEAT;
+    }
 }
 
-void BL::Combo_status::increase_combo(unsigned long long combo_point) {
-    combo += combo_point;
+int BL::Game_session::get_health() const {
+    return health;
 }
 
-[[maybe_unused]] unsigned long long BL::Combo_status::get_combo() const {
-    return combo;
+void BL::Game_session::increase_combo(unsigned long long combo_point) {
+    combo_status += combo_point;
 }
 
-void BL::Score::increase_score(unsigned long long score_point,
-                               unsigned long long combo_bonus) {
+[[maybe_unused]] unsigned long long BL::Game_session::get_combo() const {
+    return combo_status;
+}
+
+void BL::Game_session::increase_score(unsigned long long score_point,
+                                      unsigned long long combo_bonus) {
     score += (score_point * combo_bonus);
+}
+void BL::Game_session::nullify_score() {
+    score = 0;
+}
+
+unsigned long long BL::Game_session::get_score() const {
+    return score;
 }
