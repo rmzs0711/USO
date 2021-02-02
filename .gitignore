@@ -1,7 +1,7 @@
 # Prerequisites
 *.d
 *.idea
-*.clangformat
+*.clang-format
 
 cmake-build-debug
 
