@@ -1,11 +1,8 @@
-//
-// Created by rmzs0 on 02.02.2021.
-//
-
 #ifndef USO_BASE_LOGIC_H
 #define USO_BASE_LOGIC_H
 
 #include "SFML/Audio.hpp"
+
 namespace {
 const int MAX_HEALTH = 200;
 }  // namespace
@@ -44,9 +41,9 @@ public:
     [[nodiscard]] int get_health() const;
 
     Game_status get_game_status(/*map*/) {
-//        if (map == ended) { TODO
-//            game_status = Game_status::VICTORY;
-//        }
+        //        if (map == ended) { TODO
+        //            game_status = Game_status::VICTORY;
+        //        }
         return game_status;
     }
 };
