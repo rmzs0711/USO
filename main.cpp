@@ -1,6 +1,6 @@
-#include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
 #include <cassert>
+#include "SFML/Audio.hpp"
+#include "SFML/Graphics.hpp"
 
 using namespace sf;
 
@@ -8,7 +8,8 @@ int main() {
     ContextSettings setting;
 
     setting.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(1080, 720), "SFML Works!", Style::Fullscreen, setting);
+    sf::RenderWindow window(sf::VideoMode(1080, 720), "SFML Works!",
+                            Style::Fullscreen, setting);
     sf::Vector2i position_circle{0, 0};
     sf::Vector2i position_mouse{0, 0};
     const float radius = 100;
@@ -24,24 +25,24 @@ int main() {
         Event event;
         Texture img;
         while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) window.close();
+            if (event.type == Event::Closed)
+                window.close();
             if (event.type == Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     window.close();
                 }
-            }if (event.type == sf::Event::MouseButtonPressed) {
+            }
+            if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     position_mouse = Mouse::getPosition();
-
                 }
             }
         }
 
-
         img.loadFromFile("..\\source\\lucifer.png");
 
         RectangleShape rect(Vector2f(WIDTH, HEIGHT));
-//        rect.setFillColor(Color(230, 0, 230));
+        //        rect.setFillColor(Color(230, 0, 230));
         rect.setPosition(0, 0);
         rect.setTexture(&img);
 
@@ -54,7 +55,6 @@ int main() {
         window.draw(circle);
 
         window.display();
-
     }
     return 0;
 }
