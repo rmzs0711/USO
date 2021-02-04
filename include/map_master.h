@@ -4,6 +4,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <list>
 #include "SFML/Graphics.hpp"
 #include "maps.h"
 #include "base_logic.h"
@@ -21,7 +22,8 @@ public:
 };
 
 struct Field {
-    std::vector<std::unique_ptr<Map_object>> circles;
+    std::list<std::unique_ptr<Map_object>> field_objects;
+
 };
 }  // namespace USO
 #endif  // USO_MAP_MASTER_H
