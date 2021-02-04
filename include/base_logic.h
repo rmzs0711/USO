@@ -21,13 +21,15 @@ private:
     int health;
     unsigned long long score;
     unsigned long long combo_status;
+    sf::Time game_time;
 
 public:
     Game_session()
         : game_status(Game_status::ACTION),
           health(MAX_HEALTH),
           score(0),
-          combo_status(0) {}
+          combo_status(0),
+          game_time() {}
 
     void increase_score(unsigned long long, unsigned long long);
     void nullify_score();

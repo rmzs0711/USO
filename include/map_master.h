@@ -23,7 +23,6 @@ public:
 
 struct Field {
     std::list<std::unique_ptr<Map_object>> field_objects;
-
 };
 }  // namespace USO
 #endif  // USO_MAP_MASTER_H

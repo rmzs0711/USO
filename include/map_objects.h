@@ -2,17 +2,9 @@
 #define USO_MAP_OBJECTS_H
 
 namespace USO {
-enum class Aim_objects {
-    CIRCLE,
-    SLIDER,
-    SPINNER,
-    MUDA
-};
+enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
-enum class Conveyor_objects {
-    NOTE,
-    HOLD_NOTE
-};
+enum class Conveyor_objects { NOTE, HOLD_NOTE };
 
 enum class Bulletproof_objects {
     SHAPE,
@@ -24,14 +16,20 @@ private:
     sf::Time duration_time;
     float x_pos;
     float y_pos;
+
 protected:
-    Map_object(sf::Time &start_time_, sf::Time &duration_time_, float x, float y)
-        : start_time(start_time_), duration_time(duration_time_), x_pos(x), y_pos(y) {}
+    Map_object(sf::Time &start_time_,
+               sf::Time &duration_time_,
+               float x,
+               float y)
+        : start_time(start_time_),
+          duration_time(duration_time_),
+          x_pos(x),
+          y_pos(y) {}
 };
 
 struct Aim_circle : Map_object {
 private:
-
     float beat_radius;
     float active_circle_start_radius;
     float active_circle_radius_shift;
