@@ -3,6 +3,8 @@
 *.idea
 *.clang-format
 *.mp3
+
+#clion rofls
 cmake-build-debug
 
 # Compiled Object files
