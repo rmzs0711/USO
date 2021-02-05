@@ -40,9 +40,9 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             default:
                 continue;
         }
-        for (auto &circle : field.circles) {
-            //            TODO: window.draw(circle);
-        }
+//        for (auto &circle : ) {
+//            //            TODO: window.draw(circle);
+//        }
         window.display();
     }
 }
