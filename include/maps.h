@@ -5,16 +5,17 @@
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
 #include "map_objects.h"
+#include <memory>
 
 namespace USO {
 
 struct Map {
-private:
+protected:
     std::string music_address;
     std::string music_name;
     std::string map_name;
     std::string author_name;
-    std::vector<std::unique_ptr<Map_object>> map_objects;
+    std::vector<std::shared_ptr<Map_object>> map_objects;
 
 public:
     // TODO setters, getters
@@ -22,7 +23,7 @@ public:
         std::string music_name_,
         std::string map_name_,
         std::string author_name_,
-        std::vector<std::unique_ptr<Map_object>> map_objects_ = {})
+        std::vector<std::shared_ptr<Map_object>> map_objects_ = {})
         : music_address(std::move(music_adress_)),
           music_name(std::move(music_name_)),
           map_name(std::move(map_name_)),
@@ -31,6 +32,7 @@ public:
     virtual ~Map() = default;
 
     virtual void run(sf::RenderWindow &) = 0;
+
 };
 
 struct Aim_map final : Map {
@@ -38,13 +40,14 @@ struct Aim_map final : Map {
             std::string music_name_,
             std::string map_name_,
             std::string author_name_,
-            std::vector<std::unique_ptr<Map_object>> map_objects_ = {})
+            std::vector<std::shared_ptr<Map_object>> map_objects_ = {})
         : Map(std::move(music_adress_),
               std::move(music_name_),
               std::move(map_name_),
               std::move(author_name_),
               std::move(map_objects_)) {}
     void run(sf::RenderWindow &) override;
+
 };
 
 struct Conveyor_map final : Map {

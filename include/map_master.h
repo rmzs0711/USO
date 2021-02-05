@@ -1,14 +1,14 @@
 #ifndef USO_MAP_MASTER_H
 #define USO_MAP_MASTER_H
 
+#include <list>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <list>
 #include "SFML/Graphics.hpp"
-#include "maps.h"
 #include "base_logic.h"
 #include "map_objects.h"
+#include "maps.h"
 
 namespace USO {
 
@@ -24,8 +24,9 @@ public:
 struct Field {
 private:
     std::list<std::unique_ptr<Map_object>> field_objects;
-public:
 
+public:
+    void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it, sf::Time);
 };
 
 }  // namespace USO

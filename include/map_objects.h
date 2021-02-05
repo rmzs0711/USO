@@ -1,14 +1,13 @@
 #ifndef USO_MAP_OBJECTS_H
 #define USO_MAP_OBJECTS_H
+#include "SFML/System/Time.hpp"
 
 namespace USO {
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
 enum class Conveyor_objects { NOTE, HOLD_NOTE };
 
-enum class Bulletproof_objects {
-    SHAPE,
-};
+enum class Bulletproof_objects { SHAPE };
 
 struct Map_object {
 private:
@@ -26,7 +25,13 @@ protected:
           duration_time(duration_time_),
           x_pos(x),
           y_pos(y) {}
+
+public:
     virtual ~Map_object() = default;
+    sf::Time &get_start_time();
+    sf::Time &get_duration_time();
+    float &get_x_coord();
+    float &get_y_coord();
 };
 
 struct Aim_circle final : Map_object {
@@ -50,10 +55,10 @@ public:
     // TODO Logic
 };
 
-//struct Aim_slider : Aim_circle {
-//private:
+// struct Aim_slider : Aim_circle {
+// private:
 //    // TODO traectory
-//public:
+// public:
 //    Aim_slider(sf::Time &start_time_,
 //               sf::Time &duration_time_,
 //               float x,
@@ -105,11 +110,11 @@ public:
         : Map_object(start_time_, duration_time_, x, y), position(position_) {}
 };
 
-//struct Conveyor_hold_note : Conveyor_note {
-//private:
+// struct Conveyor_hold_note : Conveyor_note {
+// private:
 //    sf::Time duration;
 //
-//public:
+// public:
 //    Conveyor_hold_note(sf::Time &start_time_,
 //                       sf::Time &duration_time_,
 //                       float x,
