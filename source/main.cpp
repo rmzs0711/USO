@@ -16,13 +16,13 @@ int main() {
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
     Music buffer;
-
+//
     buffer.openFromFile(R"(..\data\helltaker_rem.ogg)");
-
+//
     buffer.play();
 
     while (window.isOpen()) {
-        Event event;
+        Event event{};
         Texture img;
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
