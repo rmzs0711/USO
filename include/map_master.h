@@ -23,10 +23,11 @@ public:
 
 struct Field {
 private:
-    std::list<std::unique_ptr<Map_object>> field_objects;
+    std::list<std::shared_ptr<Map_object>> field_objects;
 
 public:
-    void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it, sf::Time);
+    void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
+              sf::Time);
 };
 
 }  // namespace USO

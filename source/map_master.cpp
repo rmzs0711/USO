@@ -6,6 +6,7 @@ void USO::Field::push(
     sf::Time current_time) {
     if ((*(*map_object_it)).get_start_time() == current_time) {
         field_objects.push_back(*map_object_it);
+        map_object_it++;
     }
 }
 
