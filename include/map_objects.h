@@ -1,5 +1,6 @@
 #ifndef USO_MAP_OBJECTS_H
 #define USO_MAP_OBJECTS_H
+#include "SFML/Graphics.hpp"
 
 namespace USO {
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
@@ -11,42 +12,50 @@ enum class Bulletproof_objects {
 };
 
 struct Map_object {
-private:
+protected:
     sf::Time start_time;
     sf::Time duration_time;
     float x_pos;
     float y_pos;
-
-protected:
+    int index;
     Map_object(sf::Time &start_time_,
                sf::Time &duration_time_,
                float x,
-               float y)
+               float y, int index_)
         : start_time(start_time_),
           duration_time(duration_time_),
           x_pos(x),
-          y_pos(y) {}
+          y_pos(y),
+          index(index_){}
+
+    virtual void change_state() = 0;
+    virtual bool check_event() = 0;
+    virtual void draw(sf::RenderWindow window) = 0;
 };
 
 struct Aim_circle : Map_object {
 private:
-    float beat_radius;
-    float active_circle_start_radius;
-    float active_circle_radius_shift;
+    float beat_radius = 0;
+    float active_circle_radius = 0;
+    float active_circle_radius_shift = 0;
+
 
 public:
     Aim_circle(sf::Time &start_time_,
                sf::Time &duration_time_,
                float x,
                float y,
+               int index,
                float beat_radius_,
-               float active_circle_start_radius_,
+               float active_circle_radius_,
                float active_circle_radius_shift_)
-        : Map_object(start_time_, duration_time_, x, y),
+        : Map_object(start_time_, duration_time_, x, y, index),
           beat_radius(beat_radius_),
-          active_circle_start_radius(active_circle_start_radius_),
+          active_circle_radius(active_circle_radius_),
           active_circle_radius_shift(active_circle_radius_shift_) {}
-    // TODO Logic
+    void change_state() override;
+    bool check_event() override;
+    void draw(sf::RenderWindow window) override;
 };
 
 struct Aim_slider : Aim_circle {
@@ -57,6 +66,7 @@ public:
                sf::Time &duration_time_,
                float x,
                float y,
+               int index,
                float beat_radius_,
                float active_circle_start_radius_,
                float active_circle_radius_shift_)
@@ -64,6 +74,7 @@ public:
                      duration_time_,
                      x,
                      y,
+                     index,
                      beat_radius_,
                      active_circle_start_radius_,
                      active_circle_radius_shift_) {}
@@ -82,9 +93,10 @@ public:
              sf::Time &duration_time_,
              float x,
              float y,
+             int index,
              float beat_radius_,
              unsigned beat_count_)
-        : Map_object(start_time_, duration_time_, x, y),
+        : Map_object(start_time_, duration_time_, x, y, index),
           beat_radius(beat_radius_),
           beat_count(beat_count_) {}
 };
@@ -100,8 +112,9 @@ public:
                   sf::Time &duration_time_,
                   float x,
                   float y,
+                  int index,
                   Conveyor_note_key_position position_)
-        : Map_object(start_time_, duration_time_, x, y), position(position_) {}
+        : Map_object(start_time_, duration_time_, x, y, index), position(position_) {}
 };
 
 struct Conveyor_hold_note : Conveyor_note {
@@ -113,9 +126,10 @@ public:
                        sf::Time &duration_time_,
                        float x,
                        float y,
+                       int index,
                        Conveyor_note_key_position position_,
                        sf::Time duration_)
-        : Conveyor_note(start_time_, duration_time_, x, y, position_),
+        : Conveyor_note(start_time_, duration_time_, x, y, index, position_),
           duration(duration_) {}
 };
 
