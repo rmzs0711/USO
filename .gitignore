@@ -3,6 +3,8 @@
 *.idea
 *.clang-format
 *.mp3
+*.jpg
+*jpeg
 
 #clion rofls
 cmake-build-debug

@@ -23,7 +23,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
            gameSession.get_game_status() != BL::Game_status::DEFEAT) {
         switch (gameSession.get_game_status()) {
             case BL::Game_status::ACTION: {
-                // TODO field.push_back() circles from map
                 if (current_object_it != map_objects.end()) {
                     assert(*current_object_it);
                     field.push(current_object_it,
@@ -48,16 +47,15 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             }
 
             case BL::Game_status::PAUSE: {
-                //когда отожмут паузу, нужно сделать restart clock
+                //когда отожмут паузу, нужно сделать restart clock, потому что
+                // sfml по пацански не останавливается
                 break;
             }
 
             default:
                 continue;
         }
-        //TODO проход по филду и перекидывание состояний в window.
-
-
+        // TODO проход по филду и перекидывание состояний в window.
 
         //        for (auto &circle : ) {
         //            //            TODO: window.draw(circle);

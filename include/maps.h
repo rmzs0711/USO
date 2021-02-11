@@ -16,7 +16,6 @@ protected:
     std::string map_name;
     std::string author_name;
     std::vector<std::shared_ptr<Map_object>> map_objects;
-
 public:
     // TODO setters, getters
     Map(std::string music_adress_,
