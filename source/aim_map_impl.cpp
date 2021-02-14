@@ -35,7 +35,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     }
                 }
                 sf::Event event{};
-                if (window.pollEvent(event)) {
+                if (window.pollEvent(event) || drag) {
                     if (event.type == sf::Event::KeyPressed) {
                         if (event.key.code == sf::Keyboard::Escape) {
                             past_time = clock.getElapsedTime();
@@ -43,7 +43,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         }
                     } else if (event.type == sf::Event::MouseButtonPressed) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
-                            drag = true; //Зажимаю мышку
+                            drag = true;  //Зажимаю мышку
                             //Я тут думаю сделать проверку только на первый
                             //элемент, типа а зачем нам проходить по всему полю,
                             //если игроку нужно попасть только в один объект{
@@ -52,18 +52,18 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                                              (float)event.mouseButton.y,
                                              game_session);
                         }
-                    }
-                } else if (event.type == sf::Event::MouseButtonReleased) {
-                    if (event.mouseButton.button == sf::Mouse::Left) {
-                        drag = false; //отпускаю мышку
-                    }
-                } else if (drag) { // пока мышка нажата
-                    USO::Map_object &front_object =
-                        *(field.get_field_objects().front().get());
-                    if (typeid(front_object) == typeid(USO::Aim_slider)) {
-                        front_object.check_event((float)event.mouseButton.x,
-                                                 (float)event.mouseButton.y,
-                                                 game_session);
+                    } else if (event.type == sf::Event::MouseButtonReleased) {
+                        if (event.mouseButton.button == sf::Mouse::Left) {
+                            drag = false;  //отпускаю мышку
+                        }
+                    } else if (drag ) {  // пока мышка нажата
+                        USO::Map_object &front_object =
+                            *(field.get_field_objects().front().get());
+                        if (typeid(front_object) == typeid(USO::Aim_slider)) {
+                            front_object.check_event((float)event.mouseButton.x,
+                                                     (float)event.mouseButton.y,
+                                                     game_session);
+                        }
                     }
                 }
 
