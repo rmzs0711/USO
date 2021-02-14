@@ -1,7 +1,8 @@
 #ifndef USO_MAP_OBJECTS_H
 #define USO_MAP_OBJECTS_H
-#include "SFML/System/Time.hpp"
 #include "SFML/Graphics.hpp"
+#include "SFML/System/Time.hpp"
+#include "base_logic.h"
 
 namespace USO {
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
@@ -27,13 +28,14 @@ protected:
           duration_time(duration_time_),
           x_pos(x),
           y_pos(y),
-          index(index_){}
-
-    virtual void change_state() = 0;
-    virtual bool check_event(float x, float y) = 0;
-    virtual void draw(sf::RenderWindow window) = 0;
+          index(index_) {}
 
 public:
+    virtual bool change_state() = 0;
+    virtual bool check_event(float x,
+                             float y,
+                             BL::Game_session &game_session) = 0;
+    virtual void draw(sf::RenderWindow &window) = 0;
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
@@ -41,8 +43,8 @@ public:
     virtual float &get_y_coord();
 };
 
-struct Aim_circle final : Map_object {
-private:
+struct Aim_circle : Map_object {
+protected:
     float beat_radius;
     float active_circle_radius;
     float active_circle_shift;
@@ -61,32 +63,45 @@ public:
           active_circle_radius(active_circle_radius_),
           active_circle_shift(active_circle_shift_) {}
 
-    void change_state() override;
-    bool check_event(float x, float y) override;
-    void draw(sf::RenderWindow window) override;
+    bool change_state() override;
+    bool check_event(float x, float y, BL::Game_session &game_session) override;
+    void draw(sf::RenderWindow &window) override;
 };
 
-// struct Aim_slider : Aim_circle {
-// private:
-//    // TODO traectory
-// public:
-//    Aim_slider(sf::Time &start_time_,
-//               sf::Time &duration_time_,
-//               float x,
-//               float y,
-//               int index_,
-//               float beat_radius_,
-//               float active_circle_start_radius_,
-//               float active_circle_radius_shift_)
-//        : Aim_circle(start_time_,
-//                     duration_time_,
-//                     x,
-//                     y,
-//                     index_,
-//                     beat_radius_,
-//                     active_circle_start_radius_,
-//                     active_circle_radius_shift_) {}
-//};
+struct Aim_slider : Aim_circle {
+private:
+    float x_shift;
+    float y_shift;
+    float dist_pow_2;
+
+public:
+    Aim_slider(sf::Time &start_time_,
+               sf::Time &duration_time_,
+               float x,
+               float y,
+               int index_,
+               float beat_radius_,
+               float active_circle_start_radius_,
+               float active_circle_radius_shift_,
+               float x_shift_,
+               float y_shift_,
+               float x_end,
+               float y_end)
+        : Aim_circle(start_time_,
+                     duration_time_,
+                     x,
+                     y,
+                     index_,
+                     beat_radius_,
+                     active_circle_start_radius_,
+                     active_circle_radius_shift_),
+          x_shift(x_shift_),
+          y_shift(y_shift_),
+          dist_pow_2((x_end - x) * (x_end - x) + (y_end - y) * (y_end - y)) {}
+    bool change_state() override;
+    bool check_event(float x, float y, BL::Game_session &game_session) override;
+    void draw(sf::RenderWindow &window) override;
+};
 
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
 // отслеживать поворот мыши
@@ -111,6 +126,7 @@ public:
 
 enum class Conveyor_note_key_position { D, F, J, K };
 
+//Потом
 struct Conveyor_note : Map_object {
 private:
     Conveyor_note_key_position position;
@@ -122,7 +138,8 @@ public:
                   float y,
                   int index_,
                   Conveyor_note_key_position position_)
-        : Map_object(start_time_, duration_time_, x, y, index_), position(position_) {}
+        : Map_object(start_time_, duration_time_, x, y, index_),
+          position(position_) {}
 };
 
 // struct Conveyor_hold_note : Conveyor_note {

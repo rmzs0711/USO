@@ -9,7 +9,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
 
-    BL::Game_session gameSession;
+    BL::Game_session game_session;
     USO::Field field;
     sf::Clock clock;
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
@@ -17,29 +17,44 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
 
-    assert(gameSession.get_game_status() == BL::Game_status::ACTION);
-
-    while (gameSession.get_game_status() != BL::Game_status::VICTORY ||
-           gameSession.get_game_status() != BL::Game_status::DEFEAT) {
-        switch (gameSession.get_game_status()) {
+    assert(game_session.get_game_status() == BL::Game_status::ACTION);
+    bool drag = false;
+    while (game_session.get_game_status() != BL::Game_status::VICTORY ||
+           game_session.get_game_status() != BL::Game_status::DEFEAT) {
+        switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {
                     assert(*current_object_it);
                     field.push(current_object_it,
                                past_time + clock.getElapsedTime());
                 }
+                for (auto it = field.get_field_objects().begin(); it != field.get_field_objects().end();  ++it) {
+                    if (!(**it).change_state()) {
+                        field.get_field_objects().erase(it);
+                    }
+                }
                 sf::Event event{};
-                while (window.pollEvent(event)) {
+                if (window.pollEvent(event)) {
                     if (event.type == sf::Event::KeyPressed) {
                         if (event.key.code == sf::Keyboard::Escape) {
                             past_time = clock.getElapsedTime();
-                            gameSession.pause_session();
+                            game_session.pause_session();
                         }
-                    }
-                    if (event.type == sf::Event::MouseButtonPressed) {
+                    } else if (event.type == sf::Event::MouseButtonPressed) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
-                            // TODO make_click or something
+                            drag = true;
+                            for (auto &object_ptr : field.get_field_objects()) {
+                                (*object_ptr)
+                                    .check_event((float)event.mouseButton.x,
+                                                 (float)event.mouseButton.y,
+                                                 game_session);
+                            }
                         }
+                    } else if (event.type == sf::Event::MouseButtonReleased) {
+                        if (event.mouseButton.button == sf::Mouse::Left) {
+                            drag = false;
+                        }
+                    } else if (drag) {
                     }
                 }
 
@@ -55,11 +70,9 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             default:
                 continue;
         }
-        // TODO проход по филду и перекидывание состояний в window.
-
-        //        for (auto &circle : ) {
-        //            //            TODO: window.draw(circle);
-        //        }
+        for (auto &object_ptr : field.get_field_objects()) {
+            (*object_ptr).draw(window);
+        }
         window.display();
     }
 }
