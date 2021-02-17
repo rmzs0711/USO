@@ -15,10 +15,11 @@ namespace USO {
 struct Map_choice_menu {
 private:
     std::vector<std::unique_ptr<USO::Map>> map_pool;
+
 public:
-    explicit Map_choice_menu(std::string& saved_maps_names_list)
+    explicit Map_choice_menu(std::string &saved_maps_names_list)
         : map_pool({}) {
-        //TODO читается файл по заданному адресу и потом по адресам ищет карты
+        // TODO читается файл по заданному адресу и потом по адресам ищет карты
     }
 };
 
@@ -29,6 +30,7 @@ private:
 public:
     void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
               sf::Time);
+    std::list<std::shared_ptr<Map_object>> &get_field_objects();
 };
 
 }  // namespace USO

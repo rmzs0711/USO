@@ -21,22 +21,22 @@ int main() {
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
     Music buffer;
 
-    buffer.openFromFile("..\\data\\music\\helltaker_rem.ogg");
-
-    buffer.play();
+//    buffer.openFromFile(R"(..\data\music\helltaker_rem.ogg)");
+//
+//    buffer.play();
 
     CircleShape circle(radius);
 
     circle.setFillColor(Color(230, 155, 230));
     Texture img;
-    img.loadFromFile("..\\data\\img\\lucifer.png");
+    img.loadFromFile(R"(..\data\img\lucifer.png)");
 
     RectangleShape rect(Vector2f(WIDTH, HEIGHT));
     rect.setPosition(0, 0);
     rect.setTexture(&img);
-    Event event;
     while (window.isOpen()) {
-        while (window.pollEvent(event)) {
+        Event event{};
+        if (window.pollEvent(event)) {
             if (event.type == Event::Closed) {
                 window.close();
             }
