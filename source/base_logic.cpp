@@ -35,6 +35,11 @@ void BL::Game_session::increase_score(unsigned long long score_point,
                                       unsigned long long combo_bonus) {
     score += (score_point * combo_bonus);
 }
+
+[[nodiscard]] int BL::Game_session::damage() const {
+    return static_cast<int>(0.05 * game_complexity * MAX_HEALTH);
+}
+
 void BL::Game_session::nullify_score() {
     score = 0;
 }

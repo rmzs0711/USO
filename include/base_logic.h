@@ -5,6 +5,7 @@
 
 namespace {
 const int MAX_HEALTH = 200;
+const int MIN_GAME_COMPLEXITY = 1;
 }  // namespace
 
 namespace BL {
@@ -19,6 +20,7 @@ struct Game_session {
 private:
     Game_status game_status;
     int health;
+    int game_complexity;
     unsigned long long score;
     unsigned long long combo_status;
     sf::Time game_time;
@@ -27,6 +29,7 @@ public:
     Game_session()
         : game_status(Game_status::ACTION),
           health(MAX_HEALTH),
+          game_complexity(MIN_GAME_COMPLEXITY),
           score(0),
           combo_status(0),
           game_time() {}
@@ -41,6 +44,8 @@ public:
     void increase_health(int);
     void decrease_health(int);
     [[nodiscard]] int get_health() const;
+
+    [[nodiscard]] int damage() const;
 
     Game_status get_game_status(/*map*/) {
         //        if (map == ended) { TODO
