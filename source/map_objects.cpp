@@ -19,7 +19,7 @@ float &USO::Map_object::get_y_coord() {
 
 bool USO::Aim_circle::change_state() {
     active_circle_radius -= active_circle_shift;
-    return true; //TODO логика исчезновения (Айгерим)
+    return true; //TODO дописать логику исчезновения
 }
 
 bool USO::Aim_circle::check_event(float x,
@@ -27,17 +27,22 @@ bool USO::Aim_circle::check_event(float x,
                                   BL::Game_session &game_session) {
     if ((x - x_pos) * (x - x_pos) + (y - y_pos) * (y - y_pos) <=
         beat_radius * beat_radius) {
-        // TODO штраф или плюшки
+        // TODO дописать штраф или плюшки
         return true;
     }
     return false;
 }
 
 void USO::Aim_circle::draw(sf::RenderWindow &window) {
-    sf::CircleShape circle(active_circle_radius);
-    circle.setPosition(x_pos, y_pos);
-    circle.setFillColor(sf::Color(230, 155, 230));
-    window.draw(circle);
+    //Я поправил, тут ты рисовала только внешний круг, в ОСУ рисуется сразу 2: круг по середине и внешняя окружность которая двигается
+    sf::CircleShape act_circle(active_circle_radius);
+    act_circle.setPosition(x_pos, y_pos);
+    act_circle.setFillColor(sf::Color(230, 155, 230));
+    sf::CircleShape beat_circle(beat_radius);
+    beat_circle.setPosition(x_pos, y_pos);
+    beat_circle.setFillColor(sf::Color(255, 255, 255));
+    window.draw(act_circle);
+    window.draw(beat_circle);
 }
 
 bool USO::Aim_slider::change_state() {

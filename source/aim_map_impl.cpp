@@ -8,10 +8,13 @@
 void USO::Aim_map::run(sf::RenderWindow &window) {
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
+    //нужны будут для рисования
 
-    BL::Game_session game_session;
-    USO::Field field;
-    sf::Clock clock;
+
+    BL::Game_session game_session; //счетчики, статус игры
+    USO::Field field; // хранилище объектов на карте
+    sf::Clock clock; //таймер
+    sf::SoundBuffer soundBuffer; //музыка
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
                          // останавливать часы
     auto current_object_it =
@@ -47,10 +50,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             //Я тут думаю сделать проверку только на первый
                             //элемент, типа а зачем нам проходить по всему полю,
                             //если игроку нужно попасть только в один объект{
-                            (*(field.get_field_objects().front()))
+                            if ((*(field.get_field_objects().front()))
                                 .check_event((float)event.mouseButton.x,
                                              (float)event.mouseButton.y,
-                                             game_session);
+                                             game_session)) {
+                                BL::play_beat_sound(soundBuffer);
+                            }
                         }
                     } else if (event.type == sf::Event::MouseButtonReleased) {
                         if (event.mouseButton.button == sf::Mouse::Left) {

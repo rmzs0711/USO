@@ -21,12 +21,12 @@ public:
         : map_pool({}) {
         // TODO читается файл по заданному адресу и потом по адресам ищет карты
     }
+    void run_map_choice_menu();
 };
 
 struct Field {
 private:
     std::list<std::shared_ptr<Map_object>> field_objects;
-
 public:
     void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
               sf::Time);

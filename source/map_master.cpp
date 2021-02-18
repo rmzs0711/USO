@@ -11,6 +11,10 @@ void Field::push(
     }
 }
 
+void Map_choice_menu::run_map_choice_menu() {
+    //менюшка с картами
+}
+
 std::list<std::shared_ptr<Map_object>> &Field::get_field_objects() {
     return field_objects;
 }
