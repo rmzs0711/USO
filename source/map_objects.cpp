@@ -1,5 +1,6 @@
 #include "map_objects.h"
-#include "SFML/System/Time.hpp"
+#include "base_logic.h"
+#include <sstream>
 
 sf::Time &USO::Map_object::get_start_time() {
     return start_time;
@@ -19,7 +20,11 @@ float &USO::Map_object::get_y_coord() {
 
 bool USO::Aim_circle::change_state() {
     active_circle_radius -= active_circle_shift;
-    return true; //TODO логика исчезновения (Айгерим)
+    if (active_circle_radius >= beat_radius) {
+        return true;  // TODO логика исчезновения (Айгерим)
+    }
+    // TODO нарисовать исчезновение и вызвать конструктор?
+    return false;
 }
 
 bool USO::Aim_circle::check_event(float x,
@@ -27,17 +32,36 @@ bool USO::Aim_circle::check_event(float x,
                                   BL::Game_session &game_session) {
     if ((x - x_pos) * (x - x_pos) + (y - y_pos) * (y - y_pos) <=
         beat_radius * beat_radius) {
-        // TODO штраф или плюшки
+        game_session.increase_combo(1); // TODO а как?
+        game_session.increase_score(10, 10); // TODO как посчитать бонус?
         return true;
     }
+    game_session.decrease_health(game_session.damage());
     return false;
 }
 
 void USO::Aim_circle::draw(sf::RenderWindow &window) {
-    sf::CircleShape circle(active_circle_radius);
-    circle.setPosition(x_pos, y_pos);
-    circle.setFillColor(sf::Color(230, 155, 230));
-    window.draw(circle);
+    sf::CircleShape active_circle(active_circle_radius);
+    sf::CircleShape base_circle(beat_radius);
+    sf::Text index_of_circle;
+
+    active_circle.setPosition(x_pos, y_pos);
+    base_circle.setPosition(x_pos, y_pos);
+    index_of_circle.setPosition(x_pos, y_pos);
+
+    active_circle.setFillColor(sf::Color(230, 155, 230));
+    base_circle.setFillColor(sf::Color(0, 255, 0));
+    index_of_circle.setFillColor(sf::Color::Red);
+
+    //а можно поумнее?
+    std::ostringstream ostr;
+    ostr << index;
+    std::string index_str = ostr.str();
+    index_of_circle.setString(index_str);
+
+    window.draw(active_circle);
+    window.draw(base_circle);
+    window.draw(index_of_circle);
 }
 
 bool USO::Aim_slider::change_state() {
