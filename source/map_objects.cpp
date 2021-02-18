@@ -20,15 +20,11 @@ float &USO::Map_object::get_y_coord() {
 
 bool USO::Aim_circle::change_state() {
     active_circle_radius -= active_circle_shift;
-<<<<<<< HEAD
     if (active_circle_radius >= beat_radius) {
         return true;  // TODO логика исчезновения (Айгерим)
     }
     // TODO нарисовать исчезновение и вызвать конструктор?
     return false;
-=======
-
->>>>>>> origin/Rama
 }
 
 bool USO::Aim_circle::check_event(float x,
@@ -36,12 +32,8 @@ bool USO::Aim_circle::check_event(float x,
                                   BL::Game_session &game_session) {
     if ((x - x_pos) * (x - x_pos) + (y - y_pos) * (y - y_pos) <=
         beat_radius * beat_radius) {
-<<<<<<< HEAD
         game_session.increase_combo(1); // TODO а как?
         game_session.increase_score(10, 10); // TODO как посчитать бонус?
-=======
-
->>>>>>> origin/Rama
         return true;
     }
     game_session.decrease_health(game_session.damage());
@@ -49,7 +41,6 @@ bool USO::Aim_circle::check_event(float x,
 }
 
 void USO::Aim_circle::draw(sf::RenderWindow &window) {
-<<<<<<< HEAD
     sf::CircleShape active_circle(active_circle_radius);
     sf::CircleShape base_circle(beat_radius);
     sf::Text index_of_circle;
@@ -71,9 +62,6 @@ void USO::Aim_circle::draw(sf::RenderWindow &window) {
     window.draw(active_circle);
     window.draw(base_circle);
     window.draw(index_of_circle);
-=======
-    
->>>>>>> origin/Rama
 }
 
 bool USO::Aim_slider::change_state() {
