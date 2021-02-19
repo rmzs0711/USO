@@ -24,7 +24,8 @@ private:
     unsigned long long score;
     unsigned long long combo_status;
     sf::Time game_time;
-
+    bool is_combo_locked = false;
+    bool is_score_locked = false;
 public:
     Game_session()
         : game_status(Game_status::ACTION),
@@ -43,6 +44,10 @@ public:
 
     void increase_health(int);
     void decrease_health(int);
+    void lock_combo();
+    void unlock_combo();
+    void lock_score();
+    void  unlock_score();
     [[nodiscard]] int get_health() const;
 
     [[nodiscard]] int damage() const;
