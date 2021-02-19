@@ -21,9 +21,8 @@ float &USO::Map_object::get_y_coord() {
 bool USO::Aim_circle::change_state() {
     active_circle_radius -= active_circle_shift;
     if (active_circle_radius >= beat_radius) {
-        return true;  // TODO логика исчезновения (Айгерим)
+        return true;
     }
-    // TODO нарисовать исчезновение и вызвать конструктор?
     return false;
 }
 
@@ -32,8 +31,8 @@ bool USO::Aim_circle::check_event(float x,
                                   BL::Game_session &game_session) {
     if ((x - x_pos) * (x - x_pos) + (y - y_pos) * (y - y_pos) <=
         beat_radius * beat_radius) {
-        game_session.increase_combo(1); // TODO а как?
-        game_session.increase_score(10, 10); // TODO как посчитать бонус?
+        game_session.increase_combo(1); // точно так?
+        game_session.increase_score(100, game_session.get_combo());
         return true;
     }
     game_session.decrease_health(game_session.damage());
@@ -53,7 +52,7 @@ void USO::Aim_circle::draw(sf::RenderWindow &window) {
     base_circle.setFillColor(sf::Color(0, 255, 0));
     index_of_circle.setFillColor(sf::Color::Red);
 
-    //а можно поумнее?
+    //а можно поумнее нарисовать индекс?
     std::ostringstream ostr;
     ostr << index;
     std::string index_str = ostr.str();

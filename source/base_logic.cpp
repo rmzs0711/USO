@@ -33,7 +33,7 @@ void BL::Game_session::increase_combo(unsigned long long combo_point) {
 
 void BL::Game_session::increase_score(unsigned long long score_point,
                                       unsigned long long combo_bonus) {
-    score += (score_point * combo_bonus);
+    score += (score_point * combo_bonus) / 25;
 }
 
 [[nodiscard]] int BL::Game_session::damage() const {
