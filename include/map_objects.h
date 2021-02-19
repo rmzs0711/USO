@@ -15,8 +15,7 @@ struct Map_object {
 protected:
     sf::Time start_time;
     sf::Time duration_time;
-    float x_pos;
-    float y_pos;
+    sf::Vector2f pos;
     int index;
 
     Map_object(sf::Time &start_time_,
@@ -26,15 +25,14 @@ protected:
                int index_)
         : start_time(start_time_),
           duration_time(duration_time_),
-          x_pos(x),
-          y_pos(y),
+          pos(x, y),
           index(index_) {}
 
 public:
-    virtual bool change_state() = 0;
-    virtual bool check_event(float x,
-                             float y,
-                             BL::Game_session &game_session) = 0;
+    virtual bool change_state(sf::Time) = 0;
+    virtual bool check_event(sf::Vector2f,
+                             BL::Game_session &game_session,
+                             sf::Time) = 0;
     virtual void draw(sf::RenderWindow &window) = 0;
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
@@ -46,8 +44,8 @@ public:
 struct Aim_circle : Map_object {
 protected:
     float beat_radius;
-    float active_circle_radius;
-    float active_circle_shift;
+    float active_circle_radius = 0;
+    float active_circle_start_radius;
 
 public:
     Aim_circle(sf::Time &start_time_,
@@ -56,23 +54,23 @@ public:
                float y,
                int index_,
                float beat_radius_,
-               float active_circle_radius_,
-               float active_circle_shift_)
+               float active_circle_radius_)
         : Map_object(start_time_, duration_time_, x, y, index_),
           beat_radius(beat_radius_),
-          active_circle_radius(active_circle_radius_),
-          active_circle_shift(active_circle_shift_) {}
+          active_circle_start_radius(active_circle_radius_){}
 
-    bool change_state() override;
-    bool check_event(float x, float y, BL::Game_session &game_session) override;
+    bool change_state(sf::Time current_time) override;
+    bool check_event(sf::Vector2f,
+                     BL::Game_session &game_session,
+                     sf::Time current_time) override;
     void draw(sf::RenderWindow &window) override;
 };
 
 struct Aim_slider : Aim_circle {
 private:
-    float x_shift;
-    float y_shift;
-    float dist_pow_2;
+    sf::Vector2f start_pos;
+    sf::Vector2f end_pos;
+    sf::Time move_time;
 
 public:
     Aim_slider(sf::Time &start_time_,
@@ -82,65 +80,64 @@ public:
                int index_,
                float beat_radius_,
                float active_circle_start_radius_,
-               float active_circle_radius_shift_,
-               float x_shift_,
-               float y_shift_,
-               float x_end,
-               float y_end)
+               float x_end_,
+               float y_end_,
+               sf::Time move_time_)
         : Aim_circle(start_time_,
                      duration_time_,
                      x,
                      y,
                      index_,
                      beat_radius_,
-                     active_circle_start_radius_,
-                     active_circle_radius_shift_),
-          x_shift(x_shift_),
-          y_shift(y_shift_),
-          dist_pow_2((x_end - x) * (x_end - x) + (y_end - y) * (y_end - y)) {}
-    bool change_state() override;
-    bool check_event(float x, float y, BL::Game_session &game_session) override;
+                     active_circle_start_radius_),
+          start_pos(x, y),
+          end_pos(x_end_, y_end_),
+          move_time(move_time_) {}
+    bool change_state(sf::Time current_time) override;
+    bool check_event(sf::Vector2f,
+                     BL::Game_session &game_session,
+                     sf::Time current_time) override;
     void draw(sf::RenderWindow &window) override;
 };
 
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
 // отслеживать поворот мыши
 
-struct Aim_muda final : Map_object {
-private:
-    float beat_radius;
-    unsigned beat_count;
+//struct Aim_muda final : Map_object {
+//private:
+//    float beat_radius;
+//    unsigned beat_count;
+//
+//public:
+//    Aim_muda(sf::Time &start_time_,
+//             sf::Time &duration_time_,
+//             float x,
+//             float y,
+//             int index_,
+//             float beat_radius_,
+//             unsigned beat_count_)
+//        : Map_object(start_time_, duration_time_, x, y, index_),
+//          beat_radius(beat_radius_),
+//          beat_count(beat_count_) {}
+//};
 
-public:
-    Aim_muda(sf::Time &start_time_,
-             sf::Time &duration_time_,
-             float x,
-             float y,
-             int index_,
-             float beat_radius_,
-             unsigned beat_count_)
-        : Map_object(start_time_, duration_time_, x, y, index_),
-          beat_radius(beat_radius_),
-          beat_count(beat_count_) {}
-};
-
-enum class Conveyor_note_key_position { D, F, J, K };
+//enum class Conveyor_note_key_position { D, F, J, K };
 
 //Потом
-struct Conveyor_note : Map_object {
-private:
-    Conveyor_note_key_position position;
-
-public:
-    Conveyor_note(sf::Time &start_time_,
-                  sf::Time &duration_time_,
-                  float x,
-                  float y,
-                  int index_,
-                  Conveyor_note_key_position position_)
-        : Map_object(start_time_, duration_time_, x, y, index_),
-          position(position_) {}
-};
+//struct Conveyor_note : Map_object {
+//private:
+//    Conveyor_note_key_position position;
+//
+//public:
+//    Conveyor_note(sf::Time &start_time_,
+//                  sf::Time &duration_time_,
+//                  float x,
+//                  float y,
+//                  int index_,
+//                  Conveyor_note_key_position position_)
+//        : Map_object(start_time_, duration_time_, x, y, index_),
+//          position(position_) {}
+//};
 
 // struct Conveyor_hold_note : Conveyor_note {
 // private:
@@ -158,10 +155,10 @@ public:
 //          duration(duration_) {}
 //};
 
-struct Bulletproof_shape : Map_object {
-    //А что если создатель карты сам придумывает фигуру, можно сделать интерфейс
-    //для создания фигур
-};
+//struct Bulletproof_shape : Map_object {
+//    //А что если создатель карты сам придумывает фигуру, можно сделать интерфейс
+//    //для создания фигур
+//};
 
 }  // namespace USO
 #endif  // USO_MAP_OBJECTS_H

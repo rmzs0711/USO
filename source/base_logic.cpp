@@ -24,6 +24,9 @@ int BL::Game_session::get_health() const {
 }
 
 void BL::Game_session::increase_combo(unsigned long long combo_point) {
+    if (is_combo_locked) {
+        return;
+    }
     combo_status += combo_point;
 }
 
@@ -33,6 +36,9 @@ void BL::Game_session::increase_combo(unsigned long long combo_point) {
 
 void BL::Game_session::increase_score(unsigned long long score_point,
                                       unsigned long long combo_bonus) {
+    if (is_score_locked) {
+        return;
+    }
     score += (score_point * combo_bonus) / 25;
 }
 
@@ -50,4 +56,18 @@ unsigned long long BL::Game_session::get_score() const {
 
 void BL::Game_session::pause_session() {
     game_status = Game_status::PAUSE;
+}
+
+void BL::Game_session::lock_combo() {
+    is_combo_locked = true;
+}
+void BL::Game_session::unlock_combo() {
+    is_combo_locked = false;
+}
+
+void BL::Game_session::lock_score() {
+    is_score_locked = true;
+}
+void BL::Game_session::unlock_score() {
+    is_score_locked = false;
 }

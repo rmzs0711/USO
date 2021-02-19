@@ -10,11 +10,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
     //нужны будут для рисования
 
-
-    BL::Game_session game_session; //счетчики, статус игры
-    USO::Field field; // хранилище объектов на карте
-    sf::Clock clock; //таймер
-    sf::SoundBuffer soundBuffer; //музыка
+    BL::Game_session game_session;  //счетчики, статус игры
+    USO::Field field;  // хранилище объектов на карте
+    sf::Clock clock;   //таймер
+    sf::SoundBuffer soundBuffer;  //музыка
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
                          // останавливать часы
     auto current_object_it =
@@ -33,7 +32,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 }
                 for (auto it = field.get_field_objects().begin();
                      it != field.get_field_objects().end(); ++it) {
-                    if (!(**it).change_state()) {
+                    if (!(**it).change_state(past_time +
+                                             clock.getElapsedTime())) {
                         field.get_field_objects().erase(it);
                     }
                 }
@@ -51,23 +51,30 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             //элемент, типа а зачем нам проходить по всему полю,
                             //если игроку нужно попасть только в один объект{
                             if ((*(field.get_field_objects().front()))
-                                .check_event((float)event.mouseButton.x,
-                                             (float)event.mouseButton.y,
-                                             game_session)) {
+                                    .check_event(
+                                        {(float)event.mouseButton.x,
+                                         (float)event.mouseButton.y},
+                                        game_session,
+                                        past_time + clock.getElapsedTime())) {
                                 BL::play_beat_sound(soundBuffer);
+                            } else {
+                                field.get_field_objects()
+                                    .pop_front();  //Если промах -- удалить
                             }
                         }
                     } else if (event.type == sf::Event::MouseButtonReleased) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
                             drag = false;  //отпускаю мышку
                         }
-                    } else if (drag ) {  // пока мышка нажата
+                    } else if (drag) {  // пока мышка нажата
                         USO::Map_object &front_object =
                             *(field.get_field_objects().front().get());
                         if (typeid(front_object) == typeid(USO::Aim_slider)) {
-                            front_object.check_event((float)event.mouseButton.x,
-                                                     (float)event.mouseButton.y,
-                                                     game_session);
+                            front_object.check_event(
+                                {(float)event.mouseButton.x,
+                                 (float)event.mouseButton.y},
+                                game_session,
+                                past_time + clock.getElapsedTime());
                         }
                     }
                 }

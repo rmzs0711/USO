@@ -5,11 +5,11 @@
 #include <fstream>
 #include <iostream>
 
-USO::Aim_map::Aim_map(const std::string& filename) : Map() {
+USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cout << "File not found\n";
-        return ;
+        return;
     }
     //видимо тут потом разделить на режимы
     file >> map_name;
@@ -36,26 +36,18 @@ USO::Aim_map::Aim_map(const std::string& filename) : Map() {
             file >> beat_radius;
             float active_circle_radius;
             file >> active_circle_radius;
-            float active_circle_shift; // может константа?
+            float active_circle_shift;  // может константа?
             file >> active_circle_shift;
 
-            map_objects.push_back(std::make_shared<USO::Aim_circle>
-                (USO::Aim_circle(start_time,
-                                   duration_time,
-                                   x_pos,
-                                   y_pos,
-                                   index,
-                                   beat_radius,
-                                   active_circle_radius,
-                                   active_circle_shift)));
+            map_objects.push_back(std::make_shared<USO::Aim_circle>(
+                USO::Aim_circle(start_time, duration_time, x_pos, y_pos, index,
+                                beat_radius, active_circle_radius)));
 
         } else if (type == "Aim_slider") {
             float beat_radius;
             file >> beat_radius;
             float active_circle_radius;
             file >> active_circle_radius;
-            float active_circle_shift; // может константа?
-            file >> active_circle_shift;
             float x_shift;
             file >> x_shift;
             float y_shift;
@@ -64,20 +56,16 @@ USO::Aim_map::Aim_map(const std::string& filename) : Map() {
             file >> x_end;
             float y_end;
             file >> y_end;
+            int move_time;
+            file >> move_time;
 
-            map_objects.push_back(std::make_shared<USO::Aim_circle>
-                (USO::Aim_slider(start_time,
-                              duration_time,
-                                 x_pos,
-                                 y_pos,
-                                 index,
-                                 beat_radius,
-                                 active_circle_radius,
-                                 active_circle_shift,
-                                 x_shift,
-                                 y_shift,
-                                 x_end,
-                                 y_end)));
+            map_objects.push_back(std::make_shared<USO::Aim_circle>(
+                USO::Aim_slider(start_time, duration_time,
+                                x_pos, y_pos,
+                                index,
+                                beat_radius, active_circle_radius,
+                                x_end, y_end,
+                                sf::milliseconds(move_time))));
 
         } /*else if (type == "Aim_muda") {
             float beat_radius;
