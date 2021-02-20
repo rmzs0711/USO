@@ -18,8 +18,8 @@ protected:
     sf::Vector2f pos;
     int index;
 
-    Map_object(sf::Time &start_time_,
-               sf::Time &duration_time_,
+    Map_object(const sf::Time &start_time_,
+               const sf::Time &duration_time_,
                float x,
                float y,
                int index_)
@@ -48,8 +48,8 @@ protected:
     float active_circle_start_radius;
 
 public:
-    Aim_circle(sf::Time &start_time_,
-               sf::Time &duration_time_,
+    Aim_circle(const sf::Time &start_time_,
+               const sf::Time &duration_time_,
                float x,
                float y,
                int index_,
@@ -57,7 +57,8 @@ public:
                float active_circle_radius_)
         : Map_object(start_time_, duration_time_, x, y, index_),
           beat_radius(beat_radius_),
-          active_circle_start_radius(active_circle_radius_){}
+          active_circle_start_radius(active_circle_radius_),
+          active_circle_radius(active_circle_radius_) {}
 
     bool change_state(sf::Time current_time) override;
     bool check_event(sf::Vector2f,
@@ -73,8 +74,8 @@ private:
     sf::Time move_time;
 
 public:
-    Aim_slider(sf::Time &start_time_,
-               sf::Time &duration_time_,
+    Aim_slider(const sf::Time &start_time_,
+               const sf::Time &duration_time_,
                float x,
                float y,
                int index_,
@@ -103,12 +104,12 @@ public:
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
 // отслеживать поворот мыши
 
-//struct Aim_muda final : Map_object {
-//private:
+// struct Aim_muda final : Map_object {
+// private:
 //    float beat_radius;
 //    unsigned beat_count;
 //
-//public:
+// public:
 //    Aim_muda(sf::Time &start_time_,
 //             sf::Time &duration_time_,
 //             float x,
@@ -121,14 +122,14 @@ public:
 //          beat_count(beat_count_) {}
 //};
 
-//enum class Conveyor_note_key_position { D, F, J, K };
+// enum class Conveyor_note_key_position { D, F, J, K };
 
 //Потом
-//struct Conveyor_note : Map_object {
-//private:
+// struct Conveyor_note : Map_object {
+// private:
 //    Conveyor_note_key_position position;
 //
-//public:
+// public:
 //    Conveyor_note(sf::Time &start_time_,
 //                  sf::Time &duration_time_,
 //                  float x,
@@ -155,8 +156,9 @@ public:
 //          duration(duration_) {}
 //};
 
-//struct Bulletproof_shape : Map_object {
-//    //А что если создатель карты сам придумывает фигуру, можно сделать интерфейс
+// struct Bulletproof_shape : Map_object {
+//    //А что если создатель карты сам придумывает фигуру, можно сделать
+//    интерфейс
 //    //для создания фигур
 //};
 

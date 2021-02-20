@@ -4,6 +4,7 @@
 #include "maps.h"
 #include <fstream>
 #include <iostream>
+#include "SFML/System/Time.hpp"
 
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);
@@ -21,11 +22,11 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         file >> type;
         int index;
         file >> index;
-        float time;
+        int32_t time;
         file >> time;
-        sf::Time start_time = sf::seconds(time);
+        sf::Time start_time = sf::milliseconds(time);
         file >> time;
-        sf::Time duration_time = sf::seconds(time);
+        sf::Time duration_time = sf::milliseconds(time);
         float x_pos;
         file >> x_pos;
         float y_pos;
@@ -36,7 +37,8 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             file >> beat_radius;
             float active_circle_radius;
             file >> active_circle_radius;
-            float active_circle_shift;  // может константа?
+            float active_circle_shift;  // может константа? //теперь юзлес, но
+                                        // на всякий оставлю
             file >> active_circle_shift;
 
             map_objects.push_back(std::make_shared<USO::Aim_circle>(
@@ -60,11 +62,8 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             file >> move_time;
 
             map_objects.push_back(std::make_shared<USO::Aim_circle>(
-                USO::Aim_slider(start_time, duration_time,
-                                x_pos, y_pos,
-                                index,
-                                beat_radius, active_circle_radius,
-                                x_end, y_end,
+                USO::Aim_slider(start_time, duration_time, x_pos, y_pos, index,
+                                beat_radius, active_circle_radius, x_end, y_end,
                                 sf::milliseconds(move_time))));
 
         } /*else if (type == "Aim_muda") {
