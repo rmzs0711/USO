@@ -33,7 +33,7 @@ float &USO::Map_object::get_y_coord() {
 }
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
-    if (current_time <= start_time + duration_time + sf::milliseconds(200)) {
+    if (current_time <= start_time + duration_time + sf::milliseconds(100)) {
         active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу
                                 //изменения и отнимаю от стартового
             active_circle_start_radius -

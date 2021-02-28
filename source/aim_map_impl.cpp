@@ -9,15 +9,15 @@
 #include <fstream>
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
-//    std::ofstream file(R"(data\maps\output_file.txt)");
-//    if (!file.is_open()) {
-//        std::cout << "File not found\n";
-//        return;
-//    }
-//    file << "Unity\n"
-//            "data\\music\\unity.ogg\n"
-//            "RMZS\n"
-//            "UNITY" << std::endl;
+    std::ofstream file(R"(data\maps\output_file.txt)");
+    if (!file.is_open()) {
+        std::cout << "File not found\n";
+        return;
+    }
+    file << "DrumGoDum\n"
+            "data\\music\\drum_go_dum.ogg\n"
+            "RMZS\n"
+            "DrumGoDum" << std::endl;
 
 
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
@@ -97,7 +97,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
 //                            file << "Aim_circle" << std::endl;
 //                            file << i++ << std::endl;
-//                            file << clock.getElapsedTime().asMilliseconds() - 500 << " " << 500 << std::endl;
+//                            file << clock.getElapsedTime().asMilliseconds() - 300 << " " << 300 << std::endl;
 //                            file << event.mouseButton.x << ' ' << event.mouseButton.y << std::endl;
 //                            file << 65 << " " << 300 << std::endl;
                             if (!field.get_field_objects().empty()) {
