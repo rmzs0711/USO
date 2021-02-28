@@ -8,7 +8,7 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(50);
+    static sf::Time epsilon = sf::milliseconds(1000);
     return end_time - current_time < epsilon;
 }
 
@@ -58,7 +58,7 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
             return true;
         }
     }
-    game_session.decrease_health(game_session.damage());
+//    game_session.decrease_health(game_session.damage());
     return false;
 }
 
