@@ -1,4 +1,5 @@
 #include <cassert>
+#include <fstream>
 #include <iostream>
 #include <typeindex>
 #include "SFML/Graphics.hpp"
@@ -6,62 +7,53 @@
 #include "iterator"
 #include "map_master.h"
 #include "maps.h"
-#include <fstream>
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
-    std::ofstream file(R"(data\maps\output_file.txt)");
-    if (!file.is_open()) {
-        std::cout << "File not found\n";
-        return;
-    }
-    file << "DrumGoDum\n"
-            "data\\music\\drum_go_dum.ogg\n"
-            "RMZS\n"
-            "DrumGoDum" << std::endl;
-
-
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
     BL::Game_session game_session;  //счетчики, статус игры
     USO::Field field;               // хранилище объектов на карте
     sf::Clock clock;                //таймер
-    sf::SoundBuffer soundBuffer;  //музыка
+    sf::SoundBuffer soundBuffer;    //звук нажатия
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет останавливать часы
     auto current_object_it = map_objects.begin();  // итератор на следующий по времени объект
-//    std::cout << typeid(current_object_it).name() << std::endl;
-    sf::Music buffer;
+    sf::Music buffer;                              //балдежный музон
 
+    assert(soundBuffer.loadFromFile(R"(data\music\click_sound.ogg)"));
     buffer.openFromFile(music_address);
+//    buffer.setVolume(100);
     buffer.play();
-//    sf::Texture img;
-//    img.loadFromFile(R"(data\img\lucifer.png)");
+    sf::Sound sound;
 
-//    sf::RectangleShape rect(sf::Vector2f((float)WIDTH, (float)HEIGHT));
-//    rect.setPosition(0, 0);
-//    rect.setTexture(&img);
+    sound.setBuffer(soundBuffer);
+//    sound.setVolume(100);
+    //    sf::Texture img;
+    //    img.loadFromFile(R"(data\img\lucifer.png)");
+
+    //    sf::RectangleShape rect(sf::Vector2f((float)WIDTH, (float)HEIGHT));
+    //    rect.setPosition(0, 0);
+    //    rect.setTexture(&img);
 
     sf::Font font;
     if (!font.loadFromFile(R"(data\fonts\GistLight.otf)")) {
         assert(false);
     }
+
     sf::Text text;
-    text.setFont(font); // font is a sf::Font
-
-
+    text.setFont(font);
     text.setCharacterSize(42);
-    text.setFillColor(sf::Color::White);
+    //    text.setFillColor(sf::Color::White);
     text.setStyle(sf::Text::Bold);
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
-
+    sf::Int32 remembered_time;
     int i = 0;
     clock.restart();
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.clear();
-//        window.draw(rect);
-
+        //        window.draw(rect);
         text.setString(std::to_string(game_session.get_score()));
         window.draw(text);
         switch (game_session.get_game_status()) {
@@ -87,28 +79,19 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             // clock.getElapsedTime();
                             // game_session.pause_session();
                         } else if (event.key.code == sf::Keyboard::X || event.key.code == sf::Keyboard::Z) {
-//                            file << "Aim_circle" << std::endl;
-//                            file << i++ << std::endl;
-//                            file << clock.getElapsedTime().asMilliseconds() - 800 << " " << 800 << std::endl;
-//                            file << sf::Mouse::getPosition().x << ' ' << sf::Mouse::getPosition().y << std::endl;
-//                            file << 65 << " " << 300 << std::endl;
                         }
                     } else if (event.type == sf::Event::MouseButtonPressed) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
-//                            file << "Aim_circle" << std::endl;
-//                            file << i++ << std::endl;
-//                            file << clock.getElapsedTime().asMilliseconds() - 300 << " " << 300 << std::endl;
-//                            file << event.mouseButton.x << ' ' << event.mouseButton.y << std::endl;
-//                            file << 65 << " " << 300 << std::endl;
                             if (!field.get_field_objects().empty()) {
                                 drag = true;  //Зажимаю мышку
+                                USO::Map_object &front_object = *(field.get_field_objects().front().get());
                                 if ((*(field.get_field_objects().back()))
                                         .check_event({(float)event.mouseButton.x, (float)event.mouseButton.y},
                                                      game_session, past_time + clock.getElapsedTime())) {
-                                    // BL::play_beat_sound(soundBuffer);
-                                    field.get_field_objects().pop_back();
-                                } else {
-//                                     field.get_field_objects().pop_back();
+                                    if (typeid(front_object) != typeid(USO::Aim_slider)) {
+                                        field.get_field_objects().pop_back();
+                                    }
+                                    sound.play();
                                 }
                             }
                         }
@@ -120,11 +103,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         if (!field.get_field_objects().empty()) {
                             USO::Map_object &front_object = *(field.get_field_objects().front().get());
                             if (typeid(front_object) == typeid(USO::Aim_slider)) {
-                                if (front_object.check_event(sf::Vector2f(sf::Mouse::getPosition()),
-                                                             game_session,
-                                                             past_time + clock.getElapsedTime())) {
-//                                    std::cout << game_session.get_score() << std::endl;
-                                }
+                                front_object.check_event(sf::Vector2f(sf::Mouse::getPosition()), game_session,
+                                                         past_time + clock.getElapsedTime());
                             }
                         }
                     }

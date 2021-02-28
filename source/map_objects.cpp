@@ -1,6 +1,7 @@
 #include "map_objects.h"
 #include <sstream>
 #include "base_logic.h"
+#include <math.h>
 namespace {
 float get_time_coefficient(const sf::Time &start, const sf::Time &duration, const sf::Time &current) {
     return (current - start) / duration;
@@ -108,5 +109,10 @@ bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
     return false;
 }
 void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font& font) {
+    sf::CircleShape target_circle(beat_radius);
+    target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
+    target_circle.setFillColor(sf::Color::Green);
+    window.draw(target_circle);
     Aim_circle::draw(window, font);
+
 }
