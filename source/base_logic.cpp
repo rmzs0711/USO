@@ -2,9 +2,7 @@
 #include "SFML/Audio.hpp"
 
 [[maybe_unused]] void BL::play_beat_sound(sf::SoundBuffer &buffer) {
-    sf::Sound sound;
-    sound.setBuffer(buffer);
-    sound.play();
+
 }
 
 void BL::Game_session::increase_health(int bonus) {

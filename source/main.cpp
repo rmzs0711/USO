@@ -1,4 +1,3 @@
-//#define _GLIBCXX_USE_CXX11_ABI 0
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
@@ -8,7 +7,6 @@
 #include "windows.h"
 #include <cassert>
 #include <random>
-// using namespace sf;
 
 int main()
 {
@@ -19,14 +17,6 @@ int main()
     window.setVerticalSyncEnabled(true);
 
     USO::Aim_map test(R"(data\maps\demo_drum_go_dum.txt)");
-
-//    int h = 0;
-//    for (auto &i : test.map_objects)
-//    {
-//        const auto &g = *i;
-//        sf::Int32 t = g.duration_time.asMilliseconds();
-//        h++;
-//    }
 
     test.run(window);
 
