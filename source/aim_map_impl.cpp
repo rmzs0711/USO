@@ -6,8 +6,20 @@
 #include "iterator"
 #include "map_master.h"
 #include "maps.h"
+#include <fstream>
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
+//    std::ofstream file(R"(data\maps\output_file.txt)");
+//    if (!file.is_open()) {
+//        std::cout << "File not found\n";
+//        return;
+//    }
+//    file << "Unity\n"
+//            "data\\music\\unity.ogg\n"
+//            "RMZS\n"
+//            "UNITY" << std::endl;
+
+
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
     BL::Game_session game_session;  //счетчики, статус игры
@@ -16,7 +28,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::SoundBuffer soundBuffer;  //музыка
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет останавливать часы
     auto current_object_it = map_objects.begin();  // итератор на следующий по времени объект
-    std::cout << typeid(current_object_it).name() << std::endl;
+//    std::cout << typeid(current_object_it).name() << std::endl;
     sf::Music buffer;
 
     buffer.openFromFile(music_address);
@@ -24,7 +36,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 //    sf::Texture img;
 //    img.loadFromFile(R"(data\img\lucifer.png)");
 
-    sf::RectangleShape rect(sf::Vector2f((float)WIDTH, (float)HEIGHT));
+//    sf::RectangleShape rect(sf::Vector2f((float)WIDTH, (float)HEIGHT));
 //    rect.setPosition(0, 0);
 //    rect.setTexture(&img);
 
@@ -36,13 +48,15 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     text.setFont(font); // font is a sf::Font
 
 
-    text.setCharacterSize(42); // in pixels, not points!
+    text.setCharacterSize(42);
     text.setFillColor(sf::Color::White);
     text.setStyle(sf::Text::Bold);
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
-    clock.restart();
     bool drag = false;
+
+    int i = 0;
+    clock.restart();
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.clear();
@@ -61,28 +75,40 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     (*it).change_state(past_time + clock.getElapsedTime());
                 }
                 if (!field.get_field_objects().empty() &&
-                    !field.get_field_objects().front()->change_state(past_time + clock.getElapsedTime())) {
-                    field.get_field_objects().pop_front();
+                    !field.get_field_objects().back()->change_state(past_time + clock.getElapsedTime())) {
+                    field.get_field_objects().pop_back();
                 }
                 sf::Event event{};
                 if (window.pollEvent(event) || drag) {
                     if (event.type == sf::Event::KeyPressed) {
                         if (event.key.code == sf::Keyboard::Escape) {
+                            return;
                             // past_time =
                             // clock.getElapsedTime();
                             // game_session.pause_session();
+                        } else if (event.key.code == sf::Keyboard::X || event.key.code == sf::Keyboard::Z) {
+//                            file << "Aim_circle" << std::endl;
+//                            file << i++ << std::endl;
+//                            file << clock.getElapsedTime().asMilliseconds() - 800 << " " << 800 << std::endl;
+//                            file << sf::Mouse::getPosition().x << ' ' << sf::Mouse::getPosition().y << std::endl;
+//                            file << 65 << " " << 300 << std::endl;
                         }
                     } else if (event.type == sf::Event::MouseButtonPressed) {
                         if (event.mouseButton.button == sf::Mouse::Left) {
-                            std::cout << clock.getElapsedTime().asMilliseconds() << std::endl;
+//                            file << "Aim_circle" << std::endl;
+//                            file << i++ << std::endl;
+//                            file << clock.getElapsedTime().asMilliseconds() - 500 << " " << 500 << std::endl;
+//                            file << event.mouseButton.x << ' ' << event.mouseButton.y << std::endl;
+//                            file << 65 << " " << 300 << std::endl;
                             if (!field.get_field_objects().empty()) {
                                 drag = true;  //Зажимаю мышку
-                                if ((*(field.get_field_objects().front()))
+                                if ((*(field.get_field_objects().back()))
                                         .check_event({(float)event.mouseButton.x, (float)event.mouseButton.y},
                                                      game_session, past_time + clock.getElapsedTime())) {
                                     // BL::play_beat_sound(soundBuffer);
+                                    field.get_field_objects().pop_back();
                                 } else {
-                                    // field.get_field_objects().pop_front();
+//                                     field.get_field_objects().pop_back();
                                 }
                             }
                         }
@@ -97,7 +123,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                                 if (front_object.check_event(sf::Vector2f(sf::Mouse::getPosition()),
                                                              game_session,
                                                              past_time + clock.getElapsedTime())) {
-                                    std::cout << game_session.get_score() << std::endl;
+//                                    std::cout << game_session.get_score() << std::endl;
                                 }
                             }
                         }
@@ -118,7 +144,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 continue;
         }
         for (auto &object_ptr : field.get_field_objects()) {
-            (*object_ptr).draw(window);
+            (*object_ptr).draw(window, font);
         }
         window.display();
     }
