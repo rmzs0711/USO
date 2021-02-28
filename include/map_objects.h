@@ -33,7 +33,7 @@ public:
     virtual bool check_event(sf::Vector2f,
                              BL::Game_session &game_session,
                              sf::Time) = 0;
-    virtual void draw(sf::RenderWindow &window) = 0;
+    virtual void draw(sf::RenderWindow &window, const sf::Font& font) = 0;
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
@@ -64,7 +64,7 @@ public:
     bool check_event(sf::Vector2f,
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
-    void draw(sf::RenderWindow &window) override;
+    void draw(sf::RenderWindow &window, const sf::Font& font) override;
 };
 
 struct Aim_slider : Aim_circle {
@@ -98,7 +98,7 @@ public:
     bool check_event(sf::Vector2f,
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
-    void draw(sf::RenderWindow &window) override;
+    void draw(sf::RenderWindow &window, const sf::Font& font) override;
 };
 
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
