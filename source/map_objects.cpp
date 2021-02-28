@@ -2,13 +2,13 @@
 #include <sstream>
 #include "base_logic.h"
 namespace {
-float get_time_coefficient(sf::Time &start,
-                           sf::Time &duration,
-                           sf::Time &current) {
+float get_time_coefficient(const sf::Time &start,
+                           const sf::Time &duration,
+                           const sf::Time &current) {
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(500);
+    static sf::Time epsilon = sf::milliseconds(1000);
     return end_time - current_time < epsilon;
 }
 
@@ -37,12 +37,15 @@ float &USO::Map_object::get_y_coord() {
 }
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
-    active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу изменения и
-                            //отнимаю от стартового
-        active_circle_start_radius -
-        active_circle_start_radius *
-            get_time_coefficient(start_time, duration_time, current_time);
-    return current_time <= start_time + duration_time;
+    if (current_time <= start_time + duration_time) {
+        active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу
+                                //изменения и отнимаю от стартового
+            active_circle_start_radius -
+            (active_circle_start_radius - beat_radius) *
+                get_time_coefficient(start_time, duration_time, current_time);
+        return true;
+    }
+    return false;
 }
 
 bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
@@ -55,40 +58,40 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
             return true;
         }
     }
-    game_session.decrease_health(game_session.damage());
+//    game_session.decrease_health(game_session.damage());
     return false;
 }
 
 void USO::Aim_circle::draw(sf::RenderWindow &window) {
     sf::CircleShape active_circle(active_circle_radius);
     sf::CircleShape base_circle(beat_radius);
-    sf::Text index_of_circle;
+    //    sf::Text index_of_circle;
 
     active_circle.setPosition(pos);
     base_circle.setPosition(pos);
-    index_of_circle.setPosition(pos);
+    //    index_of_circle.setPosition(pos);
 
     active_circle.setFillColor(sf::Color(230, 155, 230));
     base_circle.setFillColor(sf::Color(0, 255, 0));
-    index_of_circle.setFillColor(sf::Color::Red);
+    //    index_of_circle.setFillColor(sf::Color::Red);
 
     //а можно поумнее нарисовать индекс?
-    std::ostringstream ostr;
-    ostr << index;
-    std::string index_str = ostr.str();
-    index_of_circle.setString(index_str);
+    //    std::ostringstream ostr;
+    //    ostr << index;
+    //    std::string index_str = ostr.str();
+    //    index_of_circle.setString(index_str);
 
     window.draw(active_circle);
     window.draw(base_circle);
-    window.draw(index_of_circle);
+    //    window.draw(index_of_circle);
 }
 
 bool USO::Aim_slider::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
         USO::Aim_circle::change_state(current_time);
     } else if (current_time <= start_time + duration_time + move_time) {
-        float coef =
-            get_time_coefficient(start_time, duration_time, current_time);
+        float coef = get_time_coefficient(start_time + duration_time, move_time,
+                                          current_time);
         pos.x = start_pos.x + (end_pos.x - start_pos.x) * coef;
         pos.y = start_pos.y + (end_pos.y - start_pos.y) * coef;
     } else {
