@@ -18,14 +18,14 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1080, 720), "SFML Works!", sf::Style::Fullscreen, setting);
     window.setVerticalSyncEnabled(true);
 
-    USO::Aim_map test(R"(data\maps\demo_map_unity.txt)");
+    USO::Aim_map test(R"(data\maps\test_map_longer.txt)");
     int h = 0;
-    for (auto &i : test.map_objects)
-    {
-        const auto &g = *i;
-        sf::Int32 t = g.duration_time.asMilliseconds();
-        h++;
-    }
+//    for (auto &i : test.map_objects)
+//    {
+//        const auto &g = *i;
+//        sf::Int32 t = g.duration_time.asMilliseconds();
+//        h++;
+//    }
 
     test.run(window);
 
