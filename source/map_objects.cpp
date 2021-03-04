@@ -62,6 +62,10 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::Text index_of_circle;
 
     active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
+    if (active_circle_radius <= beat_radius) {
+        active_circle.setRadius(beat_radius);
+        active_circle.setPosition(fix_circle_pos(pos, beat_radius));
+    }
     base_circle.setPosition(fix_circle_pos(pos, beat_radius));
     index_of_circle.setCharacterSize(42);
     index_of_circle.setPosition(fix_circle_pos(pos, (float)index_of_circle.getCharacterSize() / 2));
@@ -73,13 +77,13 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     //    base_circle.setFillColor(sf::Color::Transparent);
     base_circle.setFillColor(sf::Color(204, 51, 51));
     base_circle.setOutlineThickness(10);
-    base_circle.setOutlineColor(sf::Color(255, 51, 102));
+    base_circle.setOutlineColor(sf::Color::White);
     index_of_circle.setFillColor(sf::Color::White);
     index_of_circle.setOutlineColor(sf::Color::White);
 
     index_of_circle.setString(std::to_string(index % 5 + 1));
-    window.draw(active_circle);
     window.draw(base_circle);
+    window.draw(active_circle);
     window.draw(index_of_circle);
 }
 
@@ -106,8 +110,10 @@ bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
 }
 void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape target_circle(beat_radius);
+    target_circle.setOutlineThickness(5.f);
+    target_circle.setOutlineColor(sf::Color::White);
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
-    target_circle.setFillColor(sf::Color(204, 51, 51));
+    target_circle.setFillColor(sf::Color(253, 151, 114));
 
     sf::ConvexShape track;
     track.setPointCount(4);
@@ -115,11 +121,23 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     track.setPoint(1, sf::Vector2<float>(pos.x, pos.y + beat_radius));
     track.setPoint(2, sf::Vector2<float>(end_pos.x, end_pos.y + beat_radius));
     track.setPoint(3, sf::Vector2<float>(end_pos.x, end_pos.y - beat_radius));
-    track.setFillColor(sf::Color(253, 151, 114, 10));
-    track.setOutlineThickness(1.f);
+    track.setFillColor(sf::Color(253, 151, 114));
+    track.setOutlineThickness(5.f);
     track.setOutlineColor(sf::Color::White);
+
+    //костыль
+    sf::ConvexShape track2;
+    track2.setPointCount(4);
+    track2.setPoint(0, sf::Vector2<float>(pos.x, pos.y - beat_radius));
+    track2.setPoint(1, sf::Vector2<float>(pos.x, pos.y + beat_radius));
+    track2.setPoint(2, sf::Vector2<float>(end_pos.x, end_pos.y + beat_radius));
+    track2.setPoint(3, sf::Vector2<float>(end_pos.x, end_pos.y - beat_radius));
+    track2.setFillColor(sf::Color(253, 151, 114));
+    track2.setOutlineThickness(0.f);
+    track2.setOutlineColor(sf::Color::Transparent);
 
     window.draw(track);
     window.draw(target_circle);
+    window.draw(track2);
     Aim_circle::draw(window, font);
 }
