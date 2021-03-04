@@ -8,6 +8,29 @@
 #include "map_master.h"
 #include "maps.h"
 
+void table_of_scores(sf::RenderWindow &window, sf::Font &font, BL::Game_session &game_session) {
+    /*sf::RectangleShape table;
+    table.setSize(sf::Vector2f(250.f, 120.f));
+    table.setFillColor(sf::Color::Blue);
+    table.setOutlineThickness(5.f);
+    table.setOutlineColor(sf::Color);
+    window.draw(table);*/
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(30);
+    //    text.setFillColor(sf::Color::White);
+    text.setStyle(sf::Text::Bold);
+    text.setString("SCORE: " + std::to_string(game_session.get_score()));
+    window.draw(text);
+    text.setPosition(sf::Vector2f(0.f, 35.f));
+    text.setString("COMBO: " + std::to_string(game_session.get_combo()));
+    window.draw(text);
+    text.setPosition(sf::Vector2f(0.f, 70.f));
+    text.setString("HEALTH: " + std::to_string(game_session.get_health()));
+    window.draw(text);
+
+}
+
 void USO::Aim_map::run(sf::RenderWindow &window) {
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
@@ -39,12 +62,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         assert(false);
     }
 
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(42);
-    //    text.setFillColor(sf::Color::White);
-    text.setStyle(sf::Text::Bold);
-
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
     sf::Int32 remembered_time;
@@ -54,8 +71,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.clear();
         //        window.draw(rect);
-        text.setString(std::to_string(game_session.get_score()));
-        window.draw(text);
+        table_of_scores(window, font, game_session);
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {

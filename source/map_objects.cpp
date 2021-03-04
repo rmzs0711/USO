@@ -1,7 +1,7 @@
 #include "map_objects.h"
+#include <math.h>
 #include <sstream>
 #include "base_logic.h"
-#include <math.h>
 namespace {
 float get_time_coefficient(const sf::Time &start, const sf::Time &duration, const sf::Time &current) {
     return (current - start) / duration;
@@ -56,7 +56,7 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
     return false;
 }
 
-void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font& font) {
+void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape active_circle(active_circle_radius);
     sf::CircleShape base_circle(beat_radius);
     sf::Text index_of_circle;
@@ -70,17 +70,13 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font& font) {
     active_circle.setFillColor(sf::Color::Transparent);
     active_circle.setOutlineThickness(10);
     active_circle.setOutlineColor(sf::Color(230, 0, 0));
-//    base_circle.setFillColor(sf::Color::Transparent);
-    base_circle.setFillColor(sf::Color::Blue);
+    //    base_circle.setFillColor(sf::Color::Transparent);
+    base_circle.setFillColor(sf::Color(204, 51, 51));
     base_circle.setOutlineThickness(10);
-    base_circle.setOutlineColor(sf::Color::Yellow);
-    index_of_circle.setFillColor(sf::Color::Red);
+    base_circle.setOutlineColor(sf::Color(255, 51, 102));
+    index_of_circle.setFillColor(sf::Color::White);
+    index_of_circle.setOutlineColor(sf::Color::White);
 
-    //а можно поумнее нарисовать индекс?
-    //    std::ostringstream ostr;
-    //    ostr << index;
-    //    std::string index_str = ostr.str();
-    //    index_of_circle.setString(index_str);
     index_of_circle.setString(std::to_string(index % 5 + 1));
     window.draw(active_circle);
     window.draw(base_circle);
@@ -108,11 +104,22 @@ bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
     }
     return false;
 }
-void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font& font) {
+void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape target_circle(beat_radius);
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
-    target_circle.setFillColor(sf::Color::Green);
+    target_circle.setFillColor(sf::Color(204, 51, 51));
+
+    sf::ConvexShape track;
+    track.setPointCount(4);
+    track.setPoint(0, sf::Vector2<float>(pos.x, pos.y - beat_radius));
+    track.setPoint(1, sf::Vector2<float>(pos.x, pos.y + beat_radius));
+    track.setPoint(2, sf::Vector2<float>(end_pos.x, end_pos.y + beat_radius));
+    track.setPoint(3, sf::Vector2<float>(end_pos.x, end_pos.y - beat_radius));
+    track.setFillColor(sf::Color(253, 151, 114, 10));
+    track.setOutlineThickness(1.f);
+    track.setOutlineColor(sf::Color::White);
+
+    window.draw(track);
     window.draw(target_circle);
     Aim_circle::draw(window, font);
-
 }
