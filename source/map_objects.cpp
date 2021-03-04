@@ -49,11 +49,11 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
         if (is_circle_correct_click(mouse_pos, pos, beat_radius)) {
             game_session.increase_combo(1);  // точно так? //Да я думаю
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(50);
+            game_session.increase_health(100);
             return true;
         }
     }
-    game_session.decrease_health(game_session.damage());
+//    game_session.decrease_health(game_session.damage());
     return false;
 }
 
@@ -71,10 +71,12 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     active_circle.setFillColor(sf::Color::Transparent);
     active_circle.setOutlineThickness(10);
     active_circle.setOutlineColor(sf::Color(230, 0, 0));
-    base_circle.setFillColor(sf::Color::Blue);
+    //    base_circle.setFillColor(sf::Color::Transparent);
+    base_circle.setFillColor(sf::Color(204, 51, 51));
     base_circle.setOutlineThickness(10);
-    base_circle.setOutlineColor(sf::Color::Yellow);
-    index_of_circle.setFillColor(sf::Color::Red);
+    base_circle.setOutlineColor(sf::Color(255, 51, 102));
+    index_of_circle.setFillColor(sf::Color::White);
+    index_of_circle.setOutlineColor(sf::Color::White);
 
     index_of_circle.setString(std::to_string(index % 5 + 1));
     window.draw(active_circle);
@@ -97,7 +99,8 @@ bool USO::Aim_slider::change_state(sf::Time current_time) {
 bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game_session, sf::Time current_time) {
     if (current_time >= start_time + duration_time && is_click_time(current_time, start_time + duration_time) &&
         is_circle_correct_click(mouse_pos, pos, beat_radius)) {
-        game_session.increase_score(1, game_session.get_combo());
+//        Aim_circle::check_event(mouse_pos, game_session, current_time);
+        game_session.increase_score(100, game_session.get_combo());
         return true;
     }
     return false;
@@ -105,7 +108,19 @@ bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
 void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape target_circle(beat_radius);
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
-    target_circle.setFillColor(sf::Color::Green);
+    target_circle.setFillColor(sf::Color(204, 51, 51));
+
+    sf::ConvexShape track;
+    track.setPointCount(4);
+    track.setPoint(0, sf::Vector2<float>(pos.x, pos.y - beat_radius));
+    track.setPoint(1, sf::Vector2<float>(pos.x, pos.y + beat_radius));
+    track.setPoint(2, sf::Vector2<float>(end_pos.x, end_pos.y + beat_radius));
+    track.setPoint(3, sf::Vector2<float>(end_pos.x, end_pos.y - beat_radius));
+    track.setFillColor(sf::Color(253, 151, 114, 10));
+    track.setOutlineThickness(1.f);
+    track.setOutlineColor(sf::Color::White);
+
+    window.draw(track);
     window.draw(target_circle);
     Aim_circle::draw(window, font);
 }
