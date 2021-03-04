@@ -46,6 +46,7 @@ protected:
     float beat_radius;
     float active_circle_radius = 0;
     float active_circle_start_radius;
+    bool is_valid = true;
 
 public:
     Aim_circle(const sf::Time &start_time_,
