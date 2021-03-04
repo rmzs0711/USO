@@ -45,11 +45,13 @@ bool USO::Aim_circle::change_state(sf::Time current_time) {
 }
 
 bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game_session, sf::Time current_time) {
-    if (is_click_time(current_time, start_time + duration_time)) {
-        if (is_circle_correct_click(mouse_pos, pos, beat_radius)) {
+    if (is_circle_correct_click(mouse_pos, pos, beat_radius)) {
+        if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);  // точно так? //Да я думаю
             game_session.increase_score(100, game_session.get_combo());
             return true;
+        } else {
+
         }
     }
     //    game_session.decrease_health(game_session.damage());
@@ -117,21 +119,27 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
 
     sf::ConvexShape track;
     track.setPointCount(4);
-    track.setPoint(0, sf::Vector2<float>(pos.x, pos.y - beat_radius));
-    track.setPoint(1, sf::Vector2<float>(pos.x, pos.y + beat_radius));
-    track.setPoint(2, sf::Vector2<float>(end_pos.x, end_pos.y + beat_radius));
-    track.setPoint(3, sf::Vector2<float>(end_pos.x, end_pos.y - beat_radius));
+    float delta_x = beat_radius;
+    float delta_y = 0;
+    if (abs(pos.x - end_pos.x) > abs(pos.y - end_pos.y)) {
+        delta_x = 0;
+        delta_y = beat_radius;
+    }
+    track.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
+    track.setPoint(1, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
+    track.setPoint(2, sf::Vector2<float>(end_pos.x + delta_x, end_pos.y + delta_y));
+    track.setPoint(3, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
     track.setFillColor(sf::Color(253, 151, 114));
     track.setOutlineThickness(5.f);
     track.setOutlineColor(sf::Color::White);
 
-    //костыль
+    //костыль для закраски
     sf::ConvexShape track2;
     track2.setPointCount(4);
-    track2.setPoint(0, sf::Vector2<float>(pos.x, pos.y - beat_radius));
-    track2.setPoint(1, sf::Vector2<float>(pos.x, pos.y + beat_radius));
-    track2.setPoint(2, sf::Vector2<float>(end_pos.x, end_pos.y + beat_radius));
-    track2.setPoint(3, sf::Vector2<float>(end_pos.x, end_pos.y - beat_radius));
+    track2.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
+    track2.setPoint(1, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
+    track2.setPoint(2, sf::Vector2<float>(end_pos.x + delta_x, end_pos.y + delta_y));
+    track2.setPoint(3, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
     track2.setFillColor(sf::Color(253, 151, 114));
     track2.setOutlineThickness(0.f);
     track2.setOutlineColor(sf::Color::Transparent);
