@@ -11,7 +11,7 @@ int main() {
     sf::ContextSettings setting;
 
     setting.antialiasingLevel = 8;
-    sf::RenderWindow window(sf::VideoMode(700, 720), "SFML Works!", sf::Style::Default, setting);
+    sf::RenderWindow window(sf::VideoMode(700, 720), "SFML Works!", sf::Style::Fullscreen, setting);
     window.setVerticalSyncEnabled(true);
 
 //    glEnable(GL_TEXTURE_2D);

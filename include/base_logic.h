@@ -32,7 +32,7 @@ public:
           health(MAX_HEALTH),
           game_complexity(MIN_GAME_COMPLEXITY),
           score(0),
-          combo_status(0),
+          combo_status(1),
           game_time() {}
 
     void increase_score(unsigned long long, unsigned long long);

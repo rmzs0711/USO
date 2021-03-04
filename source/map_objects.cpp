@@ -1,5 +1,4 @@
 #include "map_objects.h"
-#include <math.h>
 #include <sstream>
 #include "base_logic.h"
 namespace {
@@ -100,6 +99,7 @@ bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
     if (current_time >= start_time + duration_time && is_click_time(current_time, start_time + duration_time) &&
         is_circle_correct_click(mouse_pos, pos, beat_radius)) {
 //        Aim_circle::check_event(mouse_pos, game_session, current_time);
+
         game_session.increase_score(100, game_session.get_combo());
         return true;
     }

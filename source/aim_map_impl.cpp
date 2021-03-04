@@ -140,6 +140,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             }
             case BL::Game_status::DEFEAT: {
                 return;
+
             }
             default:
                 continue;

@@ -11,10 +11,12 @@ void BL::Game_session::increase_health(int bonus) {
 }
 
 void BL::Game_session::decrease_health(int damage) {
-    health -= damage;
-    if (game_status == Game_status::ACTION && health < 0) {
-        game_status = Game_status::DEFEAT;
+    if (health > 0) {
+        health -= damage;
     }
+//    if (game_status == Game_status::ACTION && health < 0) {
+//        game_status = Game_status::DEFEAT;
+//    }
 }
 
 int BL::Game_session::get_health() const {
@@ -34,9 +36,9 @@ void BL::Game_session::increase_combo(unsigned long long combo_point) {
 
 void BL::Game_session::increase_score(unsigned long long score_point,
                                       unsigned long long combo_bonus) {
-    if (is_score_locked) {
-        return;
-    }
+//    if (is_score_locked) {
+//        return;
+//    }
     score += (score_point * combo_bonus) / 25;
 }
 
