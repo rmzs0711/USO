@@ -1,7 +1,7 @@
 #include "map_objects.h"
+#include <math.h>
 #include <sstream>
 #include "base_logic.h"
-#include <math.h>
 namespace {
 float get_time_coefficient(const sf::Time &start, const sf::Time &duration, const sf::Time &current) {
     return (current - start) / duration;
@@ -49,14 +49,15 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
         if (is_circle_correct_click(mouse_pos, pos, beat_radius)) {
             game_session.increase_combo(1);  // точно так? //Да я думаю
             game_session.increase_score(100, game_session.get_combo());
+            game_session.increase_health(50);
             return true;
         }
     }
-    //    game_session.decrease_health(game_session.damage());
+    game_session.decrease_health(game_session.damage());
     return false;
 }
 
-void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font& font) {
+void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape active_circle(active_circle_radius);
     sf::CircleShape base_circle(beat_radius);
     sf::Text index_of_circle;
@@ -70,17 +71,11 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font& font) {
     active_circle.setFillColor(sf::Color::Transparent);
     active_circle.setOutlineThickness(10);
     active_circle.setOutlineColor(sf::Color(230, 0, 0));
-//    base_circle.setFillColor(sf::Color::Transparent);
     base_circle.setFillColor(sf::Color::Blue);
     base_circle.setOutlineThickness(10);
     base_circle.setOutlineColor(sf::Color::Yellow);
     index_of_circle.setFillColor(sf::Color::Red);
 
-    //а можно поумнее нарисовать индекс?
-    //    std::ostringstream ostr;
-    //    ostr << index;
-    //    std::string index_str = ostr.str();
-    //    index_of_circle.setString(index_str);
     index_of_circle.setString(std::to_string(index % 5 + 1));
     window.draw(active_circle);
     window.draw(base_circle);
@@ -102,17 +97,15 @@ bool USO::Aim_slider::change_state(sf::Time current_time) {
 bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game_session, sf::Time current_time) {
     if (current_time >= start_time + duration_time && is_click_time(current_time, start_time + duration_time) &&
         is_circle_correct_click(mouse_pos, pos, beat_radius)) {
-        game_session.increase_score(1, 25);
-        //пока костыль, я не придумал как по умному
+        game_session.increase_score(1, game_session.get_combo());
         return true;
     }
     return false;
 }
-void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font& font) {
+void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape target_circle(beat_radius);
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
     target_circle.setFillColor(sf::Color::Green);
     window.draw(target_circle);
     Aim_circle::draw(window, font);
-
 }

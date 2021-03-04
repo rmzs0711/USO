@@ -21,12 +21,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 
     assert(soundBuffer.loadFromFile(R"(data\music\click_sound.ogg)"));
     buffer.openFromFile(music_address);
-//    buffer.setVolume(100);
     buffer.play();
     sf::Sound sound;
 
     sound.setBuffer(soundBuffer);
-//    sound.setVolume(100);
     //    sf::Texture img;
     //    img.loadFromFile(R"(data\img\lucifer.png)");
 
@@ -42,7 +40,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::Text text;
     text.setFont(font);
     text.setCharacterSize(42);
-    //    text.setFillColor(sf::Color::White);
     text.setStyle(sf::Text::Bold);
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
@@ -119,7 +116,9 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 // sfml по пацански не останавливается
                 break;
             }
-
+            case BL::Game_status::DEFEAT: {
+                return;
+            }
             default:
                 continue;
         }

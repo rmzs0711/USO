@@ -12,5 +12,6 @@ if (SFML_FOUND)
     include_directories(include)
     target_link_libraries(USO ${SFML_LIBRARIES})
     target_link_libraries(USO sfml-graphics sfml-audio)
+    target_link_libraries(USO opengl32)
 endif ()
 
