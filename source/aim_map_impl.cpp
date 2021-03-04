@@ -48,7 +48,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 
     sound.setBuffer(soundBuffer);
     sf::Texture img;
-    img.loadFromFile(R"(data\img\lucifer.png)");
+    img.loadFromFile(R"(data\img\stronger.png)");
 
     sf::RectangleShape rect(sf::Vector2f((float)WIDTH, (float)HEIGHT));
     rect.setPosition(0, 0);

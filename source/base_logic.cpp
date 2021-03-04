@@ -7,7 +7,7 @@
 
 void BL::Game_session::increase_health(int bonus) {
     health += bonus;
-    health = health - (health % MAX_HEALTH);
+    health = health > 200 ? health - (health % MAX_HEALTH) : health;
 }
 
 void BL::Game_session::decrease_health(int damage) {

@@ -15,7 +15,7 @@ int main() {
     window.setVerticalSyncEnabled(true);
 
 //    glEnable(GL_TEXTURE_2D);
-    USO::Aim_map test(R"(data\maps\demo_drum_go_dum.txt)");
+    USO::Aim_map test(R"(data\maps\stronger.txt)");
     test.run(window);
 
     return 0;
