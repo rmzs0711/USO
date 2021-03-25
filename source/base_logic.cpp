@@ -37,13 +37,18 @@ void BL::Game_session::increase_score(unsigned long long score_point,
     if (is_score_locked) {
         return;
     }
+    /* возможно, стоит вынести 25 в константу и дать ей такое название, чтобы
+     * было понятно, что она означает */
     score += (score_point * combo_bonus) / 25;
 }
 
 [[nodiscard]] int BL::Game_session::damage() const {
+    /* 0.05 тоже стоит вынести в константу. Как минимум потому, что так будет
+     * удобнее править баланс. */
     return static_cast<int>(0.05 * game_complexity * MAX_HEALTH);
 }
 
+/* Note: reset кажется более подходящим словом, но тут уж как кому нравится */
 void BL::Game_session::nullify_score() {
     score = 0;
 }
