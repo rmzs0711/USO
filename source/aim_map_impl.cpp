@@ -20,6 +20,9 @@ void table_of_scores(sf::RenderWindow &window, sf::Font &font, BL::Game_session 
     text.setCharacterSize(30);
     //    text.setFillColor(sf::Color::White);
     text.setStyle(sf::Text::Bold);
+    /* Кажется, тут подразумевается, что position = (0, 0). Лучше явно сделать setPosition. */
+    /* Алсо, возможно, стоит начальные координаты вынести в параметры функции.
+     * Вдруг захочется нарисовать таблицу в другом месте? */
     text.setString("SCORE: " + std::to_string(game_session.get_score()));
     window.draw(text);
     text.setPosition(sf::Vector2f(0.f, 35.f));
@@ -32,16 +35,28 @@ void table_of_scores(sf::RenderWindow &window, sf::Font &font, BL::Game_session 
 }
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
+    /* width и height можно получить из window (см. документацию, там есть метод
+     * getSize или что-то вроде). Так оставлять опасно, ибо ничто не гарантирует,
+     * что эти значения верны. */
     const unsigned HEIGHT = sf::VideoMode::getFullscreenModes().front().height;
     const unsigned WIDTH = sf::VideoMode::getFullscreenModes().front().width;
+    /* Note: не все комментарии одинаково полезны, те, которые не дают новой
+     * информации, скорее всего, не нужны. */
     BL::Game_session game_session;  //счетчики, статус игры
     USO::Field field;               // хранилище объектов на карте
     sf::Clock clock;                //таймер
+    /* Note: если назвать переменную press_sound, то комментарий не понадобится. :)
+     * Алсо, старайтесь называть переменные в одинаковом стиле и не мешать camelCase
+     * со snake_case в одинаковых сущностях. Консистентно стилизованный код проще
+     * и приятнее читать. */
     sf::SoundBuffer soundBuffer;    //звук нажатия
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет останавливать часы
     auto current_object_it = map_objects.begin();  // итератор на следующий по времени объект
+    /* Note: слишком абстрактное название переменной, bg_music или track было
+     * бы более информативно */
     sf::Music buffer;                              //балдежный музон
 
+    /* Note: для дебага норм, но вообще лучше пользователю сказать, что файла не хватает. */
     assert(soundBuffer.loadFromFile(R"(data\music\click_sound.ogg)"));
     buffer.openFromFile(music_address);
 //    buffer.setVolume(100);
@@ -49,6 +64,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::Sound sound;
 
     sound.setBuffer(soundBuffer);
+    /* Вообще, оставлять закомментированный код - это моветон. В 9 из 10 случаев,
+     * он никогда не будет раскомментирован. */
 //    sound.setVolume(100);
     //    sf::Texture img;
     //    img.loadFromFile(R"(data\img\lucifer.png)");
@@ -58,6 +75,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     //    rect.setTexture(&img);
 
     sf::Font font;
+    /* assert(font.loadFromFile(...))? */
     if (!font.loadFromFile(R"(data\fonts\GistLight.otf)")) {
         assert(false);
     }
@@ -75,6 +93,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {
+                    /* note: для дебага пойдёт, но вообще, если карты будут задаваться
+                     * пользователем и будет техническая возможность сделать так,
+                     * чтобы этот ассерт триггернулся, лучше поступить более робастно
+                     * и просто ругнуться в stderr и пропустить этот объект. */
                     assert(*current_object_it);
                     field.push(current_object_it, past_time + clock.getElapsedTime());
                 }
@@ -87,6 +109,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     field.get_field_objects().pop_back();
                 }
                 sf::Event event{};
+                /* Note: чтобы уменьшить вложенность кода, следующий if можно заменить
+                 * на if (!window.pollEvent(event) && !drag) break;
+                 * А если вынести обработку ввода в отдельную функцию, то подобным
+                 * образом можно ещё красивее сделать. */
                 if (window.pollEvent(event) || drag) {
                     if (event.type == sf::Event::KeyPressed) {
                         if (event.key.code == sf::Keyboard::Escape) {
@@ -95,6 +121,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             // clock.getElapsedTime();
                             // game_session.pause_session();
                         } else if (event.key.code == sf::Keyboard::X || event.key.code == sf::Keyboard::Z) {
+                            /* Лучше вместо этого кейса оставить комментарий с TODO.
+                             * Компилятор, конечно, простит, но читать будет легче. */
                         }
                     } else if (event.type == sf::Event::MouseButtonPressed) {
                         if (event.mouseButton.button == sf::Mouse::Left) {

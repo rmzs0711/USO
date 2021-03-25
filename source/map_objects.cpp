@@ -2,6 +2,8 @@
 #include <math.h>
 #include <sstream>
 #include "base_logic.h"
+/* Внутри неймспейса тоже неплохо бы добавить отступ, тем более, если после него
+ * ещё есть код. */
 namespace {
 float get_time_coefficient(const sf::Time &start, const sf::Time &duration, const sf::Time &current) {
     return (current - start) / duration;
@@ -51,7 +53,7 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
             game_session.increase_score(100, game_session.get_combo());
             return true;
         } else {
-
+            /* Когда вы оставляете пустой else, где-то в мире грустит один программист. :( */
         }
     }
     //    game_session.decrease_health(game_session.damage());
@@ -106,6 +108,7 @@ bool USO::Aim_slider::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
         is_circle_correct_click(mouse_pos, pos, beat_radius)) {
         game_session.increase_score(1, 25);
         //пока костыль, я не придумал как по умному
+        /* А в чём костыльность? */
         return true;
     }
     return false;

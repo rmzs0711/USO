@@ -1,3 +1,5 @@
+/* Note: молодцы, что соблюдаете порядок в инклудах! :) Но я бы сишные импорты
+ * поднял в начало. */
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
