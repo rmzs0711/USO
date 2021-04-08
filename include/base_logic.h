@@ -23,7 +23,6 @@ private:
     int game_complexity;
     unsigned long long score;
     unsigned long long combo_status;
-    sf::Time game_time;
     bool is_combo_locked = false;
     bool is_score_locked = false;
 public:
@@ -32,8 +31,7 @@ public:
           health(MAX_HEALTH),
           game_complexity(MIN_GAME_COMPLEXITY),
           score(0),
-          combo_status(1),
-          game_time() {}
+          combo_status(1) {}
 
     void increase_score(unsigned long long, unsigned long long);
     void nullify_score();

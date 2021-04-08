@@ -26,8 +26,15 @@ public:
 
 struct Field {
 private:
+    sf::RenderWindow &window;  // ATTENTION , в филде теперь храним ссылку на
+                               // виндоу, чтобы он мог себя нарисовать
     std::list<std::shared_ptr<Map_object>> field_objects;
+
 public:
+    Field(sf::RenderWindow &window_,
+          std::list<std::shared_ptr<Map_object>> field_objects_)
+        : window(window_), field_objects(std::move(field_objects_)) {}
+    void draw(const sf::Font &);
     void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
               sf::Time);
     std::list<std::shared_ptr<Map_object>> &get_field_objects();
