@@ -2,10 +2,10 @@
 #define USO_MAPS_H
 #include <string>
 #include <utility>
+#include <memory>
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
 #include "map_objects.h"
-#include <memory>
 
 namespace USO {
 
