@@ -1,6 +1,6 @@
+#include "map_management.h"
 #include <iostream>
 #include <memory>
-#include "map_master.h"
 
 namespace USO {
 void Field::push(
@@ -12,11 +12,19 @@ void Field::push(
     }
 }
 
-void Field::draw(const sf::Font& font) { //думаю логично, чтобы филд сам мог себя нарисовать
+void Field::draw(
+    const sf::Font &font) {  //думаю логично, чтобы филд сам мог себя нарисовать
     for (auto &object_ptr : field_objects) {
         (*object_ptr).draw(window, font);
     }
 }
+
+void Field::change_state(const sf::Time & time) {
+    for (std::shared_ptr<Map_object> &ptr : get_field_objects()) {
+        (*ptr).change_state(time);
+    }
+}
+
 void Map_choice_menu::run_map_choice_menu() {
     //менюшка с картами
 }

@@ -1,7 +1,7 @@
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include "map_master.h"
+#include "map_management.h"
 #include "map_objects.h"
 #include "maps.h"
 #include "windows.h"

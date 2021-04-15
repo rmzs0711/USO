@@ -1,5 +1,5 @@
-#ifndef USO_MAP_MASTER_H
-#define USO_MAP_MASTER_H
+#ifndef USO_MAP_MANAGEMENT_H
+#define USO_MAP_MANAGEMENT_H
 
 #include <list>
 #include <memory>
@@ -11,17 +11,34 @@
 #include "maps.h"
 
 namespace USO {
-
-struct Map_choice_menu {
+struct Map_menu {
 private:
     std::vector<std::unique_ptr<USO::Map>> map_pool;
 
 public:
+    explicit Map_menu(std::string &saved_maps_names_list) : map_pool({}) {
+        // TODO читается файл по заданному адресу и потом по адресам ищет карты
+    }
+};
+struct Map_choice_menu : Map_menu {
+public:
     explicit Map_choice_menu(std::string &saved_maps_names_list)
-        : map_pool({}) {
+        : Map_menu(saved_maps_names_list) {
         // TODO читается файл по заданному адресу и потом по адресам ищет карты
     }
     void run_map_choice_menu();
+};
+
+struct Map_constructor_menu : Map_menu {
+private:
+    std::vector<std::unique_ptr<USO::Map>> map_pool;
+
+public:
+    explicit Map_constructor_menu(std::string &saved_maps_names_list)
+        : Map_menu(saved_maps_names_list) {
+        // TODO читается файл по заданному адресу и потом по адресам ищет карты
+    }
+    void run_map_constructor_menu();
 };
 
 struct Field {
@@ -35,10 +52,11 @@ public:
           std::list<std::shared_ptr<Map_object>> field_objects_)
         : window(window_), field_objects(std::move(field_objects_)) {}
     void draw(const sf::Font &);
+    void change_state(const sf::Time &);
     void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
               sf::Time);
     std::list<std::shared_ptr<Map_object>> &get_field_objects();
 };
-
 }  // namespace USO
-#endif  // USO_MAP_MASTER_H
+
+#endif  // USO_MAP_MANAGEMENT_H

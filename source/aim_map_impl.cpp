@@ -6,7 +6,7 @@
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
 #include "iterator"
-#include "map_master.h"
+#include "map_management.h"
 #include "maps.h"
 
 namespace {
@@ -60,12 +60,22 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     music.openFromFile(music_address);
     music.play();
 
+    std::ofstream file(R"(data\maps\output_file.txt)");
+    if (!file.is_open()) {
+        std::cout << "File not found\n";
+        return;
+    }
+    file << "Stronger\ndata\\music\\gold_rush.ogg\nRMZS\nnewSliderGold"
+         << std::endl;
+
     sf::Sound sound;
     sound.setBuffer(press_sound);
 
     sf::Texture img;
-    check_file_load(img.loadFromFile(R"(data\img\stronger.png)"),
-                    R"(data\img\stronger.png)"); //Тут нужно сделать загрузку названия из карты, если карта содержит в себе фон
+    check_file_load(
+        img.loadFromFile(R"(data\img\stronger.png)"),
+        R"(data\img\stronger.png)");  //Тут нужно сделать загрузку названия из
+                                      //карты, если карта содержит в себе фон
 
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
@@ -82,13 +92,19 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
-    std::vector<int> dragged_key(sf::Keyboard::KeyCount);  // чтобы различать какая кнопка зажата
-    std::vector<int> dragged_mouse_button(sf::Mouse::ButtonCount);  // то же самое только про мышку
+    std::vector<int> dragged_key(
+        sf::Keyboard::KeyCount);  // чтобы различать какая кнопка зажата
+    std::vector<int> dragged_mouse_button(
+        sf::Mouse::ButtonCount);  // то же самое только про мышку
 
     clock.restart();
+    // TODO
+    sf::Int32 remembered_time;
+    float prev_x = 0;
+    float prev_y = 0;
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
-        window.clear();
+        //        window.clear();
         window.draw(rect);
         table_of_scores(window, font, game_session);
         switch (game_session.get_game_status()) {
@@ -102,21 +118,21 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         current_object_it++;
                     }
                 }
-                for (std::shared_ptr<Map_object> &it :
-                     field.get_field_objects()) {
-                    const Map_object &temp = *it;
-                    (*it).change_state(past_time + clock.getElapsedTime());
-                }
+
+                field.change_state(past_time + clock.getElapsedTime());
+
                 if (!field.get_field_objects().empty() &&
                     !field.get_field_objects().back()->change_state(
                         past_time + clock.getElapsedTime())) {
                     field.get_field_objects().pop_back();
                     game_session.decrease_health(game_session.damage());
                 }
+
                 sf::Event event{};
 
                 field.draw(font);
                 window.display();
+
                 if (!window.pollEvent(event) && !drag) {
                     continue;
                 }
