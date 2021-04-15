@@ -1,11 +1,11 @@
 //
 // Created by Aigerim on 18.02.2021.
 //
-#include "maps.h"
 #include <fstream>
 #include <iostream>
-#include "SFML/System/Time.hpp"
 #include <cassert>
+#include "SFML/System/Time.hpp"
+#include "maps.h"
 
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);

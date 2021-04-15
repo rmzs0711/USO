@@ -1,4 +1,4 @@
 Stronger
-data\music\stronger.ogg
+data\music\gold_rush.ogg
 RMZS
-stronk
+newSliderGold
