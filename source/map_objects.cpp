@@ -51,7 +51,7 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
             game_session.increase_score(100, game_session.get_combo());
             return true;
         } else {
-
+            is_valid = false;
         }
     }
     //    game_session.decrease_health(game_session.damage());
@@ -59,34 +59,37 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos, BL::Game_session &game
 }
 
 void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
-    sf::CircleShape active_circle(active_circle_radius);
-    sf::CircleShape base_circle(beat_radius);
-    sf::Text index_of_circle;
+    if (is_valid) {
+        sf::CircleShape active_circle(active_circle_radius);
+        sf::CircleShape base_circle(beat_radius);
+        sf::Text index_of_circle;
 
-    active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
-    if (active_circle_radius <= beat_radius) {
-        active_circle.setRadius(beat_radius);
-        active_circle.setPosition(fix_circle_pos(pos, beat_radius));
+        active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
+        if (active_circle_radius <= beat_radius) {
+            active_circle.setRadius(beat_radius);
+            active_circle.setPosition(fix_circle_pos(pos, beat_radius));
+        }
+        base_circle.setPosition(fix_circle_pos(pos, beat_radius));
+        index_of_circle.setCharacterSize(42);
+        index_of_circle.setPosition(fix_circle_pos(pos, (float)index_of_circle.getCharacterSize() / 2));
+        index_of_circle.setFont(font);
+
+        active_circle.setFillColor(sf::Color::Transparent);
+        active_circle.setOutlineThickness(10);
+        active_circle.setOutlineColor(sf::Color(230, 0, 0));
+        //    base_circle.setFillColor(sf::Color::Transparent);
+        base_circle.setFillColor(sf::Color(204, 51, 51));
+        base_circle.setOutlineThickness(10);
+        base_circle.setOutlineColor(sf::Color::White);
+        index_of_circle.setFillColor(sf::Color::White);
+        index_of_circle.setOutlineColor(sf::Color::White);
+
+        index_of_circle.setString(std::to_string(index % 5 + 1));
+        window.draw(base_circle);
+        window.draw(active_circle);
+        window.draw(index_of_circle);
+    } else {
     }
-    base_circle.setPosition(fix_circle_pos(pos, beat_radius));
-    index_of_circle.setCharacterSize(42);
-    index_of_circle.setPosition(fix_circle_pos(pos, (float)index_of_circle.getCharacterSize() / 2));
-    index_of_circle.setFont(font);
-
-    active_circle.setFillColor(sf::Color::Transparent);
-    active_circle.setOutlineThickness(10);
-    active_circle.setOutlineColor(sf::Color(230, 0, 0));
-    //    base_circle.setFillColor(sf::Color::Transparent);
-    base_circle.setFillColor(sf::Color(204, 51, 51));
-    base_circle.setOutlineThickness(10);
-    base_circle.setOutlineColor(sf::Color::White);
-    index_of_circle.setFillColor(sf::Color::White);
-    index_of_circle.setOutlineColor(sf::Color::White);
-
-    index_of_circle.setString(std::to_string(index % 5 + 1));
-    window.draw(base_circle);
-    window.draw(active_circle);
-    window.draw(index_of_circle);
 }
 
 bool USO::Aim_slider::change_state(sf::Time current_time) {

@@ -28,7 +28,6 @@ void table_of_scores(sf::RenderWindow &window, sf::Font &font, BL::Game_session 
     text.setPosition(sf::Vector2f(0.f, 70.f));
     text.setString("HEALTH: " + std::to_string(game_session.get_health()));
     window.draw(text);
-
 }
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
@@ -44,12 +43,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 
     assert(soundBuffer.loadFromFile(R"(data\music\click_sound.ogg)"));
     buffer.openFromFile(music_address);
-//    buffer.setVolume(100);
+    //    buffer.setVolume(100);
     buffer.play();
     sf::Sound sound;
 
     sound.setBuffer(soundBuffer);
-//    sound.setVolume(100);
+    //    sound.setVolume(100);
     //    sf::Texture img;
     //    img.loadFromFile(R"(data\img\lucifer.png)");
 

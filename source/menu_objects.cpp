@@ -1,0 +1,74 @@
+//
+// Created by Aigerim on 15.04.2021.
+//
+
+#include "menu_objects.h"
+
+bool Menu::Button::is_circle_correct_click(const sf::Vector2f &mouse) {
+    auto center = circle.getPosition();
+    auto radius = circle.getRadius();
+    return (mouse.x - center.x - radius) * (mouse.x - center.x - radius) +
+               (mouse.y - center.y - radius) * (mouse.y - center.y - radius) <=
+           radius * radius;
+}
+
+void Menu::Button::guidance(const sf::Vector2f &mouse) {
+    if (is_circle_correct_click(mouse)) {
+        state = State::POINTED;
+    }
+}
+
+void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse) {
+    if (is_circle_correct_click(mouse)) {
+        switch (event) {
+            case EXIT: {
+                window.close();
+            } break;
+            case OPEN_AIM: {
+                USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
+                test.run(window);
+            } break;
+            case OPEN_CONVEYOR: {  // soon
+            } break;
+            case OPEN_SETTINGS: {  // soon
+                circle.getRadius();
+            } break;
+        }
+    }
+}
+
+void Menu::Button::draw(sf::RenderWindow &window) {
+    auto prev_radius = circle.getRadius();
+    if (state == State::POINTED) {
+        circle.setRadius(prev_radius + 20);
+    }
+    window.draw(circle);
+
+    std::string name_of_button;
+    switch (event) {
+        case EXIT:
+            name_of_button = "Exit";
+            break;
+        case OPEN_AIM:
+            name_of_button = "Aim mode";
+            break;
+        case OPEN_CONVEYOR:
+            name_of_button = "Conveyor mode";
+            break;
+        case OPEN_SETTINGS:
+            name_of_button = "Settings";
+            break;
+    }
+
+    sf::Text text;
+    sf::Font font;
+    font.loadFromFile(R"(data\fonts\GistLight.otf)");
+    text.setFont(font);
+    text.setCharacterSize(20);
+    text.setStyle(sf::Text::Bold);
+    text.setString(name_of_button);
+    text.setPosition(circle.getPosition().x + circle.getRadius(), circle.getPosition().y + circle.getRadius());
+    window.draw(text);
+
+    circle.setRadius(prev_radius);
+}
