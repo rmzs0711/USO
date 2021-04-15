@@ -44,7 +44,7 @@ void table_of_scores(sf::RenderWindow &window,
     window.draw(text);
 }
 
-void USO::Aim_map::run(sf::RenderWindow &window) {
+
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
@@ -68,8 +68,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     file << "Stronger\ndata\\music\\gold_rush.ogg\nRMZS\nnewSliderGold"
          << std::endl;
 
+
     sf::Sound sound;
     sound.setBuffer(press_sound);
+
 
     sf::Texture img;
     check_file_load(
