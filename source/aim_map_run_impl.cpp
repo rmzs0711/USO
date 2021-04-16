@@ -10,13 +10,6 @@
 #include "maps.h"
 
 namespace {
-int counter = -1;
-void check_file_load(const bool &condition, const std::string &filename) {
-    if (!condition) {
-        // Неудачная загрузка файла
-        std::cerr << "where's the " + filename + " Lebovski" << std::endl;
-    }
-}
 
 }  // namespace
 
@@ -60,13 +53,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     music.openFromFile(music_address);
     music.play();
 
-    std::ofstream file(R"(data\maps\output_file.txt)");
-    if (!file.is_open()) {
-        std::cout << "File not found\n";
-        return;
-    }
-    file << "Stronger\ndata\\music\\gold_rush.ogg\nRMZS\nnewSliderGold"
-         << std::endl;
+
 
     sf::Sound sound;
     sound.setBuffer(press_sound);
@@ -98,13 +85,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         sf::Mouse::ButtonCount);  // то же самое только про мышку
 
     clock.restart();
-    // TODO
-    sf::Int32 remembered_time;
     float prev_x = 0;
     float prev_y = 0;
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
-        //        window.clear();
         window.draw(rect);
         table_of_scores(window, font, game_session);
         switch (game_session.get_game_status()) {
