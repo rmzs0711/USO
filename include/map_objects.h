@@ -80,6 +80,7 @@ public:
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
 //    std::shared_ptr<Map_object> clone() override;
+    bool is_valid = true;
 };
 
 struct Aim_slider : Aim_circle {
