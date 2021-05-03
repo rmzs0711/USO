@@ -1,23 +1,27 @@
 //
 // Created by Aigerim on 18.02.2021.
 //
+#include "maps.h"
+#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <cassert>
 #include "SFML/System/Time.hpp"
-#include "maps.h"
 
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "File not found\n";
-        return;
+        std::cerr << "File not found\n";
+        throw "File not found";
     }
     //видимо тут потом разделить на режимы
     file >> map_name;
     file >> music_address;
     file >> author_name;
     file >> music_name;
+    file >> image_address;
+    file >> font_address;
+    file >> sound_address;
+
     while (!file.eof()) {
         std::string type;
         file >> type;
@@ -25,9 +29,9 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         file >> index;
         int32_t time;
         file >> time;
-        sf::Time start_time = sf::milliseconds(time);
+        sf::Time start_time = sf::microseconds(time);
         file >> time;
-        sf::Time duration_time = sf::milliseconds(time);
+        sf::Time duration_time = sf::microseconds(time);
         float x_pos;
         file >> x_pos;
         float y_pos;
@@ -75,6 +79,14 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
                                 beat_count)));
         //НЕ СМОГЛА ПОТОМУ ЧТО АБСТРАКТНЫЙ КЛАСС
         }*/
-
     }
+}
+void USO::Map::prelude(sf::Music &music,
+                       sf::SoundBuffer &sound_buffer,
+                       sf::Texture &image,
+                       sf::Font &font) {
+    check_file_load(music.openFromFile(music_address), music_address);
+    check_file_load(sound_buffer.loadFromFile(sound_address), sound_address);
+    check_file_load(image.loadFromFile(image_address), image_address);
+    check_file_load(font.loadFromFile(font_address), font_address);
 }

@@ -9,9 +9,7 @@
 #include "map_management.h"
 #include "maps.h"
 
-namespace {
-
-}  // namespace
+namespace {}  // namespace
 
 void table_of_scores(sf::RenderWindow &window,
                      sf::Font &font,
@@ -37,47 +35,28 @@ void table_of_scores(sf::RenderWindow &window,
     window.draw(text);
 }
 
-void USO::Aim_map::run(sf::RenderWindow & window) {
+void USO::Aim_map::run(sf::RenderWindow &window) {
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
-    sf::SoundBuffer press_sound;
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
-                         // останавливать часы
+    // останавливать часы
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
+
     sf::Music music;
+    sf::SoundBuffer sound_buf;
+    sf::Texture image;
+    sf::Font font;
 
-    check_file_load(press_sound.loadFromFile(R"(data\music\click_sound.ogg)"),
-                    R"(data\music\click_sound.ogg)");
-    music.openFromFile(music_address);
-    music.play();
-
-
-
+    prelude(music, sound_buf, image, font);  // Загружает и проверяет
 
     sf::Sound sound;
-    sound.setBuffer(press_sound);
-
-
-    sf::Texture img;
-    check_file_load(
-        img.loadFromFile(R"(data\img\stronger.png)"),
-        R"(data\img\stronger.png)");  //Тут нужно сделать загрузку названия из
-                                      //карты, если карта содержит в себе фон
+    sound.setBuffer(sound_buf);
 
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
-    rect.setTexture(&img);
-
-    sf::Font font;
-    check_file_load(font.loadFromFile(R"(data\fonts\GistLight.otf)"),
-                    R"(data\fonts\GistLight.otf)");
-
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(42);
-    text.setStyle(sf::Text::Bold);
+    rect.setTexture(&image);
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
@@ -86,9 +65,33 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
     std::vector<int> dragged_mouse_button(
         sf::Mouse::ButtonCount);  // то же самое только про мышку
 
+    sf::Event event{};
+
+    // WARNING: lambda zone
+    auto handle_click = [&]() -> void {
+        drag = true;  //Зажимаю мышку
+        if (field.get_field_objects().empty()) {
+            return;
+        }
+        USO::Map_object &front_object =
+            *(field.get_field_objects().front().get());
+        if (!(*(field.get_field_objects().back()))
+                 .check_event(
+                     static_cast<sf::Vector2f>(sf::Mouse::getPosition()),
+                     game_session, past_time + clock.getElapsedTime())) {
+            return;
+        }
+        if (typeid(front_object) != typeid(USO::Aim_slider)) {
+            field.get_field_objects().pop_back();
+        }
+        sound.play();
+    };
+    // lambda zone ends
+
     clock.restart();
-    float prev_x = 0;
-    float prev_y = 0;
+
+    music.play();
+
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.draw(rect);
@@ -114,36 +117,12 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                     game_session.decrease_health(game_session.damage());
                 }
 
-                sf::Event event{};
-
                 field.draw(font);
                 window.display();
 
                 if (!window.pollEvent(event) && !drag) {
                     continue;
                 }
-
-                // WARNING: lambda zone
-                auto handle_click = [&]() -> void {
-                    drag = true;  //Зажимаю мышку
-                    if (field.get_field_objects().empty()) {
-                        return;
-                    }
-                    USO::Map_object &front_object =
-                        *(field.get_field_objects().front().get());
-                    if (!(*(field.get_field_objects().back()))
-                             .check_event(static_cast<sf::Vector2f>(
-                                              sf::Mouse::getPosition()),
-                                          game_session,
-                                          past_time + clock.getElapsedTime())) {
-                        return;
-                    }
-                    if (typeid(front_object) != typeid(USO::Aim_slider)) {
-                        field.get_field_objects().pop_back();
-                    }
-                    sound.play();
-                };
-                // lambda zone ends
 
                 switch (event.type) {
                     case sf::Event::KeyPressed:

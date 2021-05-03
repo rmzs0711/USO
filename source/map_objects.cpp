@@ -104,6 +104,9 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     } else {
     }
 }
+std::shared_ptr<USO::Map_object> USO::Aim_circle::clone() {
+    return std::make_shared<Aim_circle>(Aim_circle(*this));
+}
 
 bool USO::Aim_slider::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
@@ -171,4 +174,8 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(target_circle);
     window.draw(track2);
     Aim_circle::draw(window, font);
+}
+
+std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
+    return std::make_shared<Aim_circle>(Aim_slider(*this));
 }

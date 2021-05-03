@@ -40,7 +40,7 @@ public:
     virtual sf::Time &get_duration_time();
     virtual float &get_x_coord();
     virtual float &get_y_coord();
-//    virtual std::shared_ptr<Map_object> clone() = 0;
+    virtual std::shared_ptr<Map_object> clone() = 0;
 };
 
 struct Aim_circle : Map_object {
@@ -62,15 +62,15 @@ public:
           active_circle_start_radius(active_circle_radius_),
           active_circle_radius(active_circle_radius_) {}
 
-//    Aim_circle(const Aim_circle &other_circle)
-//        : Map_object(other_circle.start_time,
-//                     other_circle.duration_time,
-//                     other_circle.pos.x,
-//                     other_circle.pos.y,
-//                     other_circle.index),
-//          beat_radius(other_circle.beat_radius),
-//          active_circle_start_radius(other_circle.active_circle_start_radius),
-//          active_circle_radius(other_circle.active_circle_radius) {}
+    //    Aim_circle(const Aim_circle &other_circle)
+    //        : Map_object(other_circle.start_time,
+    //                     other_circle.duration_time,
+    //                     other_circle.pos.x,
+    //                     other_circle.pos.y,
+    //                     other_circle.index),
+    //          beat_radius(other_circle.beat_radius),
+    //          active_circle_start_radius(other_circle.active_circle_start_radius),
+    //          active_circle_radius(other_circle.active_circle_radius) {}
 
     Aim_circle(const Aim_circle &) = default;
 
@@ -79,7 +79,7 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-//    std::shared_ptr<Map_object> clone() override;
+    std::shared_ptr<Map_object> clone() override;
     bool is_valid = true;
 };
 
@@ -115,7 +115,7 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-//    std::shared_ptr<Map_object> clone() override;
+    std::shared_ptr<Map_object> clone() override;
 };
 
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
