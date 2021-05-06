@@ -53,7 +53,7 @@ public:
         : window(window_), field_objects(std::move(field_objects_)) {}
     void draw(const sf::Font &);
     void change_state(const sf::Time &);
-    void push(std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
+    void push(std::list<std::shared_ptr<Map_object>>::iterator &map_object_it,
               sf::Time);
     std::list<std::shared_ptr<Map_object>> &get_field_objects();
 };

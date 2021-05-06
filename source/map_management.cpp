@@ -4,7 +4,7 @@
 
 namespace USO {
 void Field::push(
-    std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
+    std::list<std::shared_ptr<Map_object>>::iterator &map_object_it,
     sf::Time current_time) {
     if ((*(*map_object_it)).get_start_time() <= current_time) {
         field_objects.push_front(*map_object_it);

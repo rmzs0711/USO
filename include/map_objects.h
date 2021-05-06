@@ -6,6 +6,10 @@
 #include "base_logic.h"
 
 namespace USO {
+const int circle_beat_radius = 65;
+const int active_circle_radius = 300;
+const sf::Time active_circle_duration = sf::seconds(3);
+
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
 enum class Conveyor_objects { NOTE, HOLD_NOTE };
@@ -38,8 +42,8 @@ public:
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
-    virtual float &get_x_coord();
-    virtual float &get_y_coord();
+    virtual sf::Vector2f &get_pos();
+    virtual sf::Vector2f &get_end_pos() = 0;
     virtual std::shared_ptr<Map_object> clone() = 0;
 };
 
@@ -81,6 +85,7 @@ public:
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     std::shared_ptr<Map_object> clone() override;
     bool is_valid = true;
+    sf::Vector2f &get_end_pos() override;
 };
 
 struct Aim_slider : Aim_circle {
@@ -115,6 +120,7 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
+    virtual sf::Vector2f &get_end_pos();
     std::shared_ptr<Map_object> clone() override;
 };
 

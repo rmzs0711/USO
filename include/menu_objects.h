@@ -13,10 +13,10 @@ struct Button {
     State state = State::QUIET;
 
     Button(float x,
-                  float y,
-                  float r,
-                  Event event_,
-                  sf::Color color = sf::Color::Red)
+           float y,
+           float r,
+           Event event_,
+           sf::Color color = sf::Color::Red)
         : event(event_) {
         circle.setRadius(r);
         circle.setPosition(x, y);

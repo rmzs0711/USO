@@ -1,9 +1,7 @@
 #include "base_logic.h"
 #include "SFML/Audio.hpp"
 
-[[maybe_unused]] void BL::play_beat_sound(sf::SoundBuffer &buffer) {
-
-}
+[[maybe_unused]] void BL::play_beat_sound(sf::SoundBuffer &buffer) {}
 
 void BL::Game_session::increase_health(int bonus) {
     health += bonus;
@@ -14,9 +12,9 @@ void BL::Game_session::decrease_health(int damage) {
     if (health > 0) {
         health -= damage;
     }
-//    if (game_status == Game_status::ACTION && health < 0) {
-//        game_status = Game_status::DEFEAT;
-//    }
+    //    if (game_status == Game_status::ACTION && health < 0) {
+    //        game_status = Game_status::DEFEAT;
+    //    }
 }
 
 int BL::Game_session::get_health() const {
@@ -36,9 +34,9 @@ void BL::Game_session::increase_combo(unsigned long long combo_point) {
 
 void BL::Game_session::increase_score(unsigned long long score_point,
                                       unsigned long long combo_bonus) {
-//    if (is_score_locked) {
-//        return;
-//    }
+    //    if (is_score_locked) {
+    //        return;
+    //    }
     score += (score_point * combo_bonus) / 25;
 }
 

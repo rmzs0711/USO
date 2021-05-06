@@ -93,6 +93,6 @@ void Menu::constructor_menu(sf::Window &window) {
     float start_x = static_cast<float>(window.getSize().x) - sizes.x;
     float start_y = sizes.y;
     for (auto &map_name: saved_maps) {
-        buttons.emplace_back(start_x, start_y, );
+//        buttons.emplace_back(start_x, start_y, );
     }
 }

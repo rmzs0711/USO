@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <list>
 #include <utility>
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
@@ -19,7 +20,7 @@ protected:
     std::string image_address;
     std::string font_address;
     std::string sound_address;
-    std::vector<std::shared_ptr<Map_object>> map_objects;
+    std::list<std::shared_ptr<Map_object>> map_objects;
 
     static void check_file_load(const bool &condition,
                                 const std::string &filename) {
@@ -43,7 +44,7 @@ public:
         std::string image_address_,
         std::string font_address_,
         std::string sound_address_,
-        std::vector<std::shared_ptr<Map_object>> map_objects_ = {})
+        std::list<std::shared_ptr<Map_object>> map_objects_ = {})
         : map_name(std::move(map_name_)),
           author_name(std::move(author_name_)),
           music_address(std::move(music_address_)),
@@ -69,7 +70,7 @@ struct Aim_map final : Map {
             std::string image_address_,
             std::string font_address_,
             std::string sound_address_,
-            std::vector<std::shared_ptr<Map_object>> map_objects_ = {})
+            std::list<std::shared_ptr<Map_object>> map_objects_ = {})
         : Map(std::move(map_name_),
               std::move(author_name_),
               std::move(music_name_),

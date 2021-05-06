@@ -31,13 +31,10 @@ sf::Time &USO::Map_object::get_duration_time() {
     return duration_time;
 }
 
-float &USO::Map_object::get_x_coord() {
-    return pos.x;
+sf::Vector2f &USO::Map_object::get_pos() {
+    return pos;
 }
 
-float &USO::Map_object::get_y_coord() {
-    return pos.y;
-}
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time + sf::milliseconds(100)) {
@@ -106,6 +103,9 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
 }
 std::shared_ptr<USO::Map_object> USO::Aim_circle::clone() {
     return std::make_shared<Aim_circle>(Aim_circle(*this));
+}
+sf::Vector2f &USO::Aim_circle::get_end_pos() {
+    return get_pos();
 }
 
 bool USO::Aim_slider::change_state(sf::Time current_time) {
@@ -178,4 +178,7 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
 
 std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
     return std::make_shared<Aim_circle>(Aim_slider(*this));
+}
+sf::Vector2f &USO::Aim_slider::get_end_pos() {
+    return end_pos;
 }
