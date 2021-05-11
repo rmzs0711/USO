@@ -79,33 +79,40 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 return;
             }
         }
-//        switch (object_to_create) {
-//            case OBJECT_TO_CREATE::CIRCLE:
-//                editing_map_objects.insert(
-//                    current_object_it,
-//                    std::make_shared<Aim_circle>(
-//                        Aim_circle(current_time - active_circle_duration,
-//                                   active_circle_duration, ,
-//                                   sf::Mouse::getPosition(window).x,
-//                                   sf::Mouse::getPosition(window).y, circle_beat_radius, active_circle_radius)));
-//                break;
-//            case OBJECT_TO_CREATE::SLIDER:
-//                break;
-//            case OBJECT_TO_CREATE::SPINNER:
-//                break;
-//        }
+        switch (object_to_create) {
+            case OBJECT_TO_CREATE::CIRCLE:
+                editing_map_objects.insert(
+                    current_object_it,
+                    std::make_shared<Aim_circle>(
+                        Aim_circle(current_time - active_circle_duration,
+                                   active_circle_duration,
+                                   (float)sf::Mouse::getPosition(window).x,
+                                   (float)sf::Mouse::getPosition(window).y,
+                                   circle_beat_radius, active_circle_radius)));
+                assert(current_object_it != editing_map_objects.begin());
+                field.push_back(--current_object_it);
+                dragged_object = *current_object_it;
+                assert(current_object_it != editing_map_objects.end());
+                current_object_it++;
+                break;
+            case OBJECT_TO_CREATE::SLIDER:
+
+                break;
+            case OBJECT_TO_CREATE::SPINNER:
+                break;
+        }
     };
     // lambda zone ends
 
     while (true) {
         window.draw(rect);
-        if (current_object_it != map_objects.end()) {
+        if (current_object_it != editing_map_objects.end()) {
             if (*current_object_it) {
-                field.push(current_object_it, current_time);
+                field.push_front(current_object_it, current_time);
             } else {
                 std::cerr << "invalid object iterator" << std::endl;
-                current_object_it++;
             }
+            current_object_it++;
         }
 
         field.change_state(current_time);
@@ -113,6 +120,11 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         if (!field.get_field_objects().empty() &&
             !field.get_field_objects().back()->change_state(current_time)) {
             field.get_field_objects().pop_back();
+        }
+        if (!field.get_field_objects().empty() &&
+            field.get_field_objects().front()->get_start_time() >
+                current_time) {
+            field.get_field_objects().pop_front();
         }
 
         field.draw(font);
@@ -221,6 +233,16 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     current_time += time_delta;
                 } else {
                     current_time -= time_delta;
+                    if (current_time < sf::seconds(0)) {
+                        current_time = sf::seconds(0);
+                    }
+                    if (current_object_it != editing_map_objects.begin() &&
+                        !editing_map_objects.empty() &&
+                        (*--current_object_it)->get_start_time() >=
+                            current_time) {
+
+                        field.push_back(current_object_it);
+                    }
                 }
                 break;
             default:
@@ -230,11 +252,9 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     if (typeid(front_object) != typeid(USO::Aim_slider)) {
                         break;
                     }
-                    // todo
                 }
                 break;
         }
-        break;
     }
 }
 }  // namespace USO

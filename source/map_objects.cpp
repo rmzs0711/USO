@@ -68,6 +68,8 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
 
 void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     if (is_valid) {
+        static int index = 0;
+        index %= 5;
         sf::CircleShape active_circle(active_circle_radius);
         sf::CircleShape base_circle(beat_radius);
         sf::Text index_of_circle;
@@ -94,7 +96,7 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
         index_of_circle.setFillColor(sf::Color::White);
         index_of_circle.setOutlineColor(sf::Color::White);
 
-        index_of_circle.setString(std::to_string(index % 5 + 1));
+        index_of_circle.setString(std::to_string(index++ % 5 + 1));
         window.draw(base_circle);
         window.draw(active_circle);
         window.draw(index_of_circle);

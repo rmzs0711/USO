@@ -44,7 +44,7 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             file >> active_circle_radius;
 
             map_objects.push_back(std::make_shared<USO::Aim_circle>(
-                USO::Aim_circle(start_time, duration_time, x_pos, y_pos, index,
+                USO::Aim_circle(start_time, duration_time, x_pos, y_pos,
                                 beat_radius, active_circle_radius)));
 
         } else if (type == "Aim_slider") {
@@ -60,7 +60,7 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             file >> move_time;
 
             map_objects.push_back(std::make_shared<USO::Aim_slider>(
-                USO::Aim_slider(start_time, duration_time, x_pos, y_pos, index,
+                USO::Aim_slider(start_time, duration_time, x_pos, y_pos,
                                 beat_radius, active_circle_radius, x_end, y_end,
                                 sf::milliseconds(move_time))));
 

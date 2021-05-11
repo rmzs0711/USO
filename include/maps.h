@@ -73,8 +73,8 @@ struct Aim_map final : Map {
             std::list<std::shared_ptr<Map_object>> map_objects_ = {})
         : Map(std::move(map_name_),
               std::move(author_name_),
-              std::move(music_name_),
               std::move(music_address_),
+              std::move(music_name_),
               std::move(image_address_),
               std::move(font_address_),
               std::move(sound_address_),

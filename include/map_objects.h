@@ -21,17 +21,14 @@ protected:
     sf::Time start_time;
     sf::Time duration_time;
     sf::Vector2f pos;
-    int index;
 
     Map_object(const sf::Time &start_time_,
                const sf::Time &duration_time_,
                float x,
-               float y,
-               int index_)
+               float y)
         : start_time(start_time_),
           duration_time(duration_time_),
-          pos(x, y),
-          index(index_) {}
+          pos(x, y){}
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -58,10 +55,9 @@ public:
                const sf::Time &duration_time_,
                float x,
                float y,
-               int index_,
                float beat_radius_,
                float active_circle_radius_)
-        : Map_object(start_time_, duration_time_, x, y, index_),
+        : Map_object(start_time_, duration_time_, x, y),
           beat_radius(beat_radius_),
           active_circle_start_radius(active_circle_radius_),
           active_circle_radius(active_circle_radius_) {}
@@ -99,7 +95,6 @@ public:
                const sf::Time &duration_time_,
                float x,
                float y,
-               int index_,
                float beat_radius_,
                float active_circle_start_radius_,
                float x_end_,
@@ -109,7 +104,6 @@ public:
                      duration_time_,
                      x,
                      y,
-                     index_,
                      beat_radius_,
                      active_circle_start_radius_),
           start_pos(x, y),
@@ -120,7 +114,7 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-    virtual sf::Vector2f &get_end_pos();
+    sf::Vector2f &get_end_pos() override;
     std::shared_ptr<Map_object> clone() override;
 };
 
