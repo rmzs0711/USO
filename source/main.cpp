@@ -10,7 +10,7 @@ int main() {
     window.display();
 
     USO::Aim_map f("ff", "Rama", R"(data\music\gold_rush.ogg)", "Gold",
-                   R"(data\img\lucifer.png)", R"(data\fonts\GistLight.otf)",
+                   R"(data\img\lucifer.png)", R"(data\fonts\mono.otf)",
                    R"(data\music\click_sound.ogg)");
     f.constructor_run(window);
     return 0;
