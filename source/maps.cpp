@@ -11,12 +11,20 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "File not found\n";
-        throw "File not found";
+        std::exit(3);
     }
     //видимо тут потом разделить на режимы
+//    file >> map_name;
+//    file >> music_address;
+//    file >> author_name;
+//    file >> music_name;
+//    file >> image_address;
+//    file >> font_address;
+//    file >> sound_address;
+
     file >> map_name;
-    file >> music_address;
     file >> author_name;
+    file >> music_address;
     file >> music_name;
     file >> image_address;
     file >> font_address;
@@ -25,9 +33,9 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     while (!file.eof()) {
         std::string type;
         file >> type;
-        int index;
-        file >> index;
-        int32_t time;
+//        int index;
+//        file >> index;
+        sf::Int64 time;
         file >> time;
         sf::Time start_time = sf::microseconds(time);
         file >> time;

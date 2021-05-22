@@ -6,8 +6,8 @@
 #include "base_logic.h"
 
 namespace USO {
-const int circle_beat_radius = 65;
-const int active_circle_radius = 300;
+const int const_circle_beat_radius = 65;
+const int const_active_circle_radius = 300;
 const sf::Time active_circle_duration = sf::seconds(3);
 
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
@@ -26,9 +26,7 @@ protected:
                const sf::Time &duration_time_,
                float x,
                float y)
-        : start_time(start_time_),
-          duration_time(duration_time_),
-          pos(x, y){}
+        : start_time(start_time_), duration_time(duration_time_), pos(x, y) {}
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -42,6 +40,7 @@ public:
     virtual sf::Vector2f &get_pos();
     virtual sf::Vector2f &get_end_pos() = 0;
     virtual std::shared_ptr<Map_object> clone() = 0;
+    virtual void reset() {}
 };
 
 struct Aim_circle : Map_object {
@@ -59,8 +58,7 @@ public:
                float active_circle_radius_)
         : Map_object(start_time_, duration_time_, x, y),
           beat_radius(beat_radius_),
-          active_circle_start_radius(active_circle_radius_),
-          active_circle_radius(active_circle_radius_) {}
+          active_circle_start_radius(active_circle_radius_) {}
 
     //    Aim_circle(const Aim_circle &other_circle)
     //        : Map_object(other_circle.start_time,
@@ -82,6 +80,9 @@ public:
     std::shared_ptr<Map_object> clone() override;
     bool is_valid = true;
     sf::Vector2f &get_end_pos() override;
+    void reset() override {
+        active_circle_radius = active_circle_start_radius;
+    }
 };
 
 struct Aim_slider : Aim_circle {
