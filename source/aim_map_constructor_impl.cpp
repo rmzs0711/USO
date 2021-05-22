@@ -71,13 +71,17 @@ void draw_input_text_box(sf::RenderWindow &window,
 namespace USO {
 void Aim_map::constructor_run(sf::RenderWindow &window) {
     USO::Field field(window, {});
-
+    std::fstream fout(R"(data/maps/editing_map.txt)");
+    if (!fout) {
+        return;
+    }
     std::list<std::shared_ptr<Map_object>> editing_map_objects;
     for (std::shared_ptr<Map_object> &ptr : map_objects) {
         editing_map_objects.emplace_back(ptr->clone());
     }
     auto current_object_it =
         editing_map_objects.begin();  // итератор на следующий по времени объект
+    auto start_draw_it = editing_map_objects.begin();
 
     std::shared_ptr<Map_object> dragged_object;
 
@@ -129,8 +133,14 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         }
         switch (object_to_create) {
             case OBJECT_TO_CREATE::CIRCLE:
-                //                std::cout << (current_object_it ==
-                //                editing_map_objects.begin());
+                if (current_object_it != editing_map_objects.begin()) {
+                    current_object_it--;
+                    if ((*current_object_it)->get_start_time() +
+                            (*current_object_it)->get_duration_time() <
+                        current_time) {
+                        current_object_it++;
+                    }
+                }
                 editing_map_objects.insert(
                     current_object_it,
                     std::make_shared<Aim_circle>(
@@ -142,7 +152,9 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 //                std::cout << (current_object_it ==
                 //                editing_map_objects.begin());
                 current_object_it--;
-
+                if (start_draw_it == editing_map_objects.end()) {
+                    start_draw_it--;
+                }
                 //                assert(current_object_it !=
                 //                editing_map_objects.end());
                 //                field.push_back(--current_object_it);
@@ -158,17 +170,54 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 break;
         }
     };
-    // lambda zone ends
 
+    auto inc_time = [&]() { current_time += time_delta; };
+    auto dec_time = [&]() {
+        current_time -= time_delta;
+        if (current_time < sf::seconds(0)) {
+            current_time = sf::seconds(0);
+        }
+        if (editing_map_objects.empty()) {
+            return;
+        }
+
+        if (current_object_it != editing_map_objects.begin()) {
+            current_object_it--;
+            if ((*current_object_it)->get_start_time() +
+                    active_circle_duration >=
+                current_time) {
+                if (!field.get_field_objects().empty()) {
+                    field.get_field_objects().pop_front();
+                }
+            } else {
+                current_object_it++;
+            }
+        }
+        sf::Time start_time = (*start_draw_it)->get_start_time();
+        sf::Time end_time = start_time + (*start_draw_it)->get_duration_time();
+        for (; start_draw_it != editing_map_objects.begin() &&
+               end_time >= current_time && start_time <= current_time;) {
+            field.get_field_objects().push_back(*start_draw_it);
+            start_draw_it--;
+            start_time = (*start_draw_it)->get_start_time();
+            end_time = start_time + (*start_draw_it)->get_duration_time();
+        }
+        if (start_draw_it == editing_map_objects.begin() && end_time >= current_time && start_time <= current_time) {
+            field.get_field_objects().push_back(*start_draw_it);
+        }
+    };
+    // lambda zone ends
     while (true) {
-        for (auto i = editing_map_objects.begin(); i != editing_map_objects.end(); i++) {
+        std::cout << current_time.asSeconds() << std::endl;
+        for (auto i = editing_map_objects.begin();
+             i != editing_map_objects.end(); i++) {
             if (i == current_object_it) {
                 std::cout << "*";
             } else {
                 std::cout << "-";
             }
         }
-        std::cout << "-" <<std::endl;
+        std::cout << std::endl;
         window.draw(rect);
         if (current_object_it != editing_map_objects.end()) {
             if (*current_object_it) {
@@ -210,14 +259,24 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     }
                     dragged_object->get_pos() =
                         sf::Vector2f(sf::Mouse::getPosition(window));
+                    break;
                 }
                 if (event.key.code == sf::Keyboard::Escape) {
                     //                     Покидаем
+                    auto h = editing_map_objects.size();
+                    for (auto &i : editing_map_objects) {
+                        fout << i->get_start_time().asSeconds() << std::endl;
+                    }
                     return;
+                }
+                if (event.key.code == sf::Keyboard::Right) {
+                    inc_time();
+                } else if (event.key.code == sf::Keyboard::Left) {
+                    dec_time();
                 }
                 if (event.key.code == sf::Keyboard::Z) {
                     dragged_key[event.key.code] = 1;
-                    //                    handle_left_click();
+                    handle_left_click();
                 } else if (event.key.code == sf::Keyboard::X) {
                     // handle_right_click();
                 } else if (event.key.code == sf::Keyboard::D) {
@@ -264,28 +323,12 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 drag = false;
                 break;
             case sf::Event::MouseWheelMoved:
-//                std::cout << current_time.asMicroseconds() << std::endl;
+                //                std::cout << current_time.asMicroseconds() <<
+                //                std::endl;
                 if (event.mouseWheel.delta > 0) {
-                    current_time += time_delta;
+                    inc_time();
                 } else {
-                    current_time -= time_delta;
-                    if (current_time < sf::seconds(0)) {
-                        current_time = sf::seconds(0);
-                    }
-                    if (editing_map_objects.empty()) {
-                        break;
-                    }
-                    if (current_object_it != editing_map_objects.begin()) {
-                        current_object_it--;
-                        if ((*current_object_it)->get_start_time() + active_circle_duration >=
-                            current_time) {
-                            if (!field.get_field_objects().empty()) {
-                                field.get_field_objects().pop_front();
-                            }
-                        } else {
-                            current_object_it++;
-                        }
-                    }
+                    dec_time();
                 }
                 break;
             default:
