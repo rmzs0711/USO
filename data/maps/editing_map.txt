@@ -5,3 +5,15 @@ Gold
 data\img\lucifer.png
 data\fonts\mono.otf
 data\music\click_sound.ogg
+Aim_circle
+25300000
+700000
+648
+568
+65 300
+Aim_circle
+25300000
+700000
+1053
+471
+65 300

@@ -8,7 +8,7 @@
 namespace USO {
 const int const_circle_beat_radius = 65;
 const int const_active_circle_radius = 300;
-const sf::Time active_circle_duration = sf::milliseconds(700);
+const sf::Time const_active_circle_duration = sf::milliseconds(700);
 
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 

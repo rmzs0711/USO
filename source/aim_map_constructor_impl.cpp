@@ -84,7 +84,8 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         editing_map_objects.begin();  // итератор на следующий по времени объект
     auto start_draw_iterator = editing_map_objects.begin();
 
-    std::shared_ptr<Map_object> dragged_object;
+    //    std::shared_ptr<Map_object> dragged_object;
+    sf::Vector2f* dragged_pos_ptr = nullptr;
 
     sf::Time current_time;
     sf::Time time_delta = sf::microseconds(1e6);
@@ -113,6 +114,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
     std::vector<int> dragged_mouse_button(
         sf::Mouse::ButtonCount);  // то же самое только про мышку
 
+    bool slider_choosing_end = false;
     bool drag = true;
     bool drag_end_pos = false;
     sf::Event event{};
@@ -135,7 +137,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             if (is_circle_correct_click(
                     sf::Vector2f(sf::Mouse::getPosition(window)),
                     (*i)->get_pos(), const_circle_beat_radius)) {
-                dragged_object = *i;
+                dragged_pos_ptr = &(*i)->get_pos();
                 return;
             }
         }
@@ -144,20 +146,40 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 editing_map_objects.insert(
                     start_draw_iterator,
                     std::make_shared<Aim_circle>(Aim_circle(
-                        current_time - active_circle_duration,
-                        active_circle_duration,
+                        current_time - const_active_circle_duration,
+                        const_active_circle_duration,
                         (float)sf::Mouse::getPosition(window).x,
                         (float)sf::Mouse::getPosition(window).y,
                         const_circle_beat_radius, const_active_circle_radius)));
                 start_draw_iterator--;
+                dragged_pos_ptr = &(*start_draw_iterator)->get_pos();
                 break;
             case OBJECT_TO_CREATE::SLIDER:
+                if (slider_choosing_end) {
+                    (*start_draw_iterator)->get_end_pos() =
+                        sf::Vector2f(sf::Mouse::getPosition(window));
+                    slider_choosing_end = false;
+                    dragged_pos_ptr =
+                        &(*start_draw_iterator)->get_pos();
+                }
 
+                editing_map_objects.insert(
+                    start_draw_iterator,
+                    std::make_shared<Aim_slider>(Aim_slider(
+                        current_time - const_active_circle_duration,
+                        const_active_circle_duration,
+                        (float)sf::Mouse::getPosition(window).x,
+                        (float)sf::Mouse::getPosition(window).y,
+                        const_circle_beat_radius, const_active_circle_radius,
+                        (float)sf::Mouse::getPosition(window).x,
+                        (float)sf::Mouse::getPosition(window).y,
+                        sf::seconds(0))));
+                start_draw_iterator--;
+                slider_choosing_end = true;
                 break;
             case OBJECT_TO_CREATE::SPINNER:
                 break;
         }
-        dragged_object = *start_draw_iterator;
     };
 
     auto handle_right_click = [&]() {
@@ -176,7 +198,8 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto inc_time = [&]() {
         current_time += time_delta;
-        if (time_delta > sf::seconds(0) && music.getStatus() == sf::Music::Playing) {
+        if (time_delta > sf::seconds(0) &&
+            music.getStatus() == sf::Music::Playing) {
             remembered_time += time_delta;
             music.setPlayingOffset(remembered_time + clock.getElapsedTime());
         }
@@ -232,7 +255,6 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                (*end_draw_iterator)->get_start_time() > current_time) {
             (*end_draw_iterator)->reset();
             end_draw_iterator--;
-            // TODO
         }
         (*end_draw_iterator)->reset();
         end_draw_iterator++;
@@ -257,18 +279,6 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         }
         std::cout << std::endl;
         window.draw(rect);
-        //        if (end_draw_iterator != editing_map_objects.end()) {
-        //            if (*end_draw_iterator) {
-        //                field.push_front(end_draw_iterator, current_time);
-        //            } else {
-        //                std::cerr << "invalid object iterator" <<
-        //                std::endl;
-        //            }
-        //        }
-
-        //        field.change_state(current_time);
-
-        //        field.draw(font);
 
         for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
             if ((*i)->get_start_time() > current_time) {
@@ -286,7 +296,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
         switch (event.type) {
             case sf::Event::KeyPressed:
-                if (dragged_object && drag) {
+                if (dragged_pos_ptr && drag) {
                     //                    auto &object = *dragged_object;
                     //                    if (typeid(object) ==
                     //                    typeid(USO::Aim_slider)) {
@@ -297,7 +307,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     //                            continue;
                     //                        }
                     //                    }
-                    dragged_object->get_pos() =
+                    *dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition(window));
                     break;
                 }
@@ -328,38 +338,42 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                         music.getStatus() == sf::Music::Stopped) {
                         remembered_time = current_time;
                         saved_delta = time_delta;
-//                        time_delta = sf::seconds(0);
                         clock.restart();
                         music.setPlayingOffset(current_time);
                         music.play();
-                        break;
                     } else {
                         time_delta = saved_delta;
                         music.pause();
                     }
+                    break;
                 }
                 if (event.key.code == sf::Keyboard::Right) {
                     inc_time();
                 } else if (event.key.code == sf::Keyboard::Left) {
                     dec_time();
-                }
-                if (event.key.code == sf::Keyboard::Z) {
+                } else if (event.key.code == sf::Keyboard::Z) {
                     dragged_key[event.key.code] = 1;
                     handle_left_click();
                 } else if (event.key.code == sf::Keyboard::X) {
                     handle_right_click();
                 } else if (event.key.code == sf::Keyboard::D) {
                     draw_input_text_box(window, time_delta, font);
+                } else if (event.key.code == sf::Keyboard::Num1) {
+                    object_to_create = OBJECT_TO_CREATE::CIRCLE;
+                } else if (event.key.code == sf::Keyboard::Num2) {
+                    object_to_create = OBJECT_TO_CREATE::SLIDER;
+                } else if (event.key.code == sf::Keyboard::Num3) {
+                    object_to_create = OBJECT_TO_CREATE::SPINNER;
                 }
                 break;
             case sf::Event::MouseMoved:
-                if (dragged_object && drag) {
-                    dragged_object->get_pos() =
+                if (dragged_pos_ptr && drag) {
+                    *dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition(window));
                     break;
                 }
             case sf::Event::MouseButtonPressed:
-                if (dragged_object && drag) {
+                if (dragged_pos_ptr && drag) {
                     //                    auto &object = *dragged_object;
                     //                    if (typeid(object) ==
                     //                    typeid(USO::Aim_slider)) {
@@ -370,7 +384,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     //                            continue;
                     //                        }
                     //                    }
-                    dragged_object->get_pos() =
+                    *dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition(window));
                     break;
                 }
@@ -400,7 +414,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 dragged_key[event.key.code] = 0;
                 drag = false;
                 drag_end_pos = false;
-                dragged_object.reset();
+                dragged_pos_ptr = nullptr;
                 break;
             case sf::Event::MouseButtonReleased:
                 if (!drag) {
