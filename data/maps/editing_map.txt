@@ -1,0 +1,7 @@
+ff
+Rama
+data\music\stronger.ogg
+Gold
+data\img\lucifer.png
+data\fonts\mono.otf
+data\music\click_sound.ogg

@@ -31,16 +31,13 @@ sf::Time &USO::Map_object::get_duration_time() {
     return duration_time;
 }
 
-float &USO::Map_object::get_x_coord() {
-    return pos.x;
+sf::Vector2f &USO::Map_object::get_pos() {
+    return pos;
 }
 
-float &USO::Map_object::get_y_coord() {
-    return pos.y;
-}
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
-    if (current_time <= start_time + duration_time + sf::milliseconds(100)) {
+    if (current_time <= start_time + duration_time) {
         active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу
                                 //изменения и отнимаю от стартового
             active_circle_start_radius -
@@ -71,9 +68,11 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
 
 void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     if (is_valid) {
+//        static int index = 0;
+//        index %= 5;
         sf::CircleShape active_circle(active_circle_radius);
         sf::CircleShape base_circle(beat_radius);
-        sf::Text index_of_circle;
+//        sf::Text index_of_circle;
 
 
         active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
@@ -82,9 +81,9 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
             active_circle.setPosition(fix_circle_pos(pos, beat_radius));
         }
         base_circle.setPosition(fix_circle_pos(pos, beat_radius));
-        index_of_circle.setCharacterSize(42);
-        index_of_circle.setPosition(fix_circle_pos(pos, (float)index_of_circle.getCharacterSize() / 2));
-        index_of_circle.setFont(font);
+//        index_of_circle.setCharacterSize(42);
+//        index_of_circle.setPosition(fix_circle_pos(pos, (float)index_of_circle.getCharacterSize() / 2));
+//        index_of_circle.setFont(font);
 
 
         active_circle.setFillColor(sf::Color::Transparent);
@@ -94,15 +93,21 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
         base_circle.setFillColor(sf::Color(204, 51, 51));
         base_circle.setOutlineThickness(10);
         base_circle.setOutlineColor(sf::Color::White);
-        index_of_circle.setFillColor(sf::Color::White);
-        index_of_circle.setOutlineColor(sf::Color::White);
+//        index_of_circle.setFillColor(sf::Color::White);
+//        index_of_circle.setOutlineColor(sf::Color::White);
 
-        index_of_circle.setString(std::to_string(index % 5 + 1));
+//        index_of_circle.setString(std::to_string(index++ % 5 + 1));
         window.draw(base_circle);
         window.draw(active_circle);
-        window.draw(index_of_circle);
+//        window.draw(index_of_circle);
     } else {
     }
+}
+std::shared_ptr<USO::Map_object> USO::Aim_circle::clone() {
+    return std::make_shared<Aim_circle>(Aim_circle(*this));
+}
+sf::Vector2f &USO::Aim_circle::get_end_pos() {
+    return get_pos();
 }
 
 bool USO::Aim_slider::change_state(sf::Time current_time) {
@@ -171,4 +176,11 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(target_circle);
     window.draw(track2);
     Aim_circle::draw(window, font);
+}
+
+std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
+    return std::make_shared<Aim_circle>(Aim_slider(*this));
+}
+sf::Vector2f &USO::Aim_slider::get_end_pos() {
+    return end_pos;
 }
