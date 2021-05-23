@@ -36,6 +36,11 @@ void table_of_scores(sf::RenderWindow &window,
 }
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
+    std::cout << map_objects.size();
+    for (auto &i: map_objects) {
+        auto &gg = *i;
+        std::cout << " ";
+    }
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
@@ -105,7 +110,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;
                     }
-                    current_object_it++;
                 }
 
                 field.change_state(past_time + clock.getElapsedTime());

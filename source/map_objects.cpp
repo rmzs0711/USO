@@ -37,7 +37,7 @@ sf::Vector2f &USO::Map_object::get_pos() {
 
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
-    if (current_time <= start_time + duration_time + sf::milliseconds(100)) {
+    if (current_time <= start_time + duration_time) {
         active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу
                                 //изменения и отнимаю от стартового
             active_circle_start_radius -

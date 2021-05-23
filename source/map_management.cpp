@@ -7,13 +7,11 @@ namespace USO {
 void Field::push_front(
     std::list<std::shared_ptr<Map_object>>::iterator &map_object_it,
     sf::Time current_time) {
-    if ((*map_object_it)->get_start_time() <= current_time) {
-        if (field_objects.empty() ||
-            (*map_object_it)->get_start_time() >= field_objects.front()->get_start_time()) {
-            field_objects.push_front(*map_object_it);
-        } else {
-            field_objects.push_back(*map_object_it);
-        }
+//    auto &gg = (*(*map_object_it));
+//    std::cout << current_time.asSeconds() << " " << gg.get_start_time().asSeconds() << std::endl;
+
+    if ((*(*map_object_it)).get_start_time() <= current_time) {
+        field_objects.push_front(*map_object_it);
         map_object_it++;
     }
 }
@@ -41,9 +39,9 @@ std::list<std::shared_ptr<Map_object>> &Field::get_field_objects() {
 void USO::Field::push_back(
     std::list<std::shared_ptr<Map_object>>::iterator &map_object_it) {
     assert(*map_object_it);
-//    if (!field_objects.empty()) {
-        field_objects.push_back(*map_object_it);
-//        map_object_it++;
-//    }
+    //    if (!field_objects.empty()) {
+    field_objects.push_back(*map_object_it);
+    //        map_object_it++;
+    //    }
 }
 }  // namespace USO

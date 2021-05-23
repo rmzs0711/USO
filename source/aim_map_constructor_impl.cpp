@@ -88,6 +88,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     sf::Time current_time;
     sf::Time time_delta = sf::microseconds(1e6);
+    sf::Time saved_delta = time_delta;
     sf::Clock clock;
     sf::Time remembered_time;
 
@@ -175,6 +176,10 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto inc_time = [&]() {
         current_time += time_delta;
+        if (time_delta > sf::seconds(0) && music.getStatus() == sf::Music::Playing) {
+            remembered_time += time_delta;
+            music.setPlayingOffset(remembered_time + clock.getElapsedTime());
+        }
         if (editing_map_objects.empty()) {
             return;
         }
@@ -237,7 +242,9 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
     while (true) {
         if (music.getStatus() == sf::Music::Playing) {
             current_time = clock.getElapsedTime() + remembered_time;
+            time_delta = sf::seconds(0);
             inc_time();
+            time_delta = saved_delta;
         }
         std::cout << current_time.asSeconds() << std::endl;
         for (auto i = editing_map_objects.begin();
@@ -304,22 +311,32 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     fout << sound_address << std::endl;
                     for (auto &i : editing_map_objects) {
                         fout << "Aim_circle" << std::endl;
-                        fout << i->get_start_time().asMicroseconds() << std::endl;
-                        fout << i->get_duration_time().asMicroseconds() << std::endl;
+                        fout << i->get_start_time().asMicroseconds()
+                             << std::endl;
+                        fout << i->get_duration_time().asMicroseconds()
+                             << std::endl;
                         fout << i->get_pos().x << std::endl;
                         fout << i->get_pos().y << std::endl;
-                        fout << const_circle_beat_radius << " " << const_active_circle_radius << std::endl;
+                        fout << const_circle_beat_radius << " "
+                             << const_active_circle_radius << std::endl;
                     }
                     fout.close();
                     return;
                 }
                 if (event.key.code == sf::Keyboard::Space) {
-                    remembered_time = current_time;
-                    time_delta = sf::seconds(0);
-                    clock.restart();
-                    music.setPlayingOffset(current_time);
-                    music.play();
-                    break;
+                    if (music.getStatus() == sf::Music::Paused ||
+                        music.getStatus() == sf::Music::Stopped) {
+                        remembered_time = current_time;
+                        saved_delta = time_delta;
+//                        time_delta = sf::seconds(0);
+                        clock.restart();
+                        music.setPlayingOffset(current_time);
+                        music.play();
+                        break;
+                    } else {
+                        time_delta = saved_delta;
+                        music.pause();
+                    }
                 }
                 if (event.key.code == sf::Keyboard::Right) {
                     inc_time();
