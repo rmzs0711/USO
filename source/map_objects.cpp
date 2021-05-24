@@ -116,6 +116,7 @@ bool USO::Aim_slider::change_state(sf::Time current_time) {
     } else if (current_time <= start_time + duration_time + move_time) {
         float coef = get_time_coefficient(start_time + duration_time, move_time,
                                           current_time);
+        active_circle_radius = beat_radius;
         pos.x = start_pos.x + (end_pos.x - start_pos.x) * coef;
         pos.y = start_pos.y + (end_pos.y - start_pos.y) * coef;
     } else {
@@ -176,6 +177,7 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(target_circle);
     window.draw(track2);
     Aim_circle::draw(window, font);
+
 }
 
 std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {

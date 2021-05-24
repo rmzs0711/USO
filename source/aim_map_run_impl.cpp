@@ -78,7 +78,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         if (field.get_field_objects().empty()) {
             return;
         }
-        USO::Map_object &front_object =
+        USO::Map_object &back_object =
             *(field.get_field_objects().front().get());
         if (!(*(field.get_field_objects().back()))
                  .check_event(
@@ -86,7 +86,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                      game_session, past_time + clock.getElapsedTime())) {
             return;
         }
-        if (typeid(front_object) != typeid(USO::Aim_slider)) {
+        if (typeid(back_object) != typeid(USO::Aim_slider)) {
             field.get_field_objects().pop_back();
         }
         sound.play();

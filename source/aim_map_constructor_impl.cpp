@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -17,6 +18,12 @@ bool is_circle_correct_click(const sf::Vector2f &mouse,
     return (mouse.x - center.x) * (mouse.x - center.x) +
                (mouse.y - center.y) * (mouse.y - center.y) <=
            radius * radius;
+}
+
+double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
+    return std::pow((start_pos.x - end_pos.x) * (start_pos.x - end_pos.x) +
+                        (start_pos.y - end_pos.y) * (start_pos.y - end_pos.y),
+                    0.5);
 }
 
 void draw_input_text_box(sf::RenderWindow &window,
@@ -85,7 +92,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
     auto start_draw_iterator = editing_map_objects.begin();
 
     //    std::shared_ptr<Map_object> dragged_object;
-    sf::Vector2f* dragged_pos_ptr = nullptr;
+    sf::Vector2f *dragged_pos_ptr = nullptr;
 
     sf::Time current_time;
     sf::Time time_delta = sf::microseconds(1e6);
@@ -158,9 +165,14 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 if (slider_choosing_end) {
                     (*start_draw_iterator)->get_end_pos() =
                         sf::Vector2f(sf::Mouse::getPosition(window));
+                    auto &object =
+                        **start_draw_iterator;
+                    object.get_move_time() = sf::seconds(
+                        get_dist(object.get_pos(), object.get_end_pos()) *
+                        time_per_pixels / 1000);
                     slider_choosing_end = false;
-                    dragged_pos_ptr =
-                        &(*start_draw_iterator)->get_pos();
+                    dragged_pos_ptr = &(*start_draw_iterator)->get_end_pos();
+                    break;
                 }
 
                 editing_map_objects.insert(
@@ -209,7 +221,8 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
         while (start_draw_iterator != editing_map_objects.end() &&
                (*start_draw_iterator)->get_start_time() +
-                       (*start_draw_iterator)->get_duration_time() <
+                       (*start_draw_iterator)->get_duration_time() +
+                       (*start_draw_iterator)->get_move_time() <
                    current_time) {
             (*start_draw_iterator)->reset();
             start_draw_iterator++;
@@ -235,13 +248,15 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         }
         while (start_draw_iterator != editing_map_objects.begin() &&
                (*start_draw_iterator)->get_start_time() +
-                       (*start_draw_iterator)->get_duration_time() >
+                       (*start_draw_iterator)->get_duration_time() +
+                       (*start_draw_iterator)->get_move_time() >
                    current_time) {
-            (*start_draw_iterator)->reset();
+//            (*start_draw_iterator)->reset();
             start_draw_iterator--;
         }
         if ((*start_draw_iterator)->get_start_time() +
-                (*start_draw_iterator)->get_duration_time() <
+                (*start_draw_iterator)->get_duration_time() +
+                (*start_draw_iterator)->get_move_time() <
             current_time) {
             (*start_draw_iterator)->reset();
             start_draw_iterator++;
@@ -256,7 +271,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             (*end_draw_iterator)->reset();
             end_draw_iterator--;
         }
-        (*end_draw_iterator)->reset();
+//        (*end_draw_iterator)->reset();
         end_draw_iterator++;
     };
     // lambda zone ends
