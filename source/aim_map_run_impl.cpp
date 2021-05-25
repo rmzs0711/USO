@@ -1,11 +1,8 @@
 #include <cassert>
-#include <fstream>
 #include <functional>
 #include <iostream>
-#include <typeindex>
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include "iterator"
 #include "map_management.h"
 #include "maps.h"
 
@@ -62,8 +59,8 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
 
     sf::Texture img;
     check_file_load(
-        img.loadFromFile(R"(data\img\stronger.png)"),
-        R"(data\img\stronger.png)");  //Тут нужно сделать загрузку названия из
+        img.loadFromFile(R"(data\img\lucifer.png)"),
+        R"(data\img\lucifer.png)");  //Тут нужно сделать загрузку названия из
                                       //карты, если карта содержит в себе фон
 
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));

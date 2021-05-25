@@ -40,32 +40,28 @@ public:
     virtual ~Map() = default;
 
     virtual void run(sf::RenderWindow &) = 0;
-    virtual void construct(sf::RenderWindow &) = 0;
+    // virtual void construct(sf::RenderWindow &) = 0;
 
 protected:
     Map() = default;
 };
 
 struct Aim_map final : Map {
-    Aim_map(std::string music_address_,
-            std::string music_name_,
-            std::string map_name_,
-            std::string author_name_,
-            std::vector<std::shared_ptr<Map_object>> map_objects_ = {})
-        : Map(std::move(music_address_),
-              std::move(music_name_),
-              std::move(map_name_),
-              std::move(author_name_),
-              std::move(map_objects_)) {}
-
     explicit Aim_map(const std::string &filename);
 
     void run(sf::RenderWindow &) override;
-    void construct(sf::RenderWindow &) override;
+//    void construct(sf::RenderWindow &) override;
 };
 
 struct Conveyor_map final : Map {
+private:
+    const int NUMBER_OF_LINES = 4;
+public:
+    explicit Conveyor_map(const std::string &filename);
+    std::vector<std::shared_ptr<Conveyor_line>> lines;
+
     void run(sf::RenderWindow &) override;
+    // void construct(sf::RenderWindow &);
 };
 
 struct Bulletproof_map final : Map {

@@ -1,11 +1,11 @@
 //
 // Created by Aigerim on 18.02.2021.
 //
+#include "maps.h"
+#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <cassert>
 #include "SFML/System/Time.hpp"
-#include "maps.h"
 
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);
@@ -13,7 +13,6 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         std::cout << "File not found\n";
         return;
     }
-    //видимо тут потом разделить на режимы
     file >> map_name;
     file >> music_address;
     file >> author_name;
@@ -75,6 +74,55 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
                                 beat_count)));
         //НЕ СМОГЛА ПОТОМУ ЧТО АБСТРАКТНЫЙ КЛАСС
         }*/
+    }
+}
 
+USO::Conveyor_map::Conveyor_map(const std::string &filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cout << "File not found\n";
+        return;
+    }
+    file >> map_name;
+    file >> music_address;
+    file >> author_name;
+    file >> music_name;
+
+    float pos_x;
+    file >> pos_x;
+    float pos_y;
+    file >> pos_y;
+    float width;
+    file >> width;
+    float height;
+    file >> height;
+
+    std::vector<Conveyor_note_key_position> key_pos = {
+        Conveyor_note_key_position::D, Conveyor_note_key_position::F,
+        Conveyor_note_key_position::J, Conveyor_note_key_position::K};
+
+    lines.push_back(std::make_shared<USO::Conveyor_line>(USO::Conveyor_line(
+        sf::Vector2f(pos_x, pos_y), sf::Vector2f(width, height), key_pos[0])));
+
+    for (int i = 1; i < NUMBER_OF_LINES; ++i) {
+        lines.push_back(std::make_shared<USO::Conveyor_line>(
+            USO::Conveyor_line(sf::Vector2f(pos_x + (float)i * width, pos_y),
+                               sf::Vector2f(width, height), key_pos[i])));
+    }
+
+    while (!file.eof()) {
+        int index;
+        file >> index;
+        int32_t time;
+        file >> time;
+        sf::Time start_time = sf::milliseconds(time);
+        file >> time;
+        sf::Time duration_time = sf::milliseconds(time);
+        int line_number;
+        file >> line_number;
+
+        map_objects.push_back(
+            std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
+                start_time, duration_time, index, *(lines[line_number]))));
     }
 }

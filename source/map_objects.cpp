@@ -172,3 +172,40 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(track2);
     Aim_circle::draw(window, font);
 }
+
+
+// CONVEYOR
+
+bool USO::Conveyor_note::change_state(sf::Time current_time) {
+    
+    return true;
+}
+bool USO::Conveyor_note::check_event(sf::Vector2f,
+                 BL::Game_session &game_session,
+                 sf::Time current_time) {
+    return true;
+}
+void USO::Conveyor_note::draw(sf::RenderWindow &window, const sf::Font &font) {
+    sf::RectangleShape rectangle(line.beat_sizes);
+    rectangle.setPosition(pos);
+    rectangle.setFillColor(sf::Color::Magenta);
+    rectangle.setOutlineColor(sf::Color::White);
+    window.draw(rectangle);
+}
+
+
+void USO::Conveyor_line::draw(sf::RenderWindow &window) {
+    sf::RectangleShape fall(sizes);
+    fall.setPosition(pos);
+    fall.setFillColor(sf::Color::Magenta);
+    fall.setOutlineColor(sf::Color::White);
+    fall.setOutlineThickness(1);
+    window.draw(fall);
+
+    sf::RectangleShape beat_rectangle(beat_sizes);
+    beat_rectangle.setPosition(beat_pos);
+    beat_rectangle.setFillColor(sf::Color::Green);
+    beat_rectangle.setOutlineColor(sf::Color::White);
+    beat_rectangle.setOutlineThickness(1);
+    window.draw(beat_rectangle);
+}
