@@ -53,9 +53,6 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
     music.openFromFile(music_address);
     music.play();
 
-
-
-
     sf::Sound sound;
     sound.setBuffer(press_sound);
 
@@ -138,7 +135,8 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                                           past_time + clock.getElapsedTime())) {
                         return;
                     }
-                    if (typeid(front_object) != typeid(USO::Aim_slider)) {
+                    if (typeid(front_object) != typeid(USO::Aim_slider) &&
+                        typeid(front_object) != typeid(USO::Aim_spinner)) {
                         field.get_field_objects().pop_back();
                     }
                     sound.play();
@@ -196,7 +194,8 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                             USO::Map_object &front_object =
                                 *(field.get_field_objects().front().get());
                             if (typeid(front_object) !=
-                                typeid(USO::Aim_slider)) {
+                                typeid(USO::Aim_slider) && typeid(front_object) !=
+                                    typeid(USO::Aim_spinner)) {
                                 break;
                             }
                             front_object.check_event(

@@ -32,7 +32,6 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         file >> x_pos;
         float y_pos;
         file >> y_pos;
-
         if (type == "Aim_circle") {
             float beat_radius;
             file >> beat_radius;
@@ -60,6 +59,12 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
                                 beat_radius, active_circle_radius, x_end, y_end,
                                 sf::milliseconds(move_time))));
 
+        } else if (type == "Aim_spinner") {
+            float active_circle_radius;
+            file >> active_circle_radius;
+            map_objects.push_back(std::make_shared<USO::Aim_spinner>(
+                USO::Aim_spinner(start_time, duration_time, x_pos, y_pos,
+                                 index, active_circle_radius)));
         } /*else if (type == "Aim_muda") {
             float beat_radius;
             file >> beat_radius;

@@ -118,8 +118,45 @@ public:
 //    std::shared_ptr<Map_object> clone() override;
 };
 
-// struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
-// отслеживать поворот мыши
+struct Aim_spinner : Aim_circle {
+private:
+
+    float start_radian;
+    float sum_of_radians;
+    int change_color;
+public:
+
+    Aim_spinner(const sf::Time &start_time_,
+                const sf::Time &duration_time_,
+                float x_,
+                float y_,
+                int index_,
+                float active_circle_start_radius_
+                )
+        : Aim_circle(start_time_,
+                   duration_time_,
+                   x_,
+                   y_,
+                   index_,
+                   10,
+                   active_circle_start_radius_),
+          sum_of_radians(0),
+          start_radian(0),
+          change_color(0)
+    {
+    }
+
+    float calc_delta(sf::Vector2f, float&) ;
+    bool change_state(sf::Time current_time) override;
+    bool check_event(sf::Vector2f,
+                     BL::Game_session &game_session,
+                     sf::Time current_time) override;
+    void draw(sf::RenderWindow &window, const sf::Font &font) override;
+    static bool check_sum_of_radians(float &);
+    std::vector<sf::RectangleShape> &get_new_lines();
+    static bool check_event_for_draw(sf::Vector2f);
+};
+
 
 // struct Aim_muda final : Map_object {
 // private:

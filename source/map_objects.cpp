@@ -1,6 +1,10 @@
 #include "map_objects.h"
 #include <sstream>
+#include <cmath>
 #include "base_logic.h"
+#include <iostream>
+#include <random>
+
 namespace {
 float get_time_coefficient(const sf::Time &start,
                            const sf::Time &duration,
@@ -62,7 +66,6 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
             return true;
         } else {
             is_valid = false;
-
         }
     }
     //    game_session.decrease_health(game_session.damage());
@@ -91,6 +94,7 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
         active_circle.setOutlineThickness(10);
         active_circle.setOutlineColor(sf::Color(230, 0, 0));
         //    base_circle.setFillColor(sf::Color::Transparent);
+
         base_circle.setFillColor(sf::Color(204, 51, 51));
         base_circle.setOutlineThickness(10);
         base_circle.setOutlineColor(sf::Color::White);
@@ -100,7 +104,7 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
         index_of_circle.setString(std::to_string(index % 5 + 1));
         window.draw(base_circle);
         window.draw(active_circle);
-        window.draw(index_of_circle);
+        //window.draw(index_of_circle);
     } else {
     }
 }
@@ -170,5 +174,137 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(track);
     window.draw(target_circle);
     window.draw(track2);
+    Aim_circle::draw(window, font);
+}
+
+/*float USO::Aim_spinner::calc_delta(sf::Vector2f cur_vector,
+                                   float& prev_radian) {
+    float cx = 900.f;
+    float cy = 500.f;
+    float radian = (cur_vector.x - cx) /
+                   std::sqrt((cur_vector.x - cx) * (cur_vector.x - cx) +
+                   (cur_vector.y - cy) * (cur_vector.y - cy));
+
+    radian = std::acos(radian);
+    float result;
+    if (cy - cur_vector.y > 0) {
+        radian = 2.f * (float)M_PI - radian;
+    }
+    result = std::abs(radian - prev_radian);
+   if (result > M_PI / 4) {
+        return 0;
+    }
+    prev_radian = radian;
+    return result;
+}*/
+
+float USO::Aim_spinner::calc_delta(sf::Vector2f cur_vector,
+                                   float& prev_radian) {
+    float x_pos = get_x_coord();
+    float y_pos = get_y_coord();
+    float cur_x = cur_vector.x - x_pos;
+    float cur_y = y_pos - cur_vector.y;
+    float radian = (cur_x * x_pos +
+                    cur_y * y_pos) /
+                    std::sqrt((cur_x * cur_x + cur_y * cur_y) *
+                             (x_pos * x_pos + y_pos * y_pos));
+    radian = std::acos(radian);
+    float result = std::abs(radian - prev_radian);
+    prev_radian = radian;
+    return result;
+}
+
+bool USO::Aim_spinner::check_sum_of_radians(float &cur_sum) {
+    if (cur_sum < 0) {
+        cur_sum = 0;
+        return false;
+    } else if (cur_sum >= 2.f * (float)M_PI) {
+        cur_sum = 0;
+        return true;
+    }
+    return false;
+}
+
+bool USO::Aim_spinner::change_state(sf::Time current_time) {
+    return Aim_circle::change_state(current_time);
+}
+
+bool USO::Aim_spinner::check_event(sf::Vector2f mouse_pos,
+                                   BL::Game_session &game_session,
+                                   sf::Time current_time) {
+    if (current_time <= start_time + duration_time) {
+        sum_of_radians += calc_delta(mouse_pos, start_radian);
+        if (check_sum_of_radians(sum_of_radians)) {
+            game_session.increase_score(100, 1);
+        }
+        return true;
+    }
+    return false;
+}
+
+bool USO::Aim_spinner::check_event_for_draw(sf::Vector2f mouse_pos) {
+    float angle = (mouse_pos.x) /
+                  std::hypot(mouse_pos.x, mouse_pos.y);
+    angle = std::acos(angle);
+    float div = angle / (float)M_PI / 4;
+    float epsilon = 0.1;
+    if (angle - div * M_PI / 4 < epsilon) {
+        return true;
+    }
+    return false;
+}
+
+int get_random() {
+    static std::default_random_engine random;
+    static std::uniform_int_distribution<int> distribution(0,255);
+    int dice_roll = distribution(random);
+    return dice_roll;
+}
+
+/*std::vector<sf::RectangleShape> &USO::Aim_spinner::get_new_lines() {
+    static std::vector<sf::RectangleShape> lines(
+        8, sf::RectangleShape(sf::Vector2f(std::hypot(700, 700), 5)));
+    for (int i = 0; i < 8; i++) {
+        change_color++;
+        lines[i].setPosition(900, 500);
+        if (change_color == 100) {
+            lines[i].setFillColor(
+                sf::Color(get_random(), get_random(), get_random()));
+            change_color = 0;
+        }
+        lines[i].rotate((float)i * 45);
+    }
+    return lines;
+}*/
+
+
+
+void USO::Aim_spinner::draw(sf::RenderWindow &window, const sf::Font &font) {
+    static std::vector<sf::RectangleShape> Lines(
+        8, sf::RectangleShape(sf::Vector2f(std::hypot(700, 700), 5)));
+    for (int i = 0; i < 8; i++) {
+        Lines[i].setPosition(900, 500);
+        Lines[i].rotate((float)i * 45);
+    }
+    Lines[0].setFillColor(sf::Color(193, 197, 54));
+    Lines[1].setFillColor(sf::Color(224, 128, 75));
+    Lines[2].setFillColor(sf::Color(47, 227, 253));
+    Lines[3].setFillColor(sf::Color(253, 227, 47));
+    Lines[4].setFillColor(sf::Color(253, 47, 237));
+    Lines[5].setFillColor(sf::Color(219, 81, 171));
+    Lines[6].setFillColor(sf::Color(109, 182, 190));
+    Lines[7].setFillColor(sf::Color(193, 199, 101));
+
+    for (int i = 0; i < 8; i++) {
+        window.draw(Lines[i]);
+    }
+
+    if (USO::Aim_spinner::check_event_for_draw((sf::Vector2f)sf::Mouse::getPosition())) {
+        sf::CircleShape circle;
+        circle.setRadius(10.f);
+        circle.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+        circle.setFillColor(sf::Color::Magenta);
+        window.draw(circle);
+    }
     Aim_circle::draw(window, font);
 }
