@@ -59,7 +59,6 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
             return true;
         } else {
             is_valid = false;
-
         }
     }
     //    game_session.decrease_health(game_session.damage());
@@ -239,7 +238,7 @@ bool USO::Aim_spinner::check_event_for_draw(sf::Vector2f mouse_pos) {
     float y_pos = std::abs(mouse_pos.y - get_pos().y);
     if ((std::abs(x_pos - y_pos) < epsilon ||
          x_pos < epsilon || y_pos < epsilon) &&
-        x_pos * x_pos + y_pos * y_pos <= active_circle_radius * active_circle_radius) {
+         x_pos * x_pos + y_pos * y_pos <= active_circle_radius * active_circle_radius) {
         return true;
     }
     return false;
@@ -272,12 +271,9 @@ sf::Vector2f &USO::Aim_slider::get_end_pos() {
 std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
     return std::make_shared<Aim_circle>(Aim_slider(*this));
 }
-sf::Vector2f &USO::Aim_slider::get_end_pos() {
-    return end_pos;
-}
+
 sf::Vector2f &USO::Aim_slider::get_start_pos() {
     return start_pos;
-
 }
 
 // CONVEYOR

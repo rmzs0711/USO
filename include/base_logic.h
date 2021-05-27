@@ -1,6 +1,8 @@
 #ifndef USO_BASE_LOGIC_H
 #define USO_BASE_LOGIC_H
 
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include "SFML/Audio.hpp"
 
 namespace {
@@ -34,7 +36,7 @@ public:
           combo_status(1) {}
 
     void increase_score(unsigned long long, unsigned long long);
-    void nullify_score();
+    [[maybe_unused]] void nullify_score();
     [[nodiscard]] unsigned long long get_score() const;
 
     void increase_combo(unsigned long long);
@@ -42,15 +44,16 @@ public:
 
     void increase_health(int);
     void decrease_health(int);
-    void lock_combo();
-    void unlock_combo();
-    void lock_score();
-    void unlock_score();
+    [[maybe_unused]] void lock_combo();
+    [[maybe_unused]] void unlock_combo();
+    [[maybe_unused]] void lock_score();
+    [[maybe_unused]] void unlock_score();
     [[nodiscard]] int get_health() const;
     [[nodiscard]] int damage() const;
     void set_game_status(BL::Game_status);
     Game_status get_game_status();
-    void pause_session();
+    [[maybe_unused]] void pause_session();
+    void table_of_scores(sf::RenderWindow &window, sf::Font &font) const;
 };
 
 [[maybe_unused]] void play_beat_sound(sf::SoundBuffer &);

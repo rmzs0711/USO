@@ -45,10 +45,7 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
     buttons.emplace_back(0, 0, 100, Menu::EXIT, sf::Color::Cyan);
     buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS,
                          sf::Color::Green);
-    buttons.emplace_back(900, 400, 100, Menu::OPEN_CONVEYOR,
-    buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS, sf::Color::Green);
     buttons.emplace_back(900, 400, 200, Menu::OPEN_CONVEYOR,
-
                          sf::Color::Magenta);
 
     sf::CircleShape mouse(5.f);
@@ -90,10 +87,12 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
             }
         }
         for (auto &button : buttons) {
+            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
             button.draw(window);
             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
             mouse.setFillColor(sf::Color(241, 200, 14));
             window.draw(mouse);
+
         }
         window.display();
     }
@@ -133,13 +132,7 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
         for (auto &button : buttons) {
             button.guidance((sf::Vector2f)sf::Mouse::getPosition());
         }
-        sf::CircleShape circle;
-        circle.setRadius(20);
-        circle.setPosition(
-            sf::Vector2f(((sf::Vector2f)sf::Mouse::getPosition()).x - 20,
-                         ((sf::Vector2f)sf::Mouse::getPosition()).y - 20));
-        circle.setFillColor(sf::Color::Magenta);
-        window.draw(circle);
+
         for (auto &button : buttons) {
             button.draw(window);
             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());

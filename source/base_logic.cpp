@@ -1,4 +1,5 @@
 #include "base_logic.h"
+#include <SFML/Graphics/Text.hpp>
 #include "SFML/Audio.hpp"
 
 [[maybe_unused]] void BL::play_beat_sound(sf::SoundBuffer &buffer) {}
@@ -76,3 +77,25 @@ void BL::Game_session::set_game_status(BL::Game_status game_status_) {
     game_status = game_status_;
 }
 
+void BL::Game_session::table_of_scores(sf::RenderWindow &window,
+                                       sf::Font &font) const {
+    /*sf::RectangleShape table;
+    table.setSize(sf::Vector2f(250.f, 120.f));
+    table.setFillColor(sf::Color::Blue);
+    table.setOutlineThickness(5.f);
+    table.setOutlineColor(sf::Color);
+    window.draw(table);*/
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(30);
+    //    text.setFillColor(sf::Color::White);
+    text.setStyle(sf::Text::Bold);
+    text.setString("SCORE: " + std::to_string(get_score()));
+    window.draw(text);
+    text.setPosition(sf::Vector2f(0.f, 35.f));
+    text.setString("COMBO: " + std::to_string(get_combo()));
+    window.draw(text);
+    text.setPosition(sf::Vector2f(0.f, 70.f));
+    text.setString("HEALTH: " + std::to_string(get_health()));
+    window.draw(text);
+}
