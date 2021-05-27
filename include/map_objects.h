@@ -25,13 +25,13 @@ protected:
     sf::Time duration_time;
     sf::Time move_time;
     sf::Vector2f pos;
-
     Map_object(const sf::Time &start_time_,
                const sf::Time &duration_time_,
                float x,
                float y,
                const sf::Time &move_time_)
-        : start_time(start_time_), duration_time(duration_time_), pos(x, y), move_time(move_time_) {}
+        : start_time(start_time_), duration_time(duration_time_), pos(x, y), move_time(move_time_) {
+    }
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -58,7 +58,7 @@ protected:
     float active_circle_radius = 0;
     float active_circle_start_radius;
     bool is_valid = true;
-
+    float time_coef = 1;
 public:
     Aim_circle(const sf::Time &start_time_,
                const sf::Time &duration_time_,
@@ -101,7 +101,6 @@ struct Aim_slider : Aim_circle {
 private:
     sf::Vector2f start_pos;
     sf::Vector2f end_pos;
-
 public:
     Aim_slider(const sf::Time &start_time_,
                const sf::Time &duration_time_,

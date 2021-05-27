@@ -37,12 +37,15 @@ sf::Vector2f &USO::Map_object::get_pos() {
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
+        time_coef =
+            get_time_coefficient(start_time, duration_time, current_time);
         active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу
                                 //изменения и отнимаю от стартового
             active_circle_start_radius -
-            (active_circle_start_radius - beat_radius) *
-                get_time_coefficient(start_time, duration_time, current_time);
+            (active_circle_start_radius - beat_radius) * time_coef;
         return true;
+    } else {
+        is_valid = false;
     }
     return false;
 }
@@ -66,46 +69,35 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
 
 void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     if (is_valid) {
-        //        static int index = 0;
-        //        index %= 5;
         sf::CircleShape active_circle(active_circle_radius);
         sf::CircleShape base_circle(beat_radius);
-
+        base_circle.setOrigin(beat_radius, beat_radius);
         active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
         if (active_circle_radius <= beat_radius) {
             active_circle.setRadius(beat_radius);
             active_circle.setPosition(fix_circle_pos(pos, beat_radius));
         }
-        base_circle.setPosition(fix_circle_pos(pos, beat_radius));
-
-        //        index_of_circle.setCharacterSize(42);
-        //        index_of_circle.setPosition(fix_circle_pos(pos,
-        //        (float)index_of_circle.getCharacterSize() / 2));
-        //        index_of_circle.setFont(font);
-
+        base_circle.setPosition(pos);
 
         active_circle.setFillColor(sf::Color::Transparent);
         active_circle.setOutlineThickness(20);
-        active_circle.setOutlineColor(sf::Color(230, 0, 0));
-        base_circle.setFillColor(sf::Color(204, 51, 51));
-        base_circle.setOutlineThickness(10);
-        base_circle.setOutlineColor(sf::Color::White);
+        active_circle.setOutlineColor(sf::Color::Magenta);
+        base_circle.setFillColor(
+            sf::Color(100, 5, 94, sf::Uint8(255 * time_coef)));
+        base_circle.setOutlineThickness(2);
+        base_circle.setOutlineColor(sf::Color::Magenta);
 
-        //        index_of_circle.setFillColor(sf::Color::White);
-        //        index_of_circle.setOutlineColor(sf::Color::White);
-
-        //        index_of_circle.setString(std::to_string(index++ % 5 + 1));
         window.draw(base_circle);
         window.draw(active_circle);
-        //        window.draw(index_of_circle);
     } else {
         sf::Text denied;
         denied.setString("X");
         denied.setFont(font);
         denied.setFillColor(sf::Color::Red);
         denied.setCharacterSize(65);
-        denied.setPosition(pos - sf::Vector2f(denied.getCharacterSize() / 2,
-                                              denied.getCharacterSize() / 2));
+        denied.setPosition(pos -
+                           sf::Vector2f((float)denied.getCharacterSize() / 3,
+                                        (float)denied.getCharacterSize() / 2));
         window.draw(denied);
     }
 }
@@ -193,14 +185,15 @@ sf::Vector2f &USO::Aim_slider::get_end_pos() {
 }
 sf::Vector2f &USO::Aim_slider::get_start_pos() {
     return start_pos;
-
 }
 
 // CONVEYOR
 
 bool USO::Conveyor_note::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time + sf::milliseconds(0)) {
-        pos.y = line.pos.y + (- line.pos.y + line.beat_pos.y) * get_time_coefficient(start_time, duration_time, current_time);
+        pos.y = line.pos.y + (-line.pos.y + line.beat_pos.y) *
+                                 get_time_coefficient(start_time, duration_time,
+                                                      current_time);
         return true;
     }
     return false;

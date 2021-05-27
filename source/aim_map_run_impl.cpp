@@ -87,10 +87,11 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 if (!field.get_field_objects().empty() &&
                     !field.get_field_objects().back()->change_state(
                         past_time + clock.getElapsedTime())) {
+                    field.draw(font);
+                    window.display();
                     field.get_field_objects().pop_back();
                     game_session.decrease_health(game_session.damage());
                 }
-
                 field.draw(font);
                 window.display();
 

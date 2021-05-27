@@ -24,10 +24,6 @@ double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
                     0.5);
 }
 
-
-
-
-
 }  // namespace
 
 namespace USO {
@@ -110,7 +106,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         }
         drag = true;
 
-        music.pause();
+//        music.pause();
         for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
             auto &object = **i;
             if (typeid(object) == typeid(Aim_circle)) {
@@ -256,11 +252,11 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         end_draw_iterator++;
     };
 
-    auto draw_yes_and_no_decision = [&](const std::string& decision) {
+    auto draw_yes_and_no_decision = [&](const std::string &decision) {
         sf::Text text_buf;
         text_buf.setCharacterSize(window.getSize().y / 10);
 
-        sf::CircleShape yes_button((float)window.getSize().x / 6);
+        sf::CircleShape yes_button((float)window.getSize().x / 10);
         yes_button.setPosition((float)yes_button.getRadius() * 2,
                                (float)window.getSize().y / 2);
         yes_button.setFillColor(sf::Color::Green);
@@ -271,11 +267,12 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         no_button.setFillColor(sf::Color::Red);
 
         sf::RectangleShape rect(sf::Vector2f(window.getSize()));
-        rect.setFillColor(sf::Color(0, 0, 0, 70));
+        rect.setFillColor(sf::Color(0, 0, 0, 10));
         while (true) {
             window.draw(rect);
             text_buf.setString(decision);
-            text_buf.setPosition(sf::Vector2f((float)window.getSize().x * 2 / 5, (float)window.getSize().y / 10));
+            text_buf.setPosition(sf::Vector2f((float)window.getSize().x * 2 / 5,
+                                              (float)window.getSize().y / 10));
             window.draw(text_buf);
 
             window.draw(yes_button);
@@ -292,35 +289,34 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 no_button.getPosition() +
                 sf::Vector2f(yes_button.getRadius(), yes_button.getRadius()));
             window.draw(text_buf);
+            window.display();
             if (!window.pollEvent(event)) {
                 continue;
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (is_circle_correct_click(
-                    sf::Vector2f(sf::Mouse::getPosition()),
-                    yes_button.getPosition() +
-                    sf::Vector2f(yes_button.getRadius(),
-                                 yes_button.getRadius()),
-                    yes_button.getRadius())) {
+                        sf::Vector2f(sf::Mouse::getPosition(window)),
+                        yes_button.getPosition() +
+                            sf::Vector2f(yes_button.getRadius(),
+                                         yes_button.getRadius()),
+                        yes_button.getRadius())) {
                     return true;
                 } else if (is_circle_correct_click(
-                    sf::Vector2f(sf::Mouse::getPosition()),
-                    no_button.getPosition() +
-                    sf::Vector2f(no_button.getRadius(),
-                                 no_button.getRadius()),
-                    no_button.getRadius())) {
+                               sf::Vector2f(sf::Mouse::getPosition(window)),
+                               no_button.getPosition() +
+                                   sf::Vector2f(no_button.getRadius(),
+                                                no_button.getRadius()),
+                               no_button.getRadius())) {
                     return false;
                 }
             }
-            window.display();
         }
     };
-    auto draw_input_text_box = [&](sf::Time &time,
-                             std::string time_name) {
+    auto draw_input_text_box = [&](sf::Time &time, std::string time_name) {
         sf::Event event{};
         time_name += "=";
         sf::RectangleShape input_field(
-        sf::Vector2f((float)window.getSize().x / 4, 90));
+            sf::Vector2f((float)window.getSize().x / 4, 90));
         input_field.setFillColor(sf::Color::White);
         input_field.setPosition(sf::Vector2f(window.getSize()) / 2.0f -
                                 sf::Vector2f(input_field.getSize()) / 2.0f);
@@ -627,4 +623,3 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
     }
 }
 }  // namespace USO
-
