@@ -62,6 +62,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
     rect.setTexture(&image);
+    rect.setFillColor(sf::Color(255, 255, 255, 70));
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
@@ -79,7 +80,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             return;
         }
         USO::Map_object &back_object =
-            *(field.get_field_objects().front().get());
+            *(field.get_field_objects().back().get());
         if (!(*(field.get_field_objects().back()))
                  .check_event(
                      static_cast<sf::Vector2f>(sf::Mouse::getPosition()),
@@ -176,13 +177,13 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         break;
                     default:
                         if (drag && !field.get_field_objects().empty()) {
-                            USO::Map_object &front_object =
-                                *(field.get_field_objects().front().get());
-                            if (typeid(front_object) !=
+                            USO::Map_object &back_object =
+                                *(field.get_field_objects().back().get());
+                            if (typeid(back_object) !=
                                 typeid(USO::Aim_slider)) {
                                 break;
                             }
-                            front_object.check_event(
+                            back_object.check_event(
                                 sf::Vector2f(sf::Mouse::getPosition()),
                                 game_session,
                                 past_time + clock.getElapsedTime());

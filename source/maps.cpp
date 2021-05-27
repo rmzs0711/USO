@@ -70,7 +70,7 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             map_objects.push_back(std::make_shared<USO::Aim_slider>(
                 USO::Aim_slider(start_time, duration_time, x_pos, y_pos,
                                 beat_radius, active_circle_radius, x_end, y_end,
-                                sf::milliseconds(move_time))));
+                                sf::microseconds(move_time))));
 
         } /*else if (type == "Aim_muda") {
             float beat_radius;

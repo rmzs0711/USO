@@ -8,7 +8,7 @@
 namespace USO {
 const int const_circle_beat_radius = 65;
 const int const_active_circle_radius = 300;
-const sf::Time const_active_circle_duration = sf::milliseconds(700);
+const sf::Time const_active_circle_duration = sf::seconds(0.7);
 
 const double time_per_pixels = 2;
 
@@ -30,7 +30,7 @@ protected:
                float x,
                float y,
                const sf::Time &move_time_)
-        : start_time(start_time_), duration_time(duration_time_), pos(x, y) {}
+        : start_time(start_time_), duration_time(duration_time_), pos(x, y), move_time(move_time_) {}
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -124,6 +124,7 @@ public:
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     sf::Vector2f &get_end_pos() override;
     std::shared_ptr<Map_object> clone() override;
+    sf::Vector2f& get_start_pos() ;
     void reset() override {
         active_circle_radius = active_circle_start_radius;
         pos = start_pos;
