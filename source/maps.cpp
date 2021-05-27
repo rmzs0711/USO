@@ -13,15 +13,6 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         std::cerr << "File not found\n";
         std::exit(3);
     }
-    //видимо тут потом разделить на режимы
-//    file >> map_name;
-//    file >> music_address;
-//    file >> author_name;
-//    file >> music_name;
-//    file >> image_address;
-//    file >> font_address;
-//    file >> sound_address;
-
     file >> map_name;
     file >> author_name;
     file >> music_address;
@@ -87,6 +78,52 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
                                 beat_count)));
         //НЕ СМОГЛА ПОТОМУ ЧТО АБСТРАКТНЫЙ КЛАСС
         }*/
+    }
+}
+
+USO::Conveyor_map::Conveyor_map(const std::string &filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cout << "File not found\n";
+        return;
+    }
+    file >> map_name;
+    file >> music_address;
+    file >> author_name;
+    file >> music_name;
+
+    float pos_x;
+    file >> pos_x;
+    float pos_y;
+    file >> pos_y;
+    float width;
+    file >> width;
+    float height;
+    file >> height;
+
+    lines.push_back(std::make_shared<USO::Conveyor_line>(USO::Conveyor_line(
+        sf::Vector2f(pos_x, pos_y), sf::Vector2f(width, height), 0)));
+
+    for (int i = 1; i < NUMBER_OF_LINES; ++i) {
+        lines.push_back(std::make_shared<USO::Conveyor_line>(
+            USO::Conveyor_line(sf::Vector2f(pos_x + (float)i * width, pos_y),
+                               sf::Vector2f(width, height), i)));
+    }
+
+    while (!file.eof()) {
+        int index;
+        file >> index;
+        int32_t time;
+        file >> time;
+        sf::Time start_time = sf::milliseconds(time);
+        file >> time;
+        sf::Time duration_time = sf::milliseconds(time);
+        int line_index;
+        file >> line_index;
+
+        map_objects.push_back(
+            std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
+                start_time, duration_time, index, *(lines[line_index]))));
     }
 }
 void USO::Map::prelude(sf::Music &music,

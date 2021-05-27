@@ -11,5 +11,4 @@ void start_menu();
 
 void constructor_menu(sf::Window& window);
 }
-
 #endif  // USO_MENU_H

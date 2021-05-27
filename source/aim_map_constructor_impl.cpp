@@ -627,3 +627,4 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
     }
 }
 }  // namespace USO
+

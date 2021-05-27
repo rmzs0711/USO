@@ -1,46 +1,14 @@
 #include <cassert>
-#include <fstream>
 #include <functional>
 #include <iostream>
-#include <typeindex>
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include "iterator"
 #include "map_management.h"
 #include "maps.h"
 
 namespace {}  // namespace
 
-void table_of_scores(sf::RenderWindow &window,
-                     sf::Font &font,
-                     BL::Game_session &game_session) {
-    /*sf::RectangleShape table;
-    table.setSize(sf::Vector2f(250.f, 120.f));
-    table.setFillColor(sf::Color::Blue);
-    table.setOutlineThickness(5.f);
-    table.setOutlineColor(sf::Color);
-    window.draw(table);*/
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(30);
-    //    text.setFillColor(sf::Color::White);
-    text.setStyle(sf::Text::Bold);
-    text.setString("SCORE: " + std::to_string(game_session.get_score()));
-    window.draw(text);
-    text.setPosition(sf::Vector2f(0.f, 35.f));
-    text.setString("COMBO: " + std::to_string(game_session.get_combo()));
-    window.draw(text);
-    text.setPosition(sf::Vector2f(0.f, 70.f));
-    text.setString("HEALTH: " + std::to_string(game_session.get_health()));
-    window.draw(text);
-}
-
 void USO::Aim_map::run(sf::RenderWindow &window) {
-    std::cout << map_objects.size();
-    for (auto &i: map_objects) {
-        auto &gg = *i;
-        std::cout << " ";
-    }
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
@@ -102,7 +70,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.draw(rect);
-        table_of_scores(window, font, game_session);
+        game_session.table_of_scores(window, font);
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {

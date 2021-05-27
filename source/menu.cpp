@@ -40,7 +40,8 @@ void Menu::start_menu() {
     buttons.emplace_back(400, 400, 200, Menu::OPEN_AIM);
     buttons.emplace_back(0, 0, 100, Menu::EXIT, sf::Color::Cyan);
     buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS, sf::Color::Green);
-    buttons.emplace_back(900, 400, 100, Menu::OPEN_CONVEYOR,
+    buttons.emplace_back(900, 400, 200, Menu::OPEN_CONVEYOR,
+
                          sf::Color::Magenta);
 
     while (window.isOpen()) {
@@ -55,7 +56,8 @@ void Menu::start_menu() {
                 } break;
                 case sf::Event::MouseButtonPressed: {
                     if (event.mouseButton.button == sf::Mouse::Left) {
-                        for (auto button : buttons) {
+                        for (auto &button : buttons) {
+
                             button.press(
                                 window,
                                 {static_cast<float>(event.mouseButton.x),
@@ -66,18 +68,19 @@ void Menu::start_menu() {
                 case sf::Event::Closed: {
                     window.close();
                 } break;
-                case sf::Event::MouseMoved: {
-                    for (auto button : buttons) {
-                        button.guidance(
-                            {static_cast<float>(event.mouseMove.x),
-                             static_cast<float>(event.mouseButton.y)});
-                    }
-                } break;
-                default:
-                    break;
             }
         }
-        for (auto button : buttons) {
+        for (auto &button : buttons) {
+            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
+        }
+        sf::CircleShape circle;
+        circle.setRadius(20);
+        circle.setPosition(
+            sf::Vector2f(((sf::Vector2f)sf::Mouse::getPosition()).x - 20,
+                         ((sf::Vector2f)sf::Mouse::getPosition()).y - 20));
+        circle.setFillColor(sf::Color::Magenta);
+        window.draw(circle);
+        for (auto &button : buttons) {
             button.draw(window);
         }
         window.display();

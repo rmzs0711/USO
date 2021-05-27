@@ -70,7 +70,6 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
         //        index %= 5;
         sf::CircleShape active_circle(active_circle_radius);
         sf::CircleShape base_circle(beat_radius);
-        //        sf::Text index_of_circle;
 
         active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
         if (active_circle_radius <= beat_radius) {
@@ -78,10 +77,12 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
             active_circle.setPosition(fix_circle_pos(pos, beat_radius));
         }
         base_circle.setPosition(fix_circle_pos(pos, beat_radius));
+
         //        index_of_circle.setCharacterSize(42);
         //        index_of_circle.setPosition(fix_circle_pos(pos,
         //        (float)index_of_circle.getCharacterSize() / 2));
         //        index_of_circle.setFont(font);
+
 
         active_circle.setFillColor(sf::Color::Transparent);
         active_circle.setOutlineThickness(20);
@@ -184,6 +185,65 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     Aim_circle::draw(window, font);
 }
 
+// CONVEYOR
+
+bool USO::Conveyor_note::change_state(sf::Time current_time) {
+    if (current_time <= start_time + duration_time + sf::milliseconds(0)) {
+        pos.y = line.pos.y + (- line.pos.y + line.beat_pos.y) * get_time_coefficient(start_time, duration_time, current_time);
+        return true;
+    }
+    return false;
+}
+
+bool is_note_correct_click(sf::Vector2f mouse_pos,
+                           sf::Vector2f pos,
+                           USO::Conveyor_line line) {
+    if (mouse_pos == line.beat_pos && pos.y >= line.beat_pos.y - 10 &&
+        pos.y <= line.beat_pos.y + 10) {
+        return true;
+    }
+    return false;
+}
+
+bool USO::Conveyor_note::check_event(sf::Vector2f mouse_pos,
+                                     BL::Game_session &game_session,
+                                     sf::Time current_time) {
+    if (is_note_correct_click(mouse_pos, pos, line) &&
+        is_click_time(current_time, start_time + duration_time)) {
+        game_session.increase_combo(1);  // точно так? //Да я думаю
+        game_session.increase_score(100, game_session.get_combo());
+        game_session.increase_health(100);
+        return true;
+    }
+    //    game_session.decrease_health(game_session.damage());
+    return false;
+}
+void USO::Conveyor_note::draw(sf::RenderWindow &window, const sf::Font &font) {
+    sf::RectangleShape rectangle(line.beat_sizes);
+    rectangle.setPosition(pos);
+    rectangle.setFillColor(sf::Color::Blue);
+    rectangle.setOutlineColor(sf::Color::White);
+    window.draw(rectangle);
+}
+
+void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
+    sf::RectangleShape fall(sizes);
+    fall.setPosition(pos);
+    fall.setFillColor(sf::Color::Magenta);
+    fall.setOutlineColor(sf::Color::White);
+    fall.setOutlineThickness(1);
+    window.draw(fall);
+
+    sf::RectangleShape beat_rectangle(beat_sizes);
+    beat_rectangle.setPosition(beat_pos);
+    if (dragged) {
+        beat_rectangle.setFillColor(sf::Color::Cyan);
+    } else {
+        beat_rectangle.setFillColor(sf::Color::Green);
+    }
+    beat_rectangle.setOutlineColor(sf::Color::White);
+    beat_rectangle.setOutlineThickness(1);
+    window.draw(beat_rectangle);
 std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
     return std::make_shared<Aim_circle>(Aim_slider(*this));
 }
@@ -192,4 +252,5 @@ sf::Vector2f &USO::Aim_slider::get_end_pos() {
 }
 sf::Vector2f &USO::Aim_slider::get_start_pos() {
     return start_pos;
+
 }
