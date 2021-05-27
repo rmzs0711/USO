@@ -19,8 +19,8 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
         map_objects.begin();  // итератор на следующий по времени объект
     sf::Music music;
 
-    check_file_load(press_sound.loadFromFile(R"(data\music\click_sound.ogg)"),
-                    R"(data\music\click_sound.ogg)");
+    check_file_load(press_sound.loadFromFile(R"(data/music/click_sound.ogg)"),
+                    R"(data/music/click_sound.ogg)");
     music.openFromFile(music_address);
     music.play();
 
@@ -67,7 +67,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                 if (current_object_it != map_objects.end()) {
                     if (*current_object_it) {
                         field.push_front(current_object_it,
-                                   past_time + clock.getElapsedTime());
+                                         past_time + clock.getElapsedTime());
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;
                         current_object_it++;
@@ -95,14 +95,14 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                     continue;
                 }
 
-                // WARNING: lambda zone
+                /// WARNING: lambda zone
                 auto handle_click = [&]() -> void {
                     drag = true;  //Зажимаю мышку
-                  for (int i = 0; i < NUMBER_OF_LINES; ++i) {
-                      if (dragged_key[note_keys[i]]) {
-                          lines[i]->dragged = true;
-                      }
-                  }
+                    for (int i = 0; i < NUMBER_OF_LINES; ++i) {
+                        if (dragged_key[note_keys[i]]) {
+                            lines[i]->dragged = true;
+                        }
+                    }
                     if (field.get_field_objects().empty()) {
                         return;
                     }
@@ -113,19 +113,15 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                         sf::Vector2f position = lines[i]->beat_pos;
                         if (dragged_key[note_keys[i]]) {
                             lines[i]->dragged = true;
-//                            if (!(*(field.get_field_objects().back()))
-//                                     .check_event(
-//                                         position, game_session,
-//                                         past_time + clock.getElapsedTime())) {
-//                                return;
-//                            }
+                            for (auto &note : field.get_field_objects()) {
+                                if (note->check_event(
+                                        position, game_session,
+                                        past_time + clock.getElapsedTime())) {
+                                    sound.play();
+                                }  // иначе - снять хп
+                            }
                         }
                     }
-                    //                    if (typeid(front_object) !=
-                    //                    typeid(USO::Aim_slider)) {
-                    //                        field.get_field_objects().pop_back();
-                    //                    }
-                    sound.play();
                 };
                 // lambda zone ends
 
@@ -136,8 +132,8 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                             return;
                         }
                         if (!dragged_key[event.key.code]) {
-                             dragged_key[event.key.code] = 1;
-                             number_of_dragged_buttons++;
+                            dragged_key[event.key.code] = 1;
+                            number_of_dragged_buttons++;
                         }
                         handle_click();
                         break;
@@ -155,20 +151,21 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                         }
                         break;
                     default:
+                        /*
                         if (drag && !field.get_field_objects().empty()) {
                             USO::Map_object &front_object =
                                 *(field.get_field_objects().front().get());
                             //                            if
                             //                            (typeid(front_object)
                             //                            !=
-                            //                                typeid(USO::Aim_slider))
+                            // typeid(USO::Aim_slider))
                             //                                { break;
                             //                            }
                             front_object.check_event(
                                 sf::Vector2f(sf::Mouse::getPosition()),
                                 game_session,
                                 past_time + clock.getElapsedTime());
-                        }
+                        }*/
                         break;
                 }
                 break;

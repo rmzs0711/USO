@@ -112,7 +112,9 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
 
     while (!file.eof()) {
         int index;
-        file >> index;
+        if (!(file >> index)) {
+            break;
+        }
         int32_t time;
         file >> time;
         sf::Time start_time = sf::milliseconds(time);
@@ -120,10 +122,10 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
         sf::Time duration_time = sf::milliseconds(time);
         int line_index;
         file >> line_index;
-
         map_objects.push_back(
             std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
                 start_time, duration_time, *(lines[line_index]))));
+
     }
 }
 void USO::Map::prelude(sf::Music &music,

@@ -8,8 +8,8 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::seconds(0.1);
-    return end_time - current_time < epsilon;
+    static sf::Time epsilon = sf::seconds(0.3);
+    return end_time - current_time < epsilon || current_time - end_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
     return sf::Vector2f(pos.x - radius, pos.y - radius);
@@ -209,8 +209,8 @@ bool USO::Conveyor_note::change_state(sf::Time current_time) {
 bool is_note_correct_click(sf::Vector2f mouse_pos,
                            sf::Vector2f pos,
                            USO::Conveyor_line line) {
-    if (mouse_pos == line.beat_pos && pos.y >= line.beat_pos.y - 10 &&
-        pos.y <= line.beat_pos.y + 10) {
+    if (mouse_pos == line.beat_pos && pos.y >= line.beat_pos.y - 100 &&
+        pos.y <= line.beat_pos.y + 50) {
         return true;
     }
     return false;
