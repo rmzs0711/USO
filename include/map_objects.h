@@ -77,9 +77,9 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-    std::shared_ptr<Map_object> clone() override;
+    std::shared_ptr<Map_object> clone() override {return nullptr;};
     bool is_valid = true;
-    sf::Vector2f &get_end_pos() override;
+    sf::Vector2f &get_end_pos() override {return pos;}
     void reset() override {
         active_circle_radius = active_circle_start_radius;
     }
@@ -160,7 +160,7 @@ public:
         Lines[7].setFillColor(sf::Color(193, 199, 101));
     }
 
-    float calc_delta(sf::Vector2f, float&) ;
+    float calc_delta(sf::Vector2f, float&);
     bool change_state(sf::Time current_time) override;
     bool check_event(sf::Vector2f,
                      BL::Game_session &game_session,
