@@ -44,8 +44,8 @@ public:
 
     virtual sf::Time &get_duration_time();
     virtual sf::Vector2f &get_pos();
-    virtual sf::Vector2f &get_end_pos() = 0;
-    virtual std::shared_ptr<Map_object> clone() = 0;
+    virtual sf::Vector2f &get_end_pos() {return pos;}
+    virtual std::shared_ptr<Map_object> clone() { return nullptr;}
     virtual void reset() {}
     virtual sf::Time &get_move_time() {
         return move_time;
@@ -182,13 +182,11 @@ private:
 public:
     Conveyor_note(sf::Time &start_time_,
                   sf::Time &duration_time_,
-                  int index_,
                   Conveyor_line line_)
         : Map_object(start_time_,
                      duration_time_,
                      line_.pos.x,
-                     line_.pos.y,
-                     index_),
+                     line_.pos.y, sf::Time()),
           line(line_) {}
 
     bool change_state(sf::Time current_time) override;
@@ -196,6 +194,7 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
+
 };
 
 }  // namespace USO

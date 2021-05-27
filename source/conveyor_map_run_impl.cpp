@@ -66,7 +66,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {
                     if (*current_object_it) {
-                        field.push(current_object_it,
+                        field.push_front(current_object_it,
                                    past_time + clock.getElapsedTime());
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;

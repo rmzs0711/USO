@@ -123,7 +123,7 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
 
         map_objects.push_back(
             std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
-                start_time, duration_time, index, *(lines[line_index]))));
+                start_time, duration_time, *(lines[line_index]))));
     }
 }
 void USO::Map::prelude(sf::Music &music,

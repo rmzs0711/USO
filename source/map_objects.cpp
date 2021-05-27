@@ -185,6 +185,17 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     Aim_circle::draw(window, font);
 }
 
+std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
+    return std::make_shared<Aim_circle>(Aim_slider(*this));
+}
+sf::Vector2f &USO::Aim_slider::get_end_pos() {
+    return end_pos;
+}
+sf::Vector2f &USO::Aim_slider::get_start_pos() {
+    return start_pos;
+
+}
+
 // CONVEYOR
 
 bool USO::Conveyor_note::change_state(sf::Time current_time) {
@@ -244,13 +255,4 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     beat_rectangle.setOutlineColor(sf::Color::White);
     beat_rectangle.setOutlineThickness(1);
     window.draw(beat_rectangle);
-std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
-    return std::make_shared<Aim_circle>(Aim_slider(*this));
-}
-sf::Vector2f &USO::Aim_slider::get_end_pos() {
-    return end_pos;
-}
-sf::Vector2f &USO::Aim_slider::get_start_pos() {
-    return start_pos;
-
 }
