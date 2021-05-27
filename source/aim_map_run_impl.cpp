@@ -6,35 +6,9 @@
 #include "map_management.h"
 #include "maps.h"
 
-namespace {
+namespace {}  // namespace
 
-}  // namespace
-
-void table_of_scores(sf::RenderWindow &window,
-                     sf::Font &font,
-                     BL::Game_session &game_session) {
-    /*sf::RectangleShape table;
-    table.setSize(sf::Vector2f(250.f, 120.f));
-    table.setFillColor(sf::Color::Blue);
-    table.setOutlineThickness(5.f);
-    table.setOutlineColor(sf::Color);
-    window.draw(table);*/
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(30);
-    //    text.setFillColor(sf::Color::White);
-    text.setStyle(sf::Text::Bold);
-    text.setString("SCORE: " + std::to_string(game_session.get_score()));
-    window.draw(text);
-    text.setPosition(sf::Vector2f(0.f, 35.f));
-    text.setString("COMBO: " + std::to_string(game_session.get_combo()));
-    window.draw(text);
-    text.setPosition(sf::Vector2f(0.f, 70.f));
-    text.setString("HEALTH: " + std::to_string(game_session.get_health()));
-    window.draw(text);
-}
-
-void USO::Aim_map::run(sf::RenderWindow & window) {
+void USO::Aim_map::run(sf::RenderWindow &window) {
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
@@ -50,18 +24,14 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
     music.openFromFile(music_address);
     music.play();
 
-
-
-
     sf::Sound sound;
     sound.setBuffer(press_sound);
-
 
     sf::Texture img;
     check_file_load(
         img.loadFromFile(R"(data\img\lucifer.png)"),
         R"(data\img\lucifer.png)");  //Тут нужно сделать загрузку названия из
-                                      //карты, если карта содержит в себе фон
+                                     //карты, если карта содержит в себе фон
 
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
@@ -89,7 +59,7 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.draw(rect);
-        table_of_scores(window, font, game_session);
+        game_session.table_of_scores(window, font);
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {

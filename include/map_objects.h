@@ -6,11 +6,11 @@
 #include "base_logic.h"
 
 namespace USO {
-enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
+// enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
 // enum class Conveyor_objects { NOTE, HOLD_NOTE };
 
-enum class Bulletproof_objects { SHAPE };
+// enum class Bulletproof_objects { SHAPE };
 
 struct Map_object {
 protected:
@@ -37,10 +37,11 @@ public:
     virtual void draw(sf::RenderWindow &window, const sf::Font &font) = 0;
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
-    virtual sf::Time &get_duration_time();
-    virtual float &get_x_coord();
-    virtual float &get_y_coord();
-//    virtual std::shared_ptr<Map_object> clone() = 0;
+
+    //    virtual sf::Time &get_duration_time();
+    //    virtual float &get_x_coord();
+    //    virtual float &get_y_coord();
+    //    virtual std::shared_ptr<Map_object> clone() = 0;
 };
 
 struct Aim_circle : Map_object {
@@ -104,7 +105,7 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-//    std::shared_ptr<Map_object> clone() override;
+    //    std::shared_ptr<Map_object> clone() override;
 };
 
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как
@@ -128,41 +129,46 @@ public:
 //          beat_count(beat_count_) {}
 //};
 
-enum class Conveyor_note_key_position { D, F, J, K };
-
 struct Conveyor_line {
 public:
     sf::Vector2f pos;
     sf::Vector2f sizes;
     sf::Vector2f beat_pos;
     sf::Vector2f beat_sizes;
-    Conveyor_note_key_position position;
-    Conveyor_line(sf::Vector2f pos_, sf::Vector2f sizes_, Conveyor_note_key_position position_) :
-    pos(pos_), sizes(sizes_), position(position_) {
+    bool dragged = false;
+    int index;
+    Conveyor_line(sf::Vector2f pos_, sf::Vector2f sizes_, int index_)
+        : pos(pos_), sizes(sizes_), index(index_) {
         beat_sizes.x = sizes.x;
         beat_sizes.y = sizes.y / 5;
         beat_pos.x = pos.x;
         beat_pos.y = pos.y + 4 * sizes.y / 5;
     }
 
-    void draw(sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window) const;
 };
 
- struct Conveyor_note : Map_object {
- private:
+struct Conveyor_note : Map_object {
+private:
     Conveyor_line line;
 
- public:
+public:
     Conveyor_note(sf::Time &start_time_,
                   sf::Time &duration_time_,
-                  int index_, Conveyor_line line_)
-        : Map_object(start_time_, duration_time_, line_.pos.x, line_.pos.y, index_), line(line_) {}
+                  int index_,
+                  Conveyor_line line_)
+        : Map_object(start_time_,
+                     duration_time_,
+                     line_.pos.x,
+                     line_.pos.y,
+                     index_),
+          line(line_) {}
 
-     bool change_state(sf::Time current_time) override;
-     bool check_event(sf::Vector2f,
-                      BL::Game_session &game_session,
-                      sf::Time current_time) override;
-     void draw(sf::RenderWindow &window, const sf::Font &font) override;
+    bool change_state(sf::Time current_time) override;
+    bool check_event(sf::Vector2f,
+                     BL::Game_session &game_session,
+                     sf::Time current_time) override;
+    void draw(sf::RenderWindow &window, const sf::Font &font) override;
 };
 
 }  // namespace USO

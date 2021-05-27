@@ -97,17 +97,13 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
     float height;
     file >> height;
 
-    std::vector<Conveyor_note_key_position> key_pos = {
-        Conveyor_note_key_position::D, Conveyor_note_key_position::F,
-        Conveyor_note_key_position::J, Conveyor_note_key_position::K};
-
     lines.push_back(std::make_shared<USO::Conveyor_line>(USO::Conveyor_line(
-        sf::Vector2f(pos_x, pos_y), sf::Vector2f(width, height), key_pos[0])));
+        sf::Vector2f(pos_x, pos_y), sf::Vector2f(width, height), 0)));
 
     for (int i = 1; i < NUMBER_OF_LINES; ++i) {
         lines.push_back(std::make_shared<USO::Conveyor_line>(
             USO::Conveyor_line(sf::Vector2f(pos_x + (float)i * width, pos_y),
-                               sf::Vector2f(width, height), key_pos[i])));
+                               sf::Vector2f(width, height), i)));
     }
 
     while (!file.eof()) {
@@ -118,11 +114,11 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
         sf::Time start_time = sf::milliseconds(time);
         file >> time;
         sf::Time duration_time = sf::milliseconds(time);
-        int line_number;
-        file >> line_number;
+        int line_index;
+        file >> line_index;
 
         map_objects.push_back(
             std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
-                start_time, duration_time, index, *(lines[line_number]))));
+                start_time, duration_time, index, *(lines[line_index]))));
     }
 }

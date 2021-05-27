@@ -11,7 +11,7 @@
 namespace USO {
 
 struct Map {
-protected:
+public:
     std::string music_address;
     std::string music_name;
     std::string map_name;

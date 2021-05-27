@@ -29,6 +29,8 @@ void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse) {
                 test.run(window);
             } break;
             case OPEN_CONVEYOR: {  // soon
+                USO::Conveyor_map test(R"(input.txt)");
+                test.run(window);
             } break;
             case OPEN_SETTINGS: {  // soon
                 circle.getRadius();
