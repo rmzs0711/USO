@@ -10,23 +10,27 @@
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "File not found\n";
-        return;
+        std::cerr << "File not found\n";
+        std::exit(3);
     }
     file >> map_name;
-    file >> music_address;
     file >> author_name;
+    file >> music_address;
     file >> music_name;
+    file >> image_address;
+    file >> font_address;
+    file >> sound_address;
+
     while (!file.eof()) {
         std::string type;
         file >> type;
-        int index;
-        file >> index;
-        int32_t time;
+//        int index;
+//        file >> index;
+        sf::Int64 time;
         file >> time;
-        sf::Time start_time = sf::milliseconds(time);
+        sf::Time start_time = sf::microseconds(time);
         file >> time;
-        sf::Time duration_time = sf::milliseconds(time);
+        sf::Time duration_time = sf::microseconds(time);
         float x_pos;
         file >> x_pos;
         float y_pos;
@@ -39,7 +43,7 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             file >> active_circle_radius;
 
             map_objects.push_back(std::make_shared<USO::Aim_circle>(
-                USO::Aim_circle(start_time, duration_time, x_pos, y_pos, index,
+                USO::Aim_circle(start_time, duration_time, x_pos, y_pos,
                                 beat_radius, active_circle_radius)));
 
         } else if (type == "Aim_slider") {
@@ -55,9 +59,9 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
             file >> move_time;
 
             map_objects.push_back(std::make_shared<USO::Aim_slider>(
-                USO::Aim_slider(start_time, duration_time, x_pos, y_pos, index,
+                USO::Aim_slider(start_time, duration_time, x_pos, y_pos,
                                 beat_radius, active_circle_radius, x_end, y_end,
-                                sf::milliseconds(move_time))));
+                                sf::microseconds(move_time))));
 
         } /*else if (type == "Aim_muda") {
             float beat_radius;
@@ -121,4 +125,13 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
             std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
                 start_time, duration_time, index, *(lines[line_index]))));
     }
+}
+void USO::Map::prelude(sf::Music &music,
+                       sf::SoundBuffer &sound_buffer,
+                       sf::Texture &image,
+                       sf::Font &font) {
+    check_file_load(music.openFromFile(music_address), music_address);
+    check_file_load(sound_buffer.loadFromFile(sound_address), sound_address);
+    check_file_load(image.loadFromFile(image_address), image_address);
+    check_file_load(font.loadFromFile(font_address), font_address);
 }

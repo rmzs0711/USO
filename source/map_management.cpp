@@ -1,11 +1,15 @@
 #include "map_management.h"
+#include <cassert>
 #include <iostream>
 #include <memory>
 
 namespace USO {
-void Field::push(
-    std::vector<std::shared_ptr<Map_object>>::iterator &map_object_it,
+void Field::push_front(
+    std::list<std::shared_ptr<Map_object>>::iterator &map_object_it,
     sf::Time current_time) {
+//    auto &gg = (*(*map_object_it));
+//    std::cout << current_time.asSeconds() << " " << gg.get_start_time().asSeconds() << std::endl;
+
     if ((*(*map_object_it)).get_start_time() <= current_time) {
         field_objects.push_front(*map_object_it);
         map_object_it++;
@@ -19,7 +23,7 @@ void Field::draw(
     }
 }
 
-void Field::change_state(const sf::Time & time) {
+void Field::change_state(const sf::Time &time) {
     for (std::shared_ptr<Map_object> &ptr : get_field_objects()) {
         (*ptr).change_state(time);
     }
@@ -31,5 +35,13 @@ void Map_choice_menu::run_map_choice_menu() {
 
 std::list<std::shared_ptr<Map_object>> &Field::get_field_objects() {
     return field_objects;
+}
+void USO::Field::push_back(
+    std::list<std::shared_ptr<Map_object>>::iterator &map_object_it) {
+    assert(*map_object_it);
+    //    if (!field_objects.empty()) {
+    field_objects.push_back(*map_object_it);
+    //        map_object_it++;
+    //    }
 }
 }  // namespace USO

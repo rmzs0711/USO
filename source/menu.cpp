@@ -3,8 +3,30 @@
 //
 
 #include "menu.h"
+#include <fstream>
 #include <vector>
+#include "maps.h"
 #include "menu_objects.h"
+
+namespace {
+std::string list_of_saved_maps_file_name() {
+    static std::string saved_maps = R"(data\saved_maps)";
+    return saved_maps;
+}
+sf::Vector2f get_constructor_menu_buttons_size() {
+    static sf::Vector2f sizes(500, 200);
+    return sizes;
+}
+std::vector<std::string> get_vector_of_saved_maps_names() {
+    std::vector<std::string> res;
+    std::ifstream input(list_of_saved_maps_file_name());
+    for (std::string line; !input.eof();) {
+        std::getline(input, line);
+        res.push_back(line);
+    }
+    return res;
+}
+}  // namespace
 
 void Menu::start_menu() {
     sf::ContextSettings setting;
@@ -19,6 +41,7 @@ void Menu::start_menu() {
     buttons.emplace_back(0, 0, 100, Menu::EXIT, sf::Color::Cyan);
     buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS, sf::Color::Green);
     buttons.emplace_back(900, 400, 200, Menu::OPEN_CONVEYOR,
+
                          sf::Color::Magenta);
 
     while (window.isOpen()) {
@@ -34,6 +57,7 @@ void Menu::start_menu() {
                 case sf::Event::MouseButtonPressed: {
                     if (event.mouseButton.button == sf::Mouse::Left) {
                         for (auto &button : buttons) {
+
                             button.press(
                                 window,
                                 {static_cast<float>(event.mouseButton.x),
@@ -60,5 +84,18 @@ void Menu::start_menu() {
             button.draw(window);
         }
         window.display();
+    }
+}
+
+void Menu::constructor_menu(sf::Window &window) {
+    std::vector<std::string> saved_maps(get_vector_of_saved_maps_names());
+    sf::Vector2f sizes = get_constructor_menu_buttons_size();
+
+    std::vector<Menu::Button> buttons;
+
+    float start_x = static_cast<float>(window.getSize().x) - sizes.x;
+    float start_y = sizes.y;
+    for (auto &map_name: saved_maps) {
+//        buttons.emplace_back(start_x, start_y, );
     }
 }
