@@ -57,7 +57,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                                   sf::Keyboard::J, sf::Keyboard::K};
 
     clock.restart();
-
+    int number_of_dragged_buttons = 0;
     while (game_session.get_game_status() != BL::Game_status::VICTORY ||
            game_session.get_game_status() != BL::Game_status::DEFEAT) {
         window.draw(rect);
@@ -135,31 +135,24 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                             // остановить время на паузу
                             return;
                         }
-                        if (event.key.code != sf::Keyboard::Z &&
-                            event.key.code != sf::Keyboard::X) {
-                            break;
+                        if (!dragged_key[event.key.code]) {
+                             dragged_key[event.key.code] = 1;
+                             number_of_dragged_buttons++;
                         }
-                        dragged_key[event.key.code] = 1;
                         handle_click();
                         break;
                     case sf::Event::KeyReleased:
-                        if (!drag) {
-                            break;
-                        }
-                        if (event.key.code != sf::Keyboard::Z &&
-                            event.key.code != sf::Keyboard::X) {
-                            break;
-                        }
-                        if (dragged_key[event.key.code] == 0) {
-                            break;
-                        }
+
                         dragged_key[event.key.code] = 0;
+                        number_of_dragged_buttons--;
                         for (int i = 0; i < NUMBER_OF_LINES; ++i) {
                             if (!dragged_key[note_keys[i]]) {
                                 lines[i]->dragged = false;
                             }
                         }
-                        drag = false;
+                        if (number_of_dragged_buttons == 0) {
+                            drag = false;
+                        }
                         break;
                     default:
                         if (drag && !field.get_field_objects().empty()) {
