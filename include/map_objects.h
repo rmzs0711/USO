@@ -8,7 +8,9 @@
 namespace USO {
 const int const_circle_beat_radius = 65;
 const int const_active_circle_radius = 300;
-const sf::Time active_circle_duration = sf::milliseconds(700);
+const sf::Time const_active_circle_duration = sf::seconds(0.7);
+
+const double time_per_pixels = 2;
 
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
@@ -20,13 +22,15 @@ struct Map_object {
 protected:
     sf::Time start_time;
     sf::Time duration_time;
+    sf::Time move_time;
     sf::Vector2f pos;
 
     Map_object(const sf::Time &start_time_,
                const sf::Time &duration_time_,
                float x,
-               float y)
-        : start_time(start_time_), duration_time(duration_time_), pos(x, y) {}
+               float y,
+               const sf::Time &move_time_)
+        : start_time(start_time_), duration_time(duration_time_), pos(x, y), move_time(move_time_) {}
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -41,6 +45,9 @@ public:
     virtual sf::Vector2f &get_end_pos() = 0;
     virtual std::shared_ptr<Map_object> clone() = 0;
     virtual void reset() {}
+    virtual sf::Time &get_move_time() {
+        return move_time;
+    }
 };
 
 struct Aim_circle : Map_object {
@@ -48,6 +55,7 @@ protected:
     float beat_radius;
     float active_circle_radius = 0;
     float active_circle_start_radius;
+    bool is_valid = true;
 
 public:
     Aim_circle(const sf::Time &start_time_,
@@ -55,8 +63,9 @@ public:
                float x,
                float y,
                float beat_radius_,
-               float active_circle_radius_)
-        : Map_object(start_time_, duration_time_, x, y),
+               float active_circle_radius_,
+               const sf::Time &move_time_ = sf::seconds(0))
+        : Map_object(start_time_, duration_time_, x, y, move_time_),
           beat_radius(beat_radius_),
           active_circle_start_radius(active_circle_radius_) {}
 
@@ -78,7 +87,6 @@ public:
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     std::shared_ptr<Map_object> clone() override;
-    bool is_valid = true;
     sf::Vector2f &get_end_pos() override;
     void reset() override {
         active_circle_radius = active_circle_start_radius;
@@ -89,7 +97,6 @@ struct Aim_slider : Aim_circle {
 private:
     sf::Vector2f start_pos;
     sf::Vector2f end_pos;
-    sf::Time move_time;
 
 public:
     Aim_slider(const sf::Time &start_time_,
@@ -100,16 +107,16 @@ public:
                float active_circle_start_radius_,
                float x_end_,
                float y_end_,
-               sf::Time move_time_)
+               const sf::Time &move_time_)
         : Aim_circle(start_time_,
                      duration_time_,
                      x,
                      y,
                      beat_radius_,
-                     active_circle_start_radius_),
+                     active_circle_start_radius_,
+                     move_time_),
           start_pos(x, y),
-          end_pos(x_end_, y_end_),
-          move_time(move_time_) {}
+          end_pos(x_end_, y_end_) {}
     bool change_state(sf::Time current_time) override;
     bool check_event(sf::Vector2f,
                      BL::Game_session &game_session,
@@ -117,6 +124,11 @@ public:
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     sf::Vector2f &get_end_pos() override;
     std::shared_ptr<Map_object> clone() override;
+    sf::Vector2f& get_start_pos() ;
+    void reset() override {
+        active_circle_radius = active_circle_start_radius;
+        pos = start_pos;
+    }
 };
 
 // struct Aim_spinner : Map_object {}; Пока хз какие поля ему дать, как

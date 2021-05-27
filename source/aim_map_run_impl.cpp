@@ -62,9 +62,11 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
     rect.setTexture(&image);
+    rect.setFillColor(sf::Color(255, 255, 255, 70));
 
     assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
+    int number_of_dragged_buttons = 0;
     std::vector<int> dragged_key(
         sf::Keyboard::KeyCount);  // чтобы различать какая кнопка зажата
     std::vector<int> dragged_mouse_button(
@@ -78,15 +80,15 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         if (field.get_field_objects().empty()) {
             return;
         }
-        USO::Map_object &front_object =
-            *(field.get_field_objects().front().get());
+        USO::Map_object &back_object =
+            *(field.get_field_objects().back().get());
         if (!(*(field.get_field_objects().back()))
                  .check_event(
                      static_cast<sf::Vector2f>(sf::Mouse::getPosition()),
                      game_session, past_time + clock.getElapsedTime())) {
             return;
         }
-        if (typeid(front_object) != typeid(USO::Aim_slider)) {
+        if (typeid(back_object) != typeid(USO::Aim_slider)) {
             field.get_field_objects().pop_back();
         }
         sound.play();
@@ -138,7 +140,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             event.key.code != sf::Keyboard::X) {
                             break;
                         }
-                        dragged_key[event.key.code] = 1;
+                        if (!dragged_key[event.key.code]) {
+                            dragged_key[event.key.code] = 1;
+                            number_of_dragged_buttons++;
+                        }
                         handle_click();
                         break;
                     case sf::Event::MouseButtonPressed:
@@ -146,7 +151,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             event.mouseButton.button != sf::Mouse::Right) {
                             break;
                         }
-                        dragged_mouse_button[event.mouseButton.button] = 1;
+                        if (!dragged_mouse_button[event.mouseButton.button]) {
+                            number_of_dragged_buttons++;
+                            dragged_mouse_button[event.mouseButton.button] = 1;
+                        }
                         handle_click();
                         break;
                     case sf::Event::KeyReleased:
@@ -157,11 +165,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             event.key.code != sf::Keyboard::X) {
                             break;
                         }
-                        if (dragged_key[event.key.code] == 0) {
-                            break;
-                        }
+
                         dragged_key[event.key.code] = 0;
-                        drag = false;
+                        number_of_dragged_buttons--;
+                        if (number_of_dragged_buttons == 0) {
+                            drag = false;
+                        }
                         break;
                     case sf::Event::MouseButtonReleased:
                         if (!drag) {
@@ -172,17 +181,20 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             break;
                         }
                         dragged_mouse_button[event.mouseButton.button] = 0;
-                        drag = false;
+                        number_of_dragged_buttons--;
+                        if (number_of_dragged_buttons == 0) {
+                            drag = false;
+                        }
                         break;
                     default:
                         if (drag && !field.get_field_objects().empty()) {
-                            USO::Map_object &front_object =
-                                *(field.get_field_objects().front().get());
-                            if (typeid(front_object) !=
+                            USO::Map_object &back_object =
+                                *(field.get_field_objects().back().get());
+                            if (typeid(back_object) !=
                                 typeid(USO::Aim_slider)) {
                                 break;
                             }
-                            front_object.check_event(
+                            back_object.check_event(
                                 sf::Vector2f(sf::Mouse::getPosition()),
                                 game_session,
                                 past_time + clock.getElapsedTime());
@@ -196,6 +208,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 //когда отожмут паузу, нужно сделать restart
                 // clock, потому что
                 // sfml по пацански не останавливается
+
                 break;
             }
             case BL::Game_status::DEFEAT: {

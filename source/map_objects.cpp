@@ -8,7 +8,7 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(200);
+    static sf::Time epsilon = sf::seconds(0.1);
     return end_time - current_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
@@ -35,7 +35,6 @@ sf::Vector2f &USO::Map_object::get_pos() {
     return pos;
 }
 
-
 bool USO::Aim_circle::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
         active_circle_radius =  //Умножаю стартовый радиус на коэф, вижу
@@ -59,7 +58,6 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
             return true;
         } else {
             is_valid = false;
-
         }
     }
     //    game_session.decrease_health(game_session.damage());
@@ -68,12 +66,11 @@ bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
 
 void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
     if (is_valid) {
-//        static int index = 0;
-//        index %= 5;
+        //        static int index = 0;
+        //        index %= 5;
         sf::CircleShape active_circle(active_circle_radius);
         sf::CircleShape base_circle(beat_radius);
-//        sf::Text index_of_circle;
-
+        //        sf::Text index_of_circle;
 
         active_circle.setPosition(fix_circle_pos(pos, active_circle_radius));
         if (active_circle_radius <= beat_radius) {
@@ -81,26 +78,34 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
             active_circle.setPosition(fix_circle_pos(pos, beat_radius));
         }
         base_circle.setPosition(fix_circle_pos(pos, beat_radius));
-//        index_of_circle.setCharacterSize(42);
-//        index_of_circle.setPosition(fix_circle_pos(pos, (float)index_of_circle.getCharacterSize() / 2));
-//        index_of_circle.setFont(font);
-
+        //        index_of_circle.setCharacterSize(42);
+        //        index_of_circle.setPosition(fix_circle_pos(pos,
+        //        (float)index_of_circle.getCharacterSize() / 2));
+        //        index_of_circle.setFont(font);
 
         active_circle.setFillColor(sf::Color::Transparent);
-        active_circle.setOutlineThickness(10);
+        active_circle.setOutlineThickness(20);
         active_circle.setOutlineColor(sf::Color(230, 0, 0));
-        //    base_circle.setFillColor(sf::Color::Transparent);
         base_circle.setFillColor(sf::Color(204, 51, 51));
         base_circle.setOutlineThickness(10);
         base_circle.setOutlineColor(sf::Color::White);
-//        index_of_circle.setFillColor(sf::Color::White);
-//        index_of_circle.setOutlineColor(sf::Color::White);
 
-//        index_of_circle.setString(std::to_string(index++ % 5 + 1));
+        //        index_of_circle.setFillColor(sf::Color::White);
+        //        index_of_circle.setOutlineColor(sf::Color::White);
+
+        //        index_of_circle.setString(std::to_string(index++ % 5 + 1));
         window.draw(base_circle);
         window.draw(active_circle);
-//        window.draw(index_of_circle);
+        //        window.draw(index_of_circle);
     } else {
+        sf::Text denied;
+        denied.setString("X");
+        denied.setFont(font);
+        denied.setFillColor(sf::Color::Red);
+        denied.setCharacterSize(65);
+        denied.setPosition(pos - sf::Vector2f(denied.getCharacterSize() / 2,
+                                              denied.getCharacterSize() / 2));
+        window.draw(denied);
     }
 }
 std::shared_ptr<USO::Map_object> USO::Aim_circle::clone() {
@@ -116,6 +121,7 @@ bool USO::Aim_slider::change_state(sf::Time current_time) {
     } else if (current_time <= start_time + duration_time + move_time) {
         float coef = get_time_coefficient(start_time + duration_time, move_time,
                                           current_time);
+        active_circle_radius = beat_radius;
         pos.x = start_pos.x + (end_pos.x - start_pos.x) * coef;
         pos.y = start_pos.y + (end_pos.y - start_pos.y) * coef;
     } else {
@@ -183,4 +189,7 @@ std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
 }
 sf::Vector2f &USO::Aim_slider::get_end_pos() {
     return end_pos;
+}
+sf::Vector2f &USO::Aim_slider::get_start_pos() {
+    return start_pos;
 }

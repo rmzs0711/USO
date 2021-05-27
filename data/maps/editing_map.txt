@@ -2,6 +2,32 @@ ff
 Rama
 data\music\stronger.ogg
 Gold
-data\img\lucifer.png
-data\fonts\mono.otf
+data\img\stronger.png
+data\fonts\aller.ttf
 data\music\click_sound.ogg
+Aim_circle
+13996790
+700000
+585
+404
+65 300
+Aim_circle
+14231743
+700000
+868
+518
+65 300
+Aim_circle
+14747904
+700000
+736
+427
+65 300
+Aim_slider
+15959150
+700000
+842
+483
+65 300
+1287 493
+890224
