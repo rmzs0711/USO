@@ -6,27 +6,32 @@
 #include "base_logic.h"
 #include <cmath>
 namespace USO {
+
 const int const_circle_beat_radius = 65;
 const int const_active_circle_radius = 300;
-const sf::Time active_circle_duration = sf::milliseconds(700);
+const sf::Time const_active_circle_duration = sf::seconds(0.7);
+
+const double time_per_pixels = 2;
 
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
-enum class Conveyor_objects { NOTE, HOLD_NOTE };
+// enum class Conveyor_objects { NOTE, HOLD_NOTE };
 
-enum class Bulletproof_objects { SHAPE };
+// enum class Bulletproof_objects { SHAPE };
 
 struct Map_object {
 protected:
     sf::Time start_time;
     sf::Time duration_time;
+    sf::Time move_time;
     sf::Vector2f pos;
 
     Map_object(const sf::Time &start_time_,
                const sf::Time &duration_time_,
                float x,
-               float y)
-        : start_time(start_time_), duration_time(duration_time_), pos(x, y) {}
+               float y,
+               const sf::Time &move_time_)
+        : start_time(start_time_), duration_time(duration_time_), pos(x, y), move_time(move_time_) {}
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -38,9 +43,12 @@ public:
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
     virtual sf::Vector2f &get_pos();
-    virtual sf::Vector2f &get_end_pos() = 0;
-    virtual std::shared_ptr<Map_object> clone() = 0;
+    virtual sf::Vector2f &get_end_pos() {return pos;}
+    virtual std::shared_ptr<Map_object> clone() { return nullptr;}
     virtual void reset() {}
+    virtual sf::Time &get_move_time() {
+        return move_time;
+    }
 };
 
 struct Aim_circle : Map_object {
@@ -48,6 +56,7 @@ protected:
     float beat_radius;
     float active_circle_radius = 0;
     float active_circle_start_radius;
+    bool is_valid = true;
 
 public:
     Aim_circle(const sf::Time &start_time_,
@@ -55,8 +64,9 @@ public:
                float x,
                float y,
                float beat_radius_,
-               float active_circle_radius_)
-        : Map_object(start_time_, duration_time_, x, y),
+               float active_circle_radius_,
+               const sf::Time &move_time_ = sf::seconds(0))
+        : Map_object(start_time_, duration_time_, x, y, move_time_),
           beat_radius(beat_radius_),
           active_circle_start_radius(active_circle_radius_) {}
 
@@ -77,9 +87,9 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-    std::shared_ptr<Map_object> clone() override {return nullptr;};
-    bool is_valid = true;
-    sf::Vector2f &get_end_pos() override {return pos;}
+
+    std::shared_ptr<Map_object> clone() override;
+    sf::Vector2f &get_end_pos() override;
     void reset() override {
         active_circle_radius = active_circle_start_radius;
     }
@@ -100,16 +110,16 @@ public:
                float active_circle_start_radius_,
                float x_end_,
                float y_end_,
-               sf::Time move_time_)
+               const sf::Time &move_time_)
         : Aim_circle(start_time_,
                      duration_time_,
                      x,
                      y,
                      beat_radius_,
-                     active_circle_start_radius_),
+                     active_circle_start_radius_,
+                     move_time_),
           start_pos(x, y),
-          end_pos(x_end_, y_end_),
-          move_time(move_time_) {}
+          end_pos(x_end_, y_end_) {}
     bool change_state(sf::Time current_time) override;
     bool check_event(sf::Vector2f,
                      BL::Game_session &game_session,
@@ -117,6 +127,11 @@ public:
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     sf::Vector2f &get_end_pos() override;
     std::shared_ptr<Map_object> clone() override;
+    sf::Vector2f& get_start_pos() ;
+    void reset() override {
+        active_circle_radius = active_circle_start_radius;
+        pos = start_pos;
+    }
 };
 
 struct Aim_spinner : Aim_circle {
@@ -201,45 +216,46 @@ public:
 //          beat_count(beat_count_) {}
 //};
 
-// enum class Conveyor_note_key_position { D, F, J, K };
+struct Conveyor_line {
+public:
+    sf::Vector2f pos;
+    sf::Vector2f sizes;
+    sf::Vector2f beat_pos;
+    sf::Vector2f beat_sizes;
+    bool dragged = false;
+    int index;
+    Conveyor_line(sf::Vector2f pos_, sf::Vector2f sizes_, int index_)
+        : pos(pos_), sizes(sizes_), index(index_) {
+        beat_sizes.x = sizes.x;
+        beat_sizes.y = sizes.y / 5;
+        beat_pos.x = pos.x;
+        beat_pos.y = pos.y + 4 * sizes.y / 5;
+    }
 
-//Потом
-// struct Conveyor_note : Map_object {
-// private:
-//    Conveyor_note_key_position position;
-//
-// public:
-//    Conveyor_note(sf::Time &start_time_,
-//                  sf::Time &duration_time_,
-//                  float x,
-//                  float y,
-//                  int index_,
-//                  Conveyor_note_key_position position_)
-//        : Map_object(start_time_, duration_time_, x, y, index_),
-//          position(position_) {}
-//};
+    void draw(sf::RenderWindow &window) const;
+};
 
-// struct Conveyor_hold_note : Conveyor_note {
-// private:
-//    sf::Time duration;
-//
-// public:
-//    Conveyor_hold_note(sf::Time &start_time_,
-//                       sf::Time &duration_time_,
-//                       float x,
-//                       float y,
-//                       int index_,
-//                       Conveyor_note_key_position position_,
-//                       sf::Time duration_)
-//        : Conveyor_note(start_time_, duration_time_, x, y, index_, position_),
-//          duration(duration_) {}
-//};
+struct Conveyor_note : Map_object {
+private:
+    Conveyor_line line;
 
-// struct Bulletproof_shape : Map_object {
-//    //А что если создатель карты сам придумывает фигуру, можно сделать
-//    интерфейс
-//    //для создания фигур
-//};
+public:
+    Conveyor_note(sf::Time &start_time_,
+                  sf::Time &duration_time_,
+                  Conveyor_line line_)
+        : Map_object(start_time_,
+                     duration_time_,
+                     line_.pos.x,
+                     line_.pos.y, sf::Time()),
+          line(line_) {}
+
+    bool change_state(sf::Time current_time) override;
+    bool check_event(sf::Vector2f,
+                     BL::Game_session &game_session,
+                     sf::Time current_time) override;
+    void draw(sf::RenderWindow &window, const sf::Font &font) override;
+
+};
 
 }  // namespace USO
 #endif  // USO_MAP_OBJECTS_H

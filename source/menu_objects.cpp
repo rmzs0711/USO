@@ -6,10 +6,10 @@
 #include "menu.h"
 
 bool Menu::Button::is_circle_correct_click(const sf::Vector2f &mouse) {
-    auto center = circle.getPosition();
+    auto pos = circle.getPosition();
     auto radius = circle.getRadius();
-    return (mouse.x - center.x - radius) * (mouse.x - center.x - radius) +
-               (mouse.y - center.y - radius) * (mouse.y - center.y - radius) <=
+    return (mouse.x - pos.x - radius) * (mouse.x - pos.x - radius) +
+               (mouse.y - pos.y - radius) * (mouse.y - pos.y - radius) <=
            radius * radius;
 }
 
@@ -34,6 +34,8 @@ void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse, BL
 //                // show_maps();
 //            } break;
             case OPEN_CONVEYOR: {  // soon
+                USO::Conveyor_map test(R"(input.txt)");
+                test.run(window);
             } break;
             case OPEN_SETTINGS: {  // soon
                 circle.getRadius();
@@ -54,8 +56,10 @@ void Menu::Button::draw(sf::RenderWindow &window) {
     auto prev_radius = circle.getRadius();
     if (state == State::POINTED) {
         circle.setRadius(prev_radius + 20);
+        state = State::QUIET;
     }
     window.draw(circle);
+    circle.setRadius(prev_radius);
 
     std::string name_of_button;
     switch (event) {
@@ -89,8 +93,7 @@ void Menu::Button::draw(sf::RenderWindow &window) {
     text.setCharacterSize(20);
     text.setStyle(sf::Text::Bold);
     text.setString(name_of_button);
-    text.setPosition(circle.getPosition().x + circle.getRadius(), circle.getPosition().y + circle.getRadius());
+    text.setPosition(circle.getPosition().x + circle.getRadius() / 2,
+                     circle.getPosition().y + circle.getRadius() / 2);
     window.draw(text);
-
-    circle.setRadius(prev_radius);
 }

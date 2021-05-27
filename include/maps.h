@@ -57,7 +57,8 @@ public:
     virtual ~Map() = default;
 
     virtual void run(sf::RenderWindow &) = 0;
-    virtual void constructor_run(sf::RenderWindow &) = 0;
+    virtual void constructor_run(sf::RenderWindow &) {};
+
 
 protected:
     Map() = default;
@@ -88,7 +89,14 @@ struct Aim_map final : Map {
 };
 
 struct Conveyor_map final : Map {
+private:
+    const int NUMBER_OF_LINES = 4;
+public:
+    explicit Conveyor_map(const std::string &filename);
+    std::vector<std::shared_ptr<Conveyor_line>> lines;
+
     void run(sf::RenderWindow &) override;
+    // void construct(sf::RenderWindow &);
 };
 
 struct Bulletproof_map final : Map {

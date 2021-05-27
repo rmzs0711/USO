@@ -14,5 +14,4 @@ void constructor_menu(sf::Window& window);
 sf::RenderWindow &set_settings();
 void stop_menu(sf::RenderWindow &, BL::Game_session &);
 }
-
 #endif  // USO_MENU_H
