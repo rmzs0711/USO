@@ -8,6 +8,7 @@
 #include "iterator"
 #include "map_management.h"
 #include "maps.h"
+#include "menu.h"
 
 namespace {}  // namespace
 
@@ -42,6 +43,7 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
     sf::SoundBuffer press_sound;
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
                          // останавливать часы
+    window.setMouseCursorVisible(false);
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
     sf::Music music;
@@ -50,9 +52,6 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                     R"(data\music\click_sound.ogg)");
     music.openFromFile(music_address);
     music.play();
-
-
-
 
     sf::Sound sound;
     sound.setBuffer(press_sound);
@@ -85,17 +84,21 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
         sf::Mouse::ButtonCount);  // то же самое только про мышку
 
     clock.restart();
-    float prev_x = 0;
-    float prev_y = 0;
-    while (game_session.get_game_status() != BL::Game_status::VICTORY ||
-           game_session.get_game_status() != BL::Game_status::DEFEAT) {
+    sf::CircleShape mouse(5.f);
+    mouse.setFillColor(sf::Color(241, 200, 14));
+
+    while (true) {
         window.draw(rect);
+        mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+        window.draw(mouse);
         table_of_scores(window, font, game_session);
+        if (game_session.get_health() == 0) game_session.set_game_status(BL::Game_status::DEFEAT);
+        sf::Event event{};
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {
                     if (*current_object_it) {
-                        field.push(current_object_it,
+                        field.push_front(current_object_it,
                                    past_time + clock.getElapsedTime());
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;
@@ -112,9 +115,11 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                     game_session.decrease_health(game_session.damage());
                 }
 
-                sf::Event event{};
+
 
                 field.draw(font);
+                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                window.draw(mouse);
                 window.display();
 
                 if (!window.pollEvent(event) && !drag) {
@@ -136,7 +141,8 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                                           past_time + clock.getElapsedTime())) {
                         return;
                     }
-                    if (typeid(front_object) != typeid(USO::Aim_slider)) {
+                    if (typeid(front_object) != typeid(USO::Aim_slider) &&
+                        typeid(front_object) != typeid(USO::Aim_spinner)) {
                         field.get_field_objects().pop_back();
                     }
                     sound.play();
@@ -146,8 +152,8 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                 switch (event.type) {
                     case sf::Event::KeyPressed:
                         if (event.key.code == sf::Keyboard::Escape) {
-                            // остановить время на паузу
-                            return;
+                            game_session.set_game_status(BL::Game_status::PAUSE);
+                            continue;
                         }
                         if (event.key.code != sf::Keyboard::Z &&
                             event.key.code != sf::Keyboard::X) {
@@ -194,7 +200,8 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                             USO::Map_object &front_object =
                                 *(field.get_field_objects().front().get());
                             if (typeid(front_object) !=
-                                typeid(USO::Aim_slider)) {
+                                typeid(USO::Aim_slider) &&
+                                typeid(front_object) != typeid(USO::Aim_spinner)) {
                                 break;
                             }
                             front_object.check_event(
@@ -206,14 +213,20 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                 }
                 break;
             }
-
             case BL::Game_status::PAUSE: {
-                //когда отожмут паузу, нужно сделать restart
-                // clock, потому что
-                // sfml по пацански не останавливается
-                break;
-            }
+                past_time += clock.getElapsedTime();
+                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                window.draw(mouse);
+                Menu::menu(window, game_session);
+                clock.restart();
+            } break;
+            case BL::Game_status::VICTORY:
             case BL::Game_status::DEFEAT: {
+                field.get_field_objects().clear();
+                map_objects.clear();
+                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                window.draw(mouse);
+                Menu::menu(window, game_session);
                 return;
             }
             default:
