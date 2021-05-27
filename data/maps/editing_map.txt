@@ -5,3 +5,33 @@ Gold
 data\img\stronger.png
 data\fonts\aller.ttf
 data\music\click_sound.ogg
+Aim_circle
+6300000
+700000
+760
+693
+65 300
+Aim_circle
+6300000
+700000
+1189
+782
+65 300
+Aim_circle
+8300000
+700000
+913
+544
+65 300
+Aim_circle
+11300000
+700000
+1269
+604
+65 300
+Aim_circle
+12300000
+700000
+938
+584
+65 300

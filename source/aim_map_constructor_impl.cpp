@@ -96,6 +96,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         sf::Mouse::ButtonCount);  // то же самое только про мышку
 
     bool slider_choosing_end = false;
+    bool is_saved = true;
     bool drag = true;
     sf::Event event{};
 
@@ -104,9 +105,10 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         if (drag) {
             return;
         }
+        is_saved = false;
         drag = true;
 
-//        music.pause();
+        //        music.pause();
         for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
             auto &object = **i;
             if (typeid(object) == typeid(Aim_circle)) {
@@ -254,60 +256,66 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto draw_yes_and_no_decision = [&](const std::string &decision) {
         sf::Text text_buf;
-        text_buf.setCharacterSize(window.getSize().y / 10);
+        text_buf.setCharacterSize(80);
+        text_buf.setFont(font);
 
         sf::CircleShape yes_button((float)window.getSize().x / 10);
         yes_button.setPosition((float)yes_button.getRadius() * 2,
                                (float)window.getSize().y / 2);
-        yes_button.setFillColor(sf::Color::Green);
+        yes_button.setFillColor(sf::Color::Red);
 
         sf::CircleShape no_button(yes_button.getRadius());
-        no_button.setPosition((float)no_button.getRadius() * 4,
+        no_button.setPosition((float)no_button.getRadius() * 6,
                               (float)window.getSize().y / 2);
-        no_button.setFillColor(sf::Color::Red);
+        no_button.setFillColor(sf::Color::Green);
 
-        sf::RectangleShape rect(sf::Vector2f(window.getSize()));
-        rect.setFillColor(sf::Color(0, 0, 0, 10));
+        rect.setFillColor(sf::Color(100, 100, 100, 10));
         while (true) {
             window.draw(rect);
             text_buf.setString(decision);
-            text_buf.setPosition(sf::Vector2f((float)window.getSize().x * 2 / 5,
+            text_buf.setFillColor(sf::Color::White);
+            text_buf.setPosition(sf::Vector2f((float)window.getSize().x / 3,
                                               (float)window.getSize().y / 10));
             window.draw(text_buf);
 
             window.draw(yes_button);
             window.draw(no_button);
 
-            text_buf.setString("yes");
-            text_buf.setPosition(
-                yes_button.getPosition() +
-                sf::Vector2f(yes_button.getRadius(), yes_button.getRadius()));
-            window.draw(text_buf);
-
             text_buf.setString("no");
             text_buf.setPosition(
+                yes_button.getPosition() +
+                sf::Vector2f(
+                    yes_button.getRadius() - text_buf.getCharacterSize() / 2,
+                    yes_button.getRadius() - text_buf.getCharacterSize() / 2));
+            window.draw(text_buf);
+
+            text_buf.setString("yes");
+            text_buf.setPosition(
                 no_button.getPosition() +
-                sf::Vector2f(yes_button.getRadius(), yes_button.getRadius()));
+                sf::Vector2f(
+                    yes_button.getRadius() - text_buf.getCharacterSize() / 2,
+                    yes_button.getRadius() - text_buf.getCharacterSize() / 2));
             window.draw(text_buf);
             window.display();
             if (!window.pollEvent(event)) {
                 continue;
             }
             if (event.type == sf::Event::MouseButtonPressed) {
+                rect.setFillColor(sf::Color::White);
                 if (is_circle_correct_click(
                         sf::Vector2f(sf::Mouse::getPosition(window)),
                         yes_button.getPosition() +
                             sf::Vector2f(yes_button.getRadius(),
                                          yes_button.getRadius()),
                         yes_button.getRadius())) {
-                    return true;
+                    return false;
                 } else if (is_circle_correct_click(
                                sf::Vector2f(sf::Mouse::getPosition(window)),
                                no_button.getPosition() +
                                    sf::Vector2f(no_button.getRadius(),
                                                 no_button.getRadius()),
                                no_button.getRadius())) {
-                    return false;
+                    return true;
                 }
             }
         }
@@ -356,6 +364,47 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             window.draw(genius_text);
             window.display();
         }
+    };
+    auto save_map = [&]() {
+        std::fstream fout;
+        fout.open(R"(data/maps/editing_map.txt)",
+                  std::ios::out | std::ios::trunc);
+        if (!fout) {
+            std::cerr << "File not found" << std::endl;
+            return;
+        }
+        is_saved = true;
+        fout << map_name << std::endl;
+        fout << author_name << std::endl;
+        fout << music_address << std::endl;
+        fout << music_name << std::endl;
+        fout << image_address << std::endl;
+        fout << font_address << std::endl;
+        fout << sound_address << std::endl;
+        for (auto &i : editing_map_objects) {
+            auto &object = *i;
+            if (typeid(object) == typeid(USO::Aim_circle)) {
+                fout << "Aim_circle" << std::endl;
+                fout << i->get_start_time().asMicroseconds() << std::endl;
+                fout << i->get_duration_time().asMicroseconds() << std::endl;
+                fout << i->get_pos().x << std::endl;
+                fout << i->get_pos().y << std::endl;
+                fout << const_circle_beat_radius << " "
+                     << const_active_circle_radius << std::endl;
+            } else if (typeid(object) == typeid(USO::Aim_slider)) {
+                fout << "Aim_slider" << std::endl;
+                fout << i->get_start_time().asMicroseconds() << std::endl;
+                fout << i->get_duration_time().asMicroseconds() << std::endl;
+                fout << i->get_pos().x << std::endl;
+                fout << i->get_pos().y << std::endl;
+                fout << const_circle_beat_radius << " "
+                     << const_active_circle_radius << std::endl;
+                fout << i->get_end_pos().x << " " << i->get_end_pos().y
+                     << std::endl;
+                fout << i->get_move_time().asMicroseconds() << std::endl;
+            }
+        }
+        fout.close();
     };
     // lambda zone ends
 
@@ -452,51 +501,10 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     music.pause();
                     remembered_time = current_time;
-                    if (draw_yes_and_no_decision("Do you want to save?")) {
-                        std::fstream fout;
-                        fout.open(R"(data/maps/editing_map.txt)",
-                                  std::ios::out | std::ios::trunc);
-                        if (!fout) {
-                            std::cerr << "File not found" << std::endl;
-                        }
-                        fout << map_name << std::endl;
-                        fout << author_name << std::endl;
-                        fout << music_address << std::endl;
-                        fout << music_name << std::endl;
-                        fout << image_address << std::endl;
-                        fout << font_address << std::endl;
-                        fout << sound_address << std::endl;
-                        for (auto &i : editing_map_objects) {
-                            auto &object = *i;
-                            if (typeid(object) == typeid(USO::Aim_circle)) {
-                                fout << "Aim_circle" << std::endl;
-                                fout << i->get_start_time().asMicroseconds()
-                                     << std::endl;
-                                fout << i->get_duration_time().asMicroseconds()
-                                     << std::endl;
-                                fout << i->get_pos().x << std::endl;
-                                fout << i->get_pos().y << std::endl;
-                                fout << const_circle_beat_radius << " "
-                                     << const_active_circle_radius << std::endl;
-                            } else if (typeid(object) ==
-                                       typeid(USO::Aim_slider)) {
-                                fout << "Aim_slider" << std::endl;
-                                fout << i->get_start_time().asMicroseconds()
-                                     << std::endl;
-                                fout << i->get_duration_time().asMicroseconds()
-                                     << std::endl;
-                                fout << i->get_pos().x << std::endl;
-                                fout << i->get_pos().y << std::endl;
-                                fout << const_circle_beat_radius << " "
-                                     << const_active_circle_radius << std::endl;
-                                fout << i->get_end_pos().x << " "
-                                     << i->get_end_pos().y << std::endl;
-                                fout << i->get_move_time().asMicroseconds()
-                                     << std::endl;
-                            }
-                        }
-                        fout.close();
+                    if (!is_saved && draw_yes_and_no_decision("Do you want to save?")) {
+                        save_map();
                     }
+                    window.display();
                     if (draw_yes_and_no_decision("Do you want to leave")) {
                         return;
                     }
@@ -538,6 +546,10 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     dec_time();
                     inc_time();
                     time_delta = saved_delta;
+                } else if (event.key.code == sf::Keyboard::S) {
+                    if (!is_saved) {
+                        save_map();
+                    }
                 } else if (event.key.code == sf::Keyboard::Num1) {
                     object_to_create = OBJECT_TO_CREATE::CIRCLE;
                 } else if (event.key.code == sf::Keyboard::Num2) {
