@@ -6,6 +6,10 @@
 #include "base_logic.h"
 
 namespace USO {
+const int const_circle_beat_radius = 65;
+const int const_active_circle_radius = 300;
+const sf::Time active_circle_duration = sf::milliseconds(700);
+
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
 enum class Conveyor_objects { NOTE, HOLD_NOTE };
@@ -17,17 +21,12 @@ protected:
     sf::Time start_time;
     sf::Time duration_time;
     sf::Vector2f pos;
-    int index;
 
     Map_object(const sf::Time &start_time_,
                const sf::Time &duration_time_,
                float x,
-               float y,
-               int index_)
-        : start_time(start_time_),
-          duration_time(duration_time_),
-          pos(x, y),
-          index(index_) {}
+               float y)
+        : start_time(start_time_), duration_time(duration_time_), pos(x, y) {}
 
 public:
     virtual bool change_state(sf::Time) = 0;
@@ -38,9 +37,10 @@ public:
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
-    virtual float &get_x_coord();
-    virtual float &get_y_coord();
-//    virtual std::shared_ptr<Map_object> clone() = 0;
+    virtual sf::Vector2f &get_pos();
+    virtual sf::Vector2f &get_end_pos() = 0;
+    virtual std::shared_ptr<Map_object> clone() = 0;
+    virtual void reset() {}
 };
 
 struct Aim_circle : Map_object {
@@ -54,23 +54,21 @@ public:
                const sf::Time &duration_time_,
                float x,
                float y,
-               int index_,
                float beat_radius_,
                float active_circle_radius_)
-        : Map_object(start_time_, duration_time_, x, y, index_),
+        : Map_object(start_time_, duration_time_, x, y),
           beat_radius(beat_radius_),
-          active_circle_start_radius(active_circle_radius_),
-          active_circle_radius(active_circle_radius_) {}
+          active_circle_start_radius(active_circle_radius_) {}
 
-//    Aim_circle(const Aim_circle &other_circle)
-//        : Map_object(other_circle.start_time,
-//                     other_circle.duration_time,
-//                     other_circle.pos.x,
-//                     other_circle.pos.y,
-//                     other_circle.index),
-//          beat_radius(other_circle.beat_radius),
-//          active_circle_start_radius(other_circle.active_circle_start_radius),
-//          active_circle_radius(other_circle.active_circle_radius) {}
+    //    Aim_circle(const Aim_circle &other_circle)
+    //        : Map_object(other_circle.start_time,
+    //                     other_circle.duration_time,
+    //                     other_circle.pos.x,
+    //                     other_circle.pos.y,
+    //                     other_circle.index),
+    //          beat_radius(other_circle.beat_radius),
+    //          active_circle_start_radius(other_circle.active_circle_start_radius),
+    //          active_circle_radius(other_circle.active_circle_radius) {}
 
     Aim_circle(const Aim_circle &) = default;
 
@@ -79,8 +77,12 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-//    std::shared_ptr<Map_object> clone() override;
+    std::shared_ptr<Map_object> clone() override;
     bool is_valid = true;
+    sf::Vector2f &get_end_pos() override;
+    void reset() override {
+        active_circle_radius = active_circle_start_radius;
+    }
 };
 
 struct Aim_slider : Aim_circle {
@@ -94,7 +96,6 @@ public:
                const sf::Time &duration_time_,
                float x,
                float y,
-               int index_,
                float beat_radius_,
                float active_circle_start_radius_,
                float x_end_,
@@ -104,7 +105,6 @@ public:
                      duration_time_,
                      x,
                      y,
-                     index_,
                      beat_radius_,
                      active_circle_start_radius_),
           start_pos(x, y),
@@ -115,7 +115,8 @@ public:
                      BL::Game_session &game_session,
                      sf::Time current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-//    std::shared_ptr<Map_object> clone() override;
+    sf::Vector2f &get_end_pos() override;
+    std::shared_ptr<Map_object> clone() override;
 };
 
 struct Aim_spinner : Aim_circle {

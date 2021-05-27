@@ -9,9 +9,7 @@
 #include "map_management.h"
 #include "maps.h"
 
-namespace {
-
-}  // namespace
+namespace {}  // namespace
 
 void table_of_scores(sf::RenderWindow &window,
                      sf::Font &font,
@@ -52,6 +50,9 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                     R"(data\music\click_sound.ogg)");
     music.openFromFile(music_address);
     music.play();
+
+
+
 
     sf::Sound sound;
     sound.setBuffer(press_sound);
@@ -135,8 +136,7 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                                           past_time + clock.getElapsedTime())) {
                         return;
                     }
-                    if (typeid(front_object) != typeid(USO::Aim_slider) &&
-                        typeid(front_object) != typeid(USO::Aim_spinner)) {
+                    if (typeid(front_object) != typeid(USO::Aim_slider)) {
                         field.get_field_objects().pop_back();
                     }
                     sound.play();
@@ -194,8 +194,7 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                             USO::Map_object &front_object =
                                 *(field.get_field_objects().front().get());
                             if (typeid(front_object) !=
-                                typeid(USO::Aim_slider) && typeid(front_object) !=
-                                    typeid(USO::Aim_spinner)) {
+                                typeid(USO::Aim_slider)) {
                                 break;
                             }
                             front_object.check_event(
