@@ -24,64 +24,14 @@ double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
                     0.5);
 }
 
-void draw_input_text_box(sf::RenderWindow &window,
-                         sf::Time &time,
-                         std::string time_name,
-                         const sf::Font &font) {
-    sf::Event event{};
-    time_name += "=";
-    sf::RectangleShape input_field(
-        sf::Vector2f((float)window.getSize().x / 4, 90));
-    input_field.setFillColor(sf::Color::White);
-    input_field.setPosition(sf::Vector2f(window.getSize()) / 2.0f -
-                            sf::Vector2f(input_field.getSize()) / 2.0f);
-    sf::Int32 input_in_int = 0;
-    std::string input;
-    sf::Text genius_text;
-    genius_text.setPosition(input_field.getPosition());
-    genius_text.setFont(font);
-    genius_text.setCharacterSize(70);
-    genius_text.setFillColor(sf::Color::Red);
-    while (true) {
-        if (!window.pollEvent(event)) {
-            continue;
-        }
-        if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape) {
-                return;
-            } else if (event.key.code == sf::Keyboard::Enter) {
-                time = sf::milliseconds(input_in_int);
-                break;
-            } else if (event.key.code == sf::Keyboard::BackSpace) {
-                input_in_int /= 10;
-                if (!input.empty()) {
-                    input.pop_back();
-                }
-            }
-        } else if (event.type == sf::Event::TextEntered) {
-            if (input.size() < 5 &&
-                std::isdigit(static_cast<char>(event.text.unicode))) {
-                input_in_int *= 10;
-                input_in_int += static_cast<char>(event.text.unicode) - '0';
-                input += static_cast<char>(event.text.unicode);
-            }
-        }
-        genius_text.setString(time_name + input);
-        window.draw(input_field);
-        window.draw(genius_text);
-        window.display();
-    }
-}
+
+
+
 
 }  // namespace
 
 namespace USO {
 void Aim_map::constructor_run(sf::RenderWindow &window) {
-    std::fstream fout;
-    fout.open(R"(data/maps/editing_map.txt)", std::ios::out | std::ios::trunc);
-    if (!fout) {
-        return;
-    }
     sf::Color purple(100, 5, 94);
     std::list<std::shared_ptr<Map_object>> editing_map_objects;
     for (std::shared_ptr<Map_object> &ptr : map_objects) {
@@ -305,6 +255,112 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         }
         end_draw_iterator++;
     };
+
+    auto draw_yes_and_no_decision = [&](const std::string& decision) {
+        sf::Text text_buf;
+        text_buf.setCharacterSize(window.getSize().y / 10);
+
+        sf::CircleShape yes_button((float)window.getSize().x / 6);
+        yes_button.setPosition((float)yes_button.getRadius() * 2,
+                               (float)window.getSize().y / 2);
+        yes_button.setFillColor(sf::Color::Green);
+
+        sf::CircleShape no_button(yes_button.getRadius());
+        no_button.setPosition((float)no_button.getRadius() * 4,
+                              (float)window.getSize().y / 2);
+        no_button.setFillColor(sf::Color::Red);
+
+        sf::RectangleShape rect(sf::Vector2f(window.getSize()));
+        rect.setFillColor(sf::Color(0, 0, 0, 70));
+        while (true) {
+            window.draw(rect);
+            text_buf.setString(decision);
+            text_buf.setPosition(sf::Vector2f((float)window.getSize().x * 2 / 5, (float)window.getSize().y / 10));
+            window.draw(text_buf);
+
+            window.draw(yes_button);
+            window.draw(no_button);
+
+            text_buf.setString("yes");
+            text_buf.setPosition(
+                yes_button.getPosition() +
+                sf::Vector2f(yes_button.getRadius(), yes_button.getRadius()));
+            window.draw(text_buf);
+
+            text_buf.setString("no");
+            text_buf.setPosition(
+                no_button.getPosition() +
+                sf::Vector2f(yes_button.getRadius(), yes_button.getRadius()));
+            window.draw(text_buf);
+            if (!window.pollEvent(event)) {
+                continue;
+            }
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (is_circle_correct_click(
+                    sf::Vector2f(sf::Mouse::getPosition()),
+                    yes_button.getPosition() +
+                    sf::Vector2f(yes_button.getRadius(),
+                                 yes_button.getRadius()),
+                    yes_button.getRadius())) {
+                    return true;
+                } else if (is_circle_correct_click(
+                    sf::Vector2f(sf::Mouse::getPosition()),
+                    no_button.getPosition() +
+                    sf::Vector2f(no_button.getRadius(),
+                                 no_button.getRadius()),
+                    no_button.getRadius())) {
+                    return false;
+                }
+            }
+            window.display();
+        }
+    };
+    auto draw_input_text_box = [&](sf::Time &time,
+                             std::string time_name) {
+        sf::Event event{};
+        time_name += "=";
+        sf::RectangleShape input_field(
+        sf::Vector2f((float)window.getSize().x / 4, 90));
+        input_field.setFillColor(sf::Color::White);
+        input_field.setPosition(sf::Vector2f(window.getSize()) / 2.0f -
+                                sf::Vector2f(input_field.getSize()) / 2.0f);
+        sf::Int32 input_in_int = 0;
+        std::string input;
+        sf::Text genius_text;
+        genius_text.setPosition(input_field.getPosition());
+        genius_text.setFont(font);
+        genius_text.setCharacterSize(70);
+        genius_text.setFillColor(sf::Color::Red);
+        while (true) {
+            if (!window.pollEvent(event)) {
+                continue;
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    return;
+                } else if (event.key.code == sf::Keyboard::Enter) {
+                    time = sf::milliseconds(input_in_int);
+                    break;
+                } else if (event.key.code == sf::Keyboard::BackSpace) {
+                    input_in_int /= 10;
+                    if (!input.empty()) {
+                        input.pop_back();
+                    }
+                }
+            } else if (event.type == sf::Event::TextEntered) {
+                if (input.size() < 5 &&
+                    std::isdigit(static_cast<char>(event.text.unicode))) {
+                    input_in_int *= 10;
+                    input_in_int += static_cast<char>(event.text.unicode) - '0';
+                    input += static_cast<char>(event.text.unicode);
+                }
+            }
+            genius_text.setString(time_name + input);
+            window.draw(input_field);
+            window.draw(genius_text);
+            window.display();
+        }
+    };
     // lambda zone ends
 
     while (true) {
@@ -314,15 +370,6 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             inc_time();
             time_delta = saved_delta;
         }
-        for (auto i = editing_map_objects.begin();
-             i != editing_map_objects.end(); i++) {
-            if (i == end_draw_iterator) {
-                std::cout << "*";
-            } else {
-                std::cout << "-";
-            }
-        }
-        std::cout << std::endl;
         window.draw(rect);
 
         for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
@@ -359,10 +406,17 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                                          object_rect.getPosition().y});
                 window.draw(object_rect);
             }
-            if (break_point_time >= current_time && break_point_time - current_time< (float) number_of_delta * time_delta) {
+            if (break_point_time >= current_time &&
+                break_point_time - current_time <
+                    (float)number_of_delta * time_delta) {
                 object_rect.setFillColor(sf::Color::Red);
                 object_rect.setSize({20.f, road_rect.getSize().y});
-                object_rect.setPosition(road_rect.getPosition().x + (break_point_time - current_time) / (time_delta * (float) number_of_delta) * road_rect.getSize().x, road_rect.getPosition().y);
+                object_rect.setPosition(
+                    road_rect.getPosition().x +
+                        (break_point_time - current_time) /
+                            (time_delta * (float)number_of_delta) *
+                            road_rect.getSize().x,
+                    road_rect.getPosition().y);
                 window.draw(object_rect);
             }
             window.draw(road_rect);
@@ -400,43 +454,56 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     break;
                 }
                 if (event.key.code == sf::Keyboard::Escape) {
-                    fout << map_name << std::endl;
-                    fout << author_name << std::endl;
-                    fout << music_address << std::endl;
-                    fout << music_name << std::endl;
-                    fout << image_address << std::endl;
-                    fout << font_address << std::endl;
-                    fout << sound_address << std::endl;
-                    for (auto &i : editing_map_objects) {
-                        auto &object = *i;
-                        if (typeid(object) == typeid(USO::Aim_circle)) {
-                            fout << "Aim_circle" << std::endl;
-                            fout << i->get_start_time().asMicroseconds()
-                                 << std::endl;
-                            fout << i->get_duration_time().asMicroseconds()
-                                 << std::endl;
-                            fout << i->get_pos().x << std::endl;
-                            fout << i->get_pos().y << std::endl;
-                            fout << const_circle_beat_radius << " "
-                                 << const_active_circle_radius << std::endl;
-                        } else if (typeid(object) == typeid(USO::Aim_slider)) {
-                            fout << "Aim_slider" << std::endl;
-                            fout << i->get_start_time().asMicroseconds()
-                                 << std::endl;
-                            fout << i->get_duration_time().asMicroseconds()
-                                 << std::endl;
-                            fout << i->get_pos().x << std::endl;
-                            fout << i->get_pos().y << std::endl;
-                            fout << const_circle_beat_radius << " "
-                                 << const_active_circle_radius << std::endl;
-                            fout << i->get_end_pos().x << " "
-                                 << i->get_end_pos().y << std::endl;
-                            fout << i->get_move_time().asMicroseconds()
-                                 << std::endl;
+                    music.pause();
+                    remembered_time = current_time;
+                    if (draw_yes_and_no_decision("Do you want to save?")) {
+                        std::fstream fout;
+                        fout.open(R"(data/maps/editing_map.txt)",
+                                  std::ios::out | std::ios::trunc);
+                        if (!fout) {
+                            std::cerr << "File not found" << std::endl;
                         }
+                        fout << map_name << std::endl;
+                        fout << author_name << std::endl;
+                        fout << music_address << std::endl;
+                        fout << music_name << std::endl;
+                        fout << image_address << std::endl;
+                        fout << font_address << std::endl;
+                        fout << sound_address << std::endl;
+                        for (auto &i : editing_map_objects) {
+                            auto &object = *i;
+                            if (typeid(object) == typeid(USO::Aim_circle)) {
+                                fout << "Aim_circle" << std::endl;
+                                fout << i->get_start_time().asMicroseconds()
+                                     << std::endl;
+                                fout << i->get_duration_time().asMicroseconds()
+                                     << std::endl;
+                                fout << i->get_pos().x << std::endl;
+                                fout << i->get_pos().y << std::endl;
+                                fout << const_circle_beat_radius << " "
+                                     << const_active_circle_radius << std::endl;
+                            } else if (typeid(object) ==
+                                       typeid(USO::Aim_slider)) {
+                                fout << "Aim_slider" << std::endl;
+                                fout << i->get_start_time().asMicroseconds()
+                                     << std::endl;
+                                fout << i->get_duration_time().asMicroseconds()
+                                     << std::endl;
+                                fout << i->get_pos().x << std::endl;
+                                fout << i->get_pos().y << std::endl;
+                                fout << const_circle_beat_radius << " "
+                                     << const_active_circle_radius << std::endl;
+                                fout << i->get_end_pos().x << " "
+                                     << i->get_end_pos().y << std::endl;
+                                fout << i->get_move_time().asMicroseconds()
+                                     << std::endl;
+                            }
+                        }
+                        fout.close();
                     }
-                    fout.close();
-                    return;
+                    if (draw_yes_and_no_decision("Do you want to leave")) {
+                        return;
+                    }
                 }
                 if (event.key.code == sf::Keyboard::Space) {
                     if (music.getStatus() == sf::Music::Paused ||
@@ -463,10 +530,10 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     handle_right_click();
                 } else if (event.key.code == sf::Keyboard::D) {
                     music.pause();
-                    draw_input_text_box(window, time_delta, "delta", font);
+                    draw_input_text_box(time_delta, "delta");
                 } else if (event.key.code == sf::Keyboard::B) {
                     break_point_time = current_time;
-                }else if (event.key.code == sf::Keyboard::R) {
+                } else if (event.key.code == sf::Keyboard::R) {
                     remembered_time = break_point_time;
                     clock.restart();
                     current_time = remembered_time;
