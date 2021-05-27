@@ -56,7 +56,6 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
     sf::Sound sound;
     sound.setBuffer(press_sound);
 
-
     sf::Texture img;
     check_file_load(
         img.loadFromFile(R"(data\img\stronger.png)"),
@@ -92,7 +91,13 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
         mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
         window.draw(mouse);
         table_of_scores(window, font, game_session);
+
         if (game_session.get_health() == 0) game_session.set_game_status(BL::Game_status::DEFEAT);
+        if (map_objects.back()->get_start_time() +
+                map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()) {
+            game_session.set_game_status(BL::Game_status::VICTORY);
+        }
+
         sf::Event event{};
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
@@ -217,20 +222,42 @@ void USO::Aim_map::run(sf::RenderWindow & window) {
                 past_time += clock.getElapsedTime();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
-                Menu::menu(window, game_session);
+                Menu::stop_menu(window, game_session);
                 clock.restart();
+                if (game_session.get_game_status() != BL::Game_status::ACTION) {
+                    return;
+                }
             } break;
-            case BL::Game_status::VICTORY:
+            case BL::Game_status::VICTORY: {
+                while (true) {
+                    if (window.pollEvent(event)) {
+                        if (event.key.code == sf::Keyboard::Space) {
+                            field.get_field_objects().clear();
+                            map_objects.clear();
+                            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                            window.draw(mouse);
+                            Menu::stop_menu(window, game_session);
+                            return;
+                        }
+                    }
+                    window.draw(rect);
+                    table_of_scores(window, font, game_session);
+                    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                    window.draw(mouse);
+                    window.display();
+                }
+            } break;
             case BL::Game_status::DEFEAT: {
                 field.get_field_objects().clear();
                 map_objects.clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
-                Menu::menu(window, game_session);
+                Menu::stop_menu(window, game_session);
                 return;
             }
-            default:
+            default: {
                 continue;
+            }
         }
     }
 }

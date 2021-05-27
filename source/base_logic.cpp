@@ -69,3 +69,10 @@ void BL::Game_session::lock_score() {
 void BL::Game_session::unlock_score() {
     is_score_locked = false;
 }
+BL::Game_status BL::Game_session::get_game_status() {
+    return game_status;
+}
+void BL::Game_session::set_game_status(BL::Game_status game_status_) {
+    game_status = game_status_;
+}
+

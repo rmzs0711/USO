@@ -45,17 +45,11 @@ public:
     void lock_combo();
     void unlock_combo();
     void lock_score();
-    void  unlock_score();
+    void unlock_score();
     [[nodiscard]] int get_health() const;
-
     [[nodiscard]] int damage() const;
-
-    Game_status get_game_status(/*map*/) {
-        //        if (map == ended) { TODO
-        //            game_status = Game_status::VICTORY;
-        //        }
-        return game_status;
-    }
+    void set_game_status(BL::Game_status);
+    Game_status get_game_status();
     void pause_session();
 };
 

@@ -74,9 +74,11 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         } else if (type == "Aim_spinner") {
             float active_circle_radius;
             file >> active_circle_radius;
+            x_pos = (float)sf::VideoMode::getFullscreenModes().begin()->width / 2;
+            y_pos = (float)sf::VideoMode::getFullscreenModes().begin()->height / 2;
             map_objects.push_back(std::make_shared<USO::Aim_spinner>(
                 USO::Aim_spinner(start_time, duration_time, x_pos, y_pos,
-                                 index, active_circle_radius)));
+                                 active_circle_radius)));
         } /*else if (type == "Aim_muda") {
             float beat_radius;
             file >> beat_radius;

@@ -3,6 +3,7 @@
 //
 
 #include "menu_objects.h"
+#include "menu.h"
 
 bool Menu::Button::is_circle_correct_click(const sf::Vector2f &mouse) {
     auto center = circle.getPosition();
@@ -18,21 +19,33 @@ void Menu::Button::guidance(const sf::Vector2f &mouse) {
     }
 }
 
-void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse) {
+void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse, BL::Game_session &gameSession) {
     if (is_circle_correct_click(mouse)) {
         switch (event) {
             case EXIT: {
                 window.close();
             } break;
-            case OPEN_AIM: {
+            case OPEN_AIM:
+            case RETRY: {
                 USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
                 test.run(window);
             } break;
+//            case OPEN_AIM: {
+//                // show_maps();
+//            } break;
             case OPEN_CONVEYOR: {  // soon
             } break;
             case OPEN_SETTINGS: {  // soon
                 circle.getRadius();
             } break;
+            case CONTINUE: {
+                gameSession.set_game_status(BL::Game_status::ACTION);
+                return;
+            }
+            case BACK_TO_MENU: {
+                menu(window, gameSession);
+                return;
+            }
         }
     }
 }
@@ -57,6 +70,15 @@ void Menu::Button::draw(sf::RenderWindow &window) {
             break;
         case OPEN_SETTINGS:
             name_of_button = "Settings";
+            break;
+        case RETRY:
+            name_of_button = "Retry";
+            break;
+        case CONTINUE:
+            name_of_button = "Continue";
+            break;
+        case BACK_TO_MENU:
+            name_of_button = "Back to menu";
             break;
     }
 
