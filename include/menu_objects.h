@@ -7,23 +7,24 @@
 namespace Menu {
 enum Event { OPEN_AIM, OPEN_CONVEYOR, OPEN_SETTINGS, OPEN_CONSTRUCTOR, EXIT, RETRY, CONTINUE, BACK_TO_MENU };
 enum State { POINTED, QUIET };
-
 struct Button {
     sf::CircleShape circle;
     Event event;
     State state = State::QUIET;
 
+
     Button(float x,
            float y,
            float r,
            Event event_,
-           sf::Color color = sf::Color::Red)
+           sf::Texture &img)
         : event(event_) {
+        circle.setTexture(&img);
         circle.setRadius(r);
         circle.setPosition(x, y);
         circle.setOutlineThickness(0.5);
-        circle.setOutlineColor(sf::Color::White);
-        circle.setFillColor(color);
+        circle.setOutlineColor(sf::Color::Magenta);
+
     }
 
     bool is_circle_correct_click(const sf::Vector2f &mouse);

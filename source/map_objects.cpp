@@ -135,40 +135,41 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
     target_circle.setFillColor(sf::Color(253, 151, 114));
 
-    sf::ConvexShape track;
-    track.setPointCount(4);
+    sf::ConvexShape track1;
+    track1.setPointCount(4);
+    sf::ConvexShape track2;
+    track2.setPointCount(4);
     float delta_x = beat_radius;
     float delta_y = 0;
     if (std::abs(pos.x - end_pos.x) > std::abs(pos.y - end_pos.y)) {
         delta_x = 0;
         delta_y = beat_radius;
     }
-    track.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
-    track.setPoint(1, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
-    track.setPoint(
-        2, sf::Vector2<float>(end_pos.x + delta_x, end_pos.y + delta_y));
-    track.setPoint(
-        3, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
-    track.setFillColor(sf::Color(253, 151, 114));
-    track.setOutlineThickness(5.f);
-    track.setOutlineColor(sf::Color::White);
 
-    //костыль для закраски
-    sf::ConvexShape track2;
-    track2.setPointCount(4);
-    track2.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
-    track2.setPoint(1, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
+    track1.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
+    track1.setPoint(1, sf::Vector2<float>(pos.x - delta_x + 0.5, pos.y - delta_y + 0.5));
+    track1.setPoint(
+        2, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
+    track1.setPoint(
+        3, sf::Vector2<float>(end_pos.x - delta_x - 0.5, end_pos.y - delta_y - 0.5));
+
+    track2.setPoint(0, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
+    track2.setPoint(1, sf::Vector2<float>(pos.x + delta_x + 0.5, pos.y + delta_y + 0.5));
     track2.setPoint(
         2, sf::Vector2<float>(end_pos.x + delta_x, end_pos.y + delta_y));
     track2.setPoint(
-        3, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
+        3, sf::Vector2<float>(end_pos.x + delta_x - 0.5, end_pos.y + delta_y - 0.5));
+
+    track1.setFillColor(sf::Color(253, 151, 114));
+    track1.setOutlineThickness(1.f);
+    track1.setOutlineColor(sf::Color::White);
     track2.setFillColor(sf::Color(253, 151, 114));
-    track2.setOutlineThickness(0.f);
-    track2.setOutlineColor(sf::Color::Transparent);
+    track2.setOutlineThickness(1.f);
+    track2.setOutlineColor(sf::Color::White);
 
-    window.draw(track);
-    window.draw(target_circle);
+    window.draw(track1);
     window.draw(track2);
+    window.draw(target_circle);
     Aim_circle::draw(window, font);
 }
 

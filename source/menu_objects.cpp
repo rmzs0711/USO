@@ -95,5 +95,6 @@ void Menu::Button::draw(sf::RenderWindow &window) {
     text.setString(name_of_button);
     text.setPosition(circle.getPosition().x + circle.getRadius() / 2,
                      circle.getPosition().y + circle.getRadius() / 2);
+    text.setFillColor(sf::Color::Magenta);
     window.draw(text);
 }

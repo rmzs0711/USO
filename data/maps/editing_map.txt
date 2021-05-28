@@ -6,7 +6,7 @@ data\img\stronger.png
 data\fonts\aller.ttf
 data\music\click_sound.ogg
 Aim_slider
-8647770
+1647770
 700000
 671
 462

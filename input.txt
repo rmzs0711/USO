@@ -8,7 +8,7 @@ data\music\click_sound.ogg
 300
 0
 250
-900
+1100
 500 2000
 0
 2126 2000
