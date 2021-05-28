@@ -32,7 +32,6 @@ void draw_menu(sf::RenderWindow &window) {
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setTexture(&img);
     rect.setPosition(0, 0);
-//    rect.setFillColor(sf::Color(255, 255, 255, 40));
     window.draw(rect);
 }
 }  // namespace
@@ -184,8 +183,6 @@ void Menu::constructor_menu(sf::Window &window) {
 
     std::vector<Menu::Button> buttons;
 
-    float start_x = static_cast<float>(window.getSize().x) - sizes.x;
-    float start_y = sizes.y;
     for (auto &map_name : saved_maps) {
         //        buttons.emplace_back(start_x, start_y, );
     }

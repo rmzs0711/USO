@@ -509,8 +509,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto save_map = [&]() {
         std::fstream fout;
-        fout.open(map_address,
-                  std::ios::out | std::ios::trunc);
+        fout.open(map_address, std::ios::out | std::ios::trunc);
         if (!fout) {
             std::cerr << "File not found" << std::endl;
             return;
@@ -701,16 +700,17 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
 
         editing_box.music.pause();
-        for (auto i = editing_box.start_draw_iterator;
-             i != editing_box.end_draw_iterator; i++) {
-            auto &object = **i;
-            if (USO::Conveyor_note::is_note_correct_click(
-                    sf::Vector2f(sf::Mouse::getPosition(window)),
-                    (*i)->get_pos(), line)) {
-                editing_box.editing_map_objects.erase(i);
-                return;
-            }
+        if (USO::Conveyor_note::is_note_correct_click(
+                line.beat_pos, (*editing_box.start_draw_iterator)->get_pos(),
+                dynamic_cast<USO::Conveyor_note &>(
+                    **editing_box.start_draw_iterator)
+                    .get_line())) {
+            editing_box.editing_map_objects.erase(
+                editing_box.start_draw_iterator);
+            editing_box.start_draw_iterator++;
+            return;
         }
+
         editing_box.editing_map_objects.insert(
             editing_box.start_draw_iterator,
             std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
@@ -721,8 +721,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
 
     auto save_map = [&]() {
         std::fstream fout;
-        fout.open(map_address,
-                  std::ios::out | std::ios::trunc);
+        fout.open(map_address, std::ios::out | std::ios::trunc);
         if (!fout) {
             std::cerr << "File not found" << std::endl;
             return;
@@ -745,7 +744,8 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
             auto &object = *i;
             fout << i->get_start_time().asMicroseconds() << std::endl;
             fout << i->get_duration_time().asMicroseconds() << std::endl;
-            fout << dynamic_cast<USO::Conveyor_note&>(*i).get_line().index << std::endl;
+            fout << dynamic_cast<USO::Conveyor_note &>(*i).get_line().index
+                 << std::endl;
         }
         map_objects = editing_box.editing_map_objects;
         fout.close();
@@ -807,8 +807,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
                     }
                 } else if (event.key.code >= sf::Keyboard::Num1 &&
                            event.key.code <= sf::Keyboard::Num4) {
-                    handle_click(
-                        *lines[event.key.code - sf::Keyboard::Num1]);
+                    handle_click(*lines[event.key.code - sf::Keyboard::Num1]);
                 }
                 break;
             case sf::Event::KeyReleased:

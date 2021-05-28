@@ -141,6 +141,7 @@ sf::Vector2f *USO::Aim_circle::get_end_pos_ptr() {
 }
 void USO::Aim_circle::reset() {
     active_circle_radius = active_circle_start_radius;
+    is_valid = true;
 }
 
 bool USO::Aim_slider::change_state(const sf::Time &current_time) {
