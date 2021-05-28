@@ -8,7 +8,7 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::seconds(0.1);
+    static sf::Time epsilon = sf::milliseconds(200);
     return end_time - current_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
@@ -34,6 +34,7 @@ sf::Time &USO::Map_object::get_duration_time() {
 sf::Vector2f &USO::Map_object::get_pos() {
     return pos;
 }
+
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
@@ -177,17 +178,101 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     Aim_circle::draw(window, font);
 }
 
-std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
-    return std::make_shared<Aim_circle>(Aim_slider(*this));
+float USO::Aim_spinner::calc_delta(sf::Vector2f cur_vector,
+                                   float& prev_radian) {
+    float x_pos = cur_vector.x - get_pos().x;
+    float y_pos = get_pos().y - cur_vector.y;
+    if (x_pos * x_pos + y_pos * y_pos > active_circle_radius * active_circle_radius) {
+        return 0;
+    }
+    float radian = x_pos / std::hypot(y_pos, x_pos);
+    radian = std::acos(radian);
+    if (y_pos > 2.f * (float)M_PI) {
+        radian = 2.f * (float)M_PI - radian;
+    }
+    float result = std::abs(radian - prev_radian);
+    prev_radian = radian;
+    if (result > 0.78) {
+        return 0;
+    }
+    return result;
+}
+
+bool USO::Aim_spinner::check_sum_of_radians(float &cur_sum) {
+    if (cur_sum >= 2.f * (float)M_PI) {
+        cur_sum = 0;
+        return true;
+    }
+    return false;
+}
+
+bool USO::Aim_spinner::change_state(sf::Time current_time) {
+    return Aim_circle::change_state(current_time);
+}
+
+bool USO::Aim_spinner::check_event(sf::Vector2f mouse_pos,
+                                   BL::Game_session &game_session,
+                                   sf::Time current_time) {
+    if (current_time <= start_time + duration_time) {
+        sum_of_radians += calc_delta(mouse_pos, start_radian);
+        if (check_sum_of_radians(sum_of_radians)) {
+            game_session.decrease_health(100);
+        }
+        return true;
+    }
+    return false;
+}
+
+bool USO::Aim_spinner::check_event_for_draw(sf::Vector2f mouse_pos) {
+    float epsilon = 20.f;
+    float x_pos = std::abs(mouse_pos.x - get_pos().x);
+    float y_pos = std::abs(mouse_pos.y - get_pos().y);
+    if ((std::abs(x_pos - y_pos) < epsilon ||
+         x_pos < epsilon || y_pos < epsilon) &&
+         x_pos * x_pos + y_pos * y_pos <= active_circle_radius * active_circle_radius) {
+        return true;
+    }
+    return false;
+}
+
+void USO::Aim_spinner::draw(sf::RenderWindow &window, const sf::Font &font) {
+    for (int i = 0; i < 8; i++) {
+        change_color++;
+        if (change_color == 105) {
+            Lines[i].setFillColor(Lines[(i + change_color) % 8].getFillColor());
+            change_color = 0;
+        }
+        Lines[i].setSize(sf::Vector2f(active_circle_radius, 4));
+        window.draw(Lines[i]);
+    }
+
+    if (USO::Aim_spinner::check_event_for_draw((sf::Vector2f)sf::Mouse::getPosition())) {
+        sf::CircleShape circle;
+        circle.setRadius(10.f);
+        circle.setPosition((float)sf::Mouse::getPosition().x - 5,
+                           (float)sf::Mouse::getPosition().y - 5);
+        circle.setFillColor(sf::Color::Magenta);
+        window.draw(circle);
+    }
+    Aim_circle::draw(window, font);
 }
 sf::Vector2f &USO::Aim_slider::get_end_pos() {
     return end_pos;
 }
+std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
+    return std::make_shared<Aim_circle>(Aim_slider(*this));
+}
+
+std::shared_ptr<USO::Map_object> USO::Aim_spinner::clone() {
+    return std::make_shared<Aim_circle>(Aim_spinner(*this));
+}
+
+
+
 sf::Vector2f &USO::Aim_slider::get_start_pos() {
     return start_pos;
 }
 
-// CONVEYOR
 
 bool USO::Conveyor_note::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time + sf::milliseconds(0)) {

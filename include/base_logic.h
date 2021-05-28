@@ -27,7 +27,6 @@ private:
     unsigned long long combo_status;
     bool is_combo_locked = false;
     bool is_score_locked = false;
-
 public:
     Game_session()
         : game_status(Game_status::ACTION),
@@ -50,17 +49,11 @@ public:
     [[maybe_unused]] void lock_score();
     [[maybe_unused]] void unlock_score();
     [[nodiscard]] int get_health() const;
-
     [[nodiscard]] int damage() const;
-
-    Game_status get_game_status(/*map*/) {
-        //        if (map == ended) { TODO
-        //            game_status = Game_status::VICTORY;
-        //        }
-        return game_status;
-    }
+    void set_game_status(BL::Game_status);
+    Game_status get_game_status();
     [[maybe_unused]] void pause_session();
-    void table_of_scores(sf::RenderWindow &window, sf::Font &font);
+    void table_of_scores(sf::RenderWindow &window, sf::Font &font) const;
 };
 
 [[maybe_unused]] void play_beat_sound(sf::SoundBuffer &);

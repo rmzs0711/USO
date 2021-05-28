@@ -5,6 +5,7 @@
 #include "base_logic.h"
 #include "map_management.h"
 #include "maps.h"
+#include "menu.h"
 
 namespace {}  // namespace
 
@@ -13,7 +14,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     USO::Field field(window, {});
     sf::Clock clock;
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
-    // останавливать часы
+                         // останавливать часы
+    window.setMouseCursorVisible(false);
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
 
@@ -32,7 +34,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     rect.setTexture(&image);
     rect.setFillColor(sf::Color(255, 255, 255, 70));
 
-    assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
     int number_of_dragged_buttons = 0;
     std::vector<int> dragged_key(
@@ -56,7 +57,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                      game_session, past_time + clock.getElapsedTime())) {
             return;
         }
-        if (typeid(back_object) != typeid(USO::Aim_slider)) {
+        if (typeid(back_object) != typeid(USO::Aim_slider) &&
+            typeid(back_object) != typeid(USO::Aim_spinner)) {
             field.get_field_objects().pop_back();
         }
         sound.play();
@@ -64,13 +66,24 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     // lambda zone ends
 
     clock.restart();
+    sf::CircleShape mouse(5.f);
+    mouse.setFillColor(sf::Color(241, 200, 14));
 
-    music.play();
-
-    while (game_session.get_game_status() != BL::Game_status::VICTORY ||
-           game_session.get_game_status() != BL::Game_status::DEFEAT) {
+    while (true) {
         window.draw(rect);
         game_session.table_of_scores(window, font);
+        mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+        window.draw(mouse);
+
+        if (game_session.get_health() == 0) {
+            game_session.set_game_status(BL::Game_status::DEFEAT);
+        }
+        if (!map_objects.empty() && map_objects.back()->get_start_time() +
+                map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()) {
+            game_session.set_game_status(BL::Game_status::VICTORY);
+        }
+
+        sf::Event event{};
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {
@@ -79,6 +92,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                                          past_time + clock.getElapsedTime());
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;
+                        return;
                     }
                 }
 
@@ -93,6 +107,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     game_session.decrease_health(game_session.damage());
                 }
                 field.draw(font);
+                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                window.draw(mouse);
                 window.display();
 
                 if (!window.pollEvent(event) && !drag) {
@@ -102,8 +118,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 switch (event.type) {
                     case sf::Event::KeyPressed:
                         if (event.key.code == sf::Keyboard::Escape) {
-                            // остановить время на паузу
-                            return;
+                            game_session.set_game_status(BL::Game_status::PAUSE);
+                            continue;
                         }
                         if (event.key.code != sf::Keyboard::Z &&
                             event.key.code != sf::Keyboard::X) {
@@ -160,7 +176,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             USO::Map_object &back_object =
                                 *(field.get_field_objects().back().get());
                             if (typeid(back_object) !=
-                                typeid(USO::Aim_slider)) {
+                                typeid(USO::Aim_slider) &&
+                                typeid(back_object) != typeid(USO::Aim_spinner)) {
                                 break;
                             }
                             back_object.check_event(
@@ -174,17 +191,45 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             }
 
             case BL::Game_status::PAUSE: {
-                //когда отожмут паузу, нужно сделать restart
-                // clock, потому что
-                // sfml по пацански не останавливается
-
-                break;
+                past_time += clock.getElapsedTime();
+                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                window.draw(mouse);
+                Menu::stop_menu(window, game_session);
+                clock.restart();
+                if (game_session.get_game_status() != BL::Game_status::ACTION) {
+                    return;
+                }
+            } break;
+            case BL::Game_status::VICTORY: {
+                while (true) {
+                    if (window.pollEvent(event)) {
+                        if (event.key.code == sf::Keyboard::Space) {
+                            field.get_field_objects().clear();
+                            map_objects.clear();
+                            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                            window.draw(mouse);
+                            Menu::stop_menu(window, game_session);
+                            return;
+                        }
+                    }
+                    window.draw(rect);
+                    game_session.table_of_scores(window, font);
+                    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                    window.draw(mouse);
+                    window.display();
+                }
             }
             case BL::Game_status::DEFEAT: {
+                field.get_field_objects().clear();
+                map_objects.clear();
+                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                window.draw(mouse);
+                Menu::stop_menu(window, game_session);
                 return;
             }
-            default:
+            default: {
                 continue;
+            }
         }
     }
 }

@@ -24,8 +24,6 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     while (!file.eof()) {
         std::string type;
         file >> type;
-//        int index;
-//        file >> index;
         sf::Int64 time;
         file >> time;
         sf::Time start_time = sf::microseconds(time);
@@ -35,7 +33,6 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         file >> x_pos;
         float y_pos;
         file >> y_pos;
-
         if (type == "Aim_circle") {
             float beat_radius;
             file >> beat_radius;
@@ -63,21 +60,17 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
                                 beat_radius, active_circle_radius, x_end, y_end,
                                 sf::microseconds(move_time))));
 
-        } /*else if (type == "Aim_muda") {
-            float beat_radius;
-            file >> beat_radius;
-            float beat_count;
-            file >> beat_count;
-            map_objects.push_back(std::make_shared<USO::Aim_muda>
-                 (USO::Aim_muda(start_time,
-                                duration_time,
-                                x_pos,
-                                y_pos,
-                                index,
-                                beat_radius,
-                                beat_count)));
-        //НЕ СМОГЛА ПОТОМУ ЧТО АБСТРАКТНЫЙ КЛАСС
-        }*/
+        } else if (type == "Aim_spinner") {
+            float active_circle_radius;
+            file >> active_circle_radius;
+            x_pos =
+                (float)sf::VideoMode::getFullscreenModes().begin()->width / 2;
+            y_pos =
+                (float)sf::VideoMode::getFullscreenModes().begin()->height / 2;
+            map_objects.push_back(std::make_shared<USO::Aim_spinner>(
+                USO::Aim_spinner(start_time, duration_time, x_pos, y_pos,
+                                 active_circle_radius)));
+        }
     }
 }
 
