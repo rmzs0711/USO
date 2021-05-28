@@ -270,7 +270,7 @@ sf::Vector2f &USO::Aim_slider::get_start_pos() {
 
 bool USO::Conveyor_note::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time + sf::milliseconds(0)) {
-        pos.y = line.pos.y + (-line.pos.y + line.beat_pos.y) *
+        pos.y = line.pos.y - line.beat_sizes.y + (-line.pos.y + line.beat_sizes.y + line.beat_pos.y) *
                                  get_time_coefficient(start_time, duration_time,
                                                       current_time);
         return true;
