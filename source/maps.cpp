@@ -8,6 +8,7 @@
 #include "SFML/System/Time.hpp"
 
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
+    map_address = filename;
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "File not found\n";
@@ -15,7 +16,7 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     }
     file >> mode;
     file >> map_name;
-    file >> author_name;
+    file >> map_address;
     file >> music_address;
     file >> music_name;
     file >> image_address;
@@ -83,8 +84,9 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
         std::cout << "File not found\n";
         return;
     }
+    file >> mode;
     file >> map_name;
-    file >> author_name;
+    file >> map_address;
     file >> music_address;
     file >> music_name;
     file >> image_address;
@@ -114,9 +116,9 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
         if (!(file >> time)) {
             break;
         }
-        sf::Time start_time = sf::milliseconds(time);
+        sf::Time start_time = sf::microseconds(time);
         file >> time;
-        sf::Time duration_time = sf::milliseconds(time);
+        sf::Time duration_time = sf::microseconds(time);
         int line_index;
         file >> line_index;
 
@@ -134,7 +136,7 @@ void USO::Map::prelude(sf::Music &music,
     check_file_load(image.loadFromFile(image_address), image_address);
     check_file_load(font.loadFromFile(font_address), font_address);
 }
-std::string USO::Map::get_map_name()  {
+std::string USO::Map::get_map_name() {
     return map_name;
 }
 std::string USO::Map::get_music_name() {

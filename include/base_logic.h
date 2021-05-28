@@ -11,13 +11,7 @@ const int MIN_GAME_COMPLEXITY = 1;
 }  // namespace
 
 namespace BL {
-enum class Game_status {
-    ACTION,
-    PAUSE,
-    VICTORY,
-    DEFEAT,
-    NEED_TO_RETRY
-};
+enum class Game_status { ACTION, PAUSE, VICTORY, DEFEAT, NEED_TO_RETRY };
 
 struct Game_session {
 private:
@@ -28,6 +22,7 @@ private:
     unsigned long long combo_status;
     bool is_combo_locked = false;
     bool is_score_locked = false;
+
 public:
     Game_session()
         : game_status(Game_status::ACTION),

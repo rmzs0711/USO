@@ -7,8 +7,9 @@ namespace USO {
 void Field::push_front(
     std::list<std::shared_ptr<Map_object>>::iterator &map_object_it,
     sf::Time current_time) {
-//    auto &gg = (*(*map_object_it));
-//    std::cout << current_time.asSeconds() << " " << gg.get_start_time().asSeconds() << std::endl;
+    //    auto &gg = (*(*map_object_it));
+    //    std::cout << current_time.asSeconds() << " " <<
+    //    gg.get_start_time().asSeconds() << std::endl;
 
     if ((*(*map_object_it)).get_start_time() <= current_time) {
         field_objects.push_front(*map_object_it);

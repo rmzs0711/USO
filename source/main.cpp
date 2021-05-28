@@ -16,7 +16,7 @@ int main() {
 
     USO::Aim_map f(R"(data/maps/demo_gold_rush.txt)");
     f.run(window);*/
-    //BL::Game_session f;
+    // BL::Game_session f;
     Menu::menu(Menu::set_settings(), {});
     return 0;
 }

@@ -16,7 +16,7 @@ struct Map {
 protected:
     std::string mode;
     std::string map_name;
-    std::string author_name;
+    std::string map_address;
     std::string music_address;
     std::string music_name;
     std::string image_address;
@@ -33,8 +33,8 @@ protected:
     }
 
 public:
-    Map(std::string map_name_,
-        std::string author_name_,
+    Map(std::string map_address_,
+        std::string map_name_,
         std::string music_address_,
         std::string music_name_,
         std::string image_address_,
@@ -42,7 +42,7 @@ public:
         std::string sound_address_,
         std::list<std::shared_ptr<Map_object>> map_objects_ = {})
         : map_name(std::move(map_name_)),
-          author_name(std::move(author_name_)),
+          map_address(std::move(map_address_)),
           music_address(std::move(music_address_)),
           music_name(std::move(music_name_)),
           image_address(std::move(image_address_)),
@@ -68,7 +68,7 @@ protected:
 
 struct Aim_map final : Map {
     Aim_map(std::string map_name_,
-            std::string author_name_,
+            std::string map_address_,
             std::string music_address_,
             std::string music_name_,
             std::string image_address_,
@@ -76,7 +76,7 @@ struct Aim_map final : Map {
             std::string sound_address_,
             std::list<std::shared_ptr<Map_object>> map_objects_ = {})
         : Map(std::move(map_name_),
-              std::move(author_name_),
+              std::move(map_address_),
               std::move(music_address_),
               std::move(music_name_),
               std::move(image_address_),

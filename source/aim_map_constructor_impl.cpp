@@ -411,7 +411,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
         editing_box.drag = true;
 
-        //        music.pause(); //TODO
+        editing_box.music.pause();
         for (auto i = editing_box.start_draw_iterator;
              i != editing_box.end_draw_iterator; i++) {
             auto &object = **i;
@@ -419,21 +419,21 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 if (USO::Aim_circle::is_circle_correct_click(
                         sf::Vector2f(sf::Mouse::getPosition(window)),
                         (*i)->get_pos(), USO::const_circle_beat_radius)) {
-                    editing_box.dragged_pos_ptr = &(*i)->get_pos();
+                    editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
                     return;
                 }
             } else if (typeid(object) == typeid(USO::Aim_slider)) {
                 if (USO::Aim_circle::is_circle_correct_click(
                         sf::Vector2f(sf::Mouse::getPosition(window)),
                         (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
-                    editing_box.dragged_pos_ptr = &(*i)->get_end_pos();
+                    editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
                     return;
                 }
             } else if (typeid(object) == typeid(USO::Aim_spinner)) {
                 if (USO::Aim_circle::is_circle_correct_click(
                         sf::Vector2f(sf::Mouse::getPosition(window)),
                         (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
-                    editing_box.dragged_pos_ptr = &(*i)->get_pos();
+                    editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
                     return;
                 }
             }
@@ -452,7 +452,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                                         USO::const_active_circle_radius)));
                 editing_box.start_draw_iterator--;
                 editing_box.dragged_pos_ptr =
-                    &(*editing_box.start_draw_iterator)->get_pos();
+                    (*editing_box.start_draw_iterator)->get_end_pos_ptr();
                 break;
             case OBJECT_TO_CREATE::SLIDER:
 
@@ -471,7 +471,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                                         sf::seconds(1000))));
                 editing_box.start_draw_iterator--;
                 editing_box.dragged_pos_ptr =
-                    &(*editing_box.start_draw_iterator)->get_end_pos();
+                    (*editing_box.start_draw_iterator)->get_end_pos_ptr();
                 slider_choosing_end = true;
                 break;
             case OBJECT_TO_CREATE::SPINNER:
@@ -486,7 +486,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                         USO::const_active_circle_radius * 2)));
                 editing_box.start_draw_iterator--;
                 editing_box.dragged_pos_ptr =
-                    &(*editing_box.start_draw_iterator)->get_pos();
+                    (*editing_box.start_draw_iterator)->get_end_pos_ptr();
                 break;
         }
     };
@@ -509,7 +509,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto save_map = [&]() {
         std::fstream fout;
-        fout.open(R"(data/maps/editing_map.txt)",
+        fout.open(map_address,
                   std::ios::out | std::ios::trunc);
         if (!fout) {
             std::cerr << "File not found" << std::endl;
@@ -518,7 +518,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         is_saved = true;
         fout << "Aim" << std::endl;
         fout << map_name << std::endl;
-        fout << author_name << std::endl;
+        fout << map_address << std::endl;
         fout << music_address << std::endl;
         fout << music_name << std::endl;
         fout << image_address << std::endl;
@@ -663,13 +663,13 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition());
                     (*editing_box.start_draw_iterator)
-                        ->get_move_time() = sf::seconds(static_cast<float>(
-                        get_dist(
-                            dynamic_cast<Aim_slider &>(
-                                **editing_box.start_draw_iterator)
-                                .get_start_pos(),
-                            (*editing_box.start_draw_iterator)->get_end_pos()) *
-                        time_per_pixels / 1000));
+                        ->set_move_time(sf::seconds(static_cast<float>(
+                            get_dist(dynamic_cast<Aim_slider &>(
+                                         **editing_box.start_draw_iterator)
+                                         .get_start_pos(),
+                                     (*editing_box.start_draw_iterator)
+                                         ->get_end_pos()) *
+                            time_per_pixels / 1000)));
                     editing_box.dragged_pos_ptr = nullptr;
                 }
                 slider_choosing_end = false;
@@ -693,7 +693,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
     bool is_saved;
 
     // WARNING: lambda zone
-    auto handle_left_click = [&](USO::Conveyor_line &line) {
+    auto handle_click = [&](USO::Conveyor_line &line) {
         if (line.dragged) {
             return;
         }
@@ -721,7 +721,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
 
     auto save_map = [&]() {
         std::fstream fout;
-        fout.open(R"(data/maps/test__map.txt)",
+        fout.open(map_address,
                   std::ios::out | std::ios::trunc);
         if (!fout) {
             std::cerr << "File not found" << std::endl;
@@ -730,7 +730,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
         is_saved = true;
         fout << "Conveyor" << std::endl;
         fout << map_name << std::endl;
-        fout << author_name << std::endl;
+        fout << map_address << std::endl;
         fout << music_address << std::endl;
         fout << music_name << std::endl;
         fout << image_address << std::endl;
@@ -745,10 +745,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
             auto &object = *i;
             fout << i->get_start_time().asMicroseconds() << std::endl;
             fout << i->get_duration_time().asMicroseconds() << std::endl;
-            fout << i->get_pos().x << std::endl;
-            fout << i->get_pos().y << std::endl;
-            fout << const_circle_beat_radius << " "
-                 << const_active_circle_radius << std::endl;
+            fout << dynamic_cast<USO::Conveyor_note&>(*i).get_line().index << std::endl;
         }
         map_objects = editing_box.editing_map_objects;
         fout.close();
@@ -810,7 +807,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
                     }
                 } else if (event.key.code >= sf::Keyboard::Num1 &&
                            event.key.code <= sf::Keyboard::Num4) {
-                    handle_left_click(
+                    handle_click(
                         *lines[event.key.code - sf::Keyboard::Num1]);
                 }
                 break;

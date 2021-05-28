@@ -32,7 +32,7 @@ sf::RenderWindow &Menu::set_settings() {
     sf::ContextSettings setting;
     setting.antialiasingLevel = 8;
     static sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
-                            sf::Style::Fullscreen, setting);
+                                   sf::Style::Fullscreen, setting);
     window.setMouseCursorVisible(false);
     window.setVerticalSyncEnabled(true);
     window.display();
@@ -43,8 +43,7 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
     std::vector<Menu::Button> buttons;
     buttons.emplace_back(400, 400, 200, Menu::OPEN_AIM);
     buttons.emplace_back(0, 0, 100, Menu::EXIT, sf::Color::Cyan);
-    buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS,
-                         sf::Color::Green);
+    buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS, sf::Color::Green);
     buttons.emplace_back(900, 400, 200, Menu::OPEN_CONVEYOR,
                          sf::Color::Magenta);
 
@@ -67,7 +66,8 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
                             button.press(
                                 window,
                                 {static_cast<float>(event.mouseButton.x),
-                                 static_cast<float>(event.mouseButton.y)}, gameSession);
+                                 static_cast<float>(event.mouseButton.y)},
+                                gameSession);
                         }
                     }
                 } break;
@@ -106,9 +106,10 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
     }
 
     sf::CircleShape mouse(5.f);
-    while (window.isOpen() && (gameSession.get_game_status() == BL::Game_status::PAUSE
-                            || gameSession.get_game_status() == BL::Game_status::DEFEAT
-                            || gameSession.get_game_status() == BL::Game_status::VICTORY)) {
+    while (window.isOpen() &&
+           (gameSession.get_game_status() == BL::Game_status::PAUSE ||
+            gameSession.get_game_status() == BL::Game_status::DEFEAT ||
+            gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         sf::Event event{};
         window.clear();
         if (window.pollEvent(event)) {
@@ -123,7 +124,8 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
                     if (event.mouseButton.button == sf::Mouse::Left) {
                         for (auto &button : buttons) {
                             button.press(window,
-                                (sf::Vector2f)sf::Mouse::getPosition(), gameSession);
+                                         (sf::Vector2f)sf::Mouse::getPosition(),
+                                         gameSession);
                         }
                     }
                 } break;
@@ -162,8 +164,8 @@ void Menu::constructor_menu(sf::Window &window) {
 
     float start_x = static_cast<float>(window.getSize().x) - sizes.x;
     float start_y = sizes.y;
-    for (auto &map_name: saved_maps) {
-//        buttons.emplace_back(start_x, start_y, );
+    for (auto &map_name : saved_maps) {
+        //        buttons.emplace_back(start_x, start_y, );
     }
 }
 
@@ -181,14 +183,10 @@ Menu::scrolling_menu::scrolling_menu(const std::string &filename) {
 
 void Menu::scrolling_menu::push(sf::Vector2f mouse) {
     for (const auto &block : blocks) {
-       /* if (block.getPosition().x >= mouse.x && block.getPosition().x <=*/
+        /* if (block.getPosition().x >= mouse.x && block.getPosition().x <=*/
     }
 }
 
-void Menu::scrolling_menu::scroll_up() {
+void Menu::scrolling_menu::scroll_up() {}
 
-}
-
-void Menu::scrolling_menu::scroll_down() {
-
-}
+void Menu::scrolling_menu::scroll_down() {}
