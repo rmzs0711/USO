@@ -92,7 +92,6 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
             mouse.setFillColor(sf::Color(241, 200, 14));
             window.draw(mouse);
-
         }
         window.display();
     }
@@ -108,7 +107,8 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
 
     sf::CircleShape mouse(5.f);
     while (window.isOpen() && (gameSession.get_game_status() == BL::Game_status::PAUSE
-                            || gameSession.get_game_status() == BL::Game_status::DEFEAT)) {
+                            || gameSession.get_game_status() == BL::Game_status::DEFEAT
+                            || gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         sf::Event event{};
         window.clear();
         if (window.pollEvent(event)) {
@@ -127,13 +127,24 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
                         }
                     }
                 } break;
+                case sf::Event::Closed: {
+                    window.close();
+                    return;
+                }
+                case sf::Event::MouseMoved: {
+                    for (auto &button : buttons) {
+                        button.guidance(
+                            {static_cast<float>(event.mouseMove.x),
+                             static_cast<float>(event.mouseButton.y)});
+                    }
+                } break;
+                default: {
+                } break;
             }
-        }
-        for (auto &button : buttons) {
-            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
         }
 
         for (auto &button : buttons) {
+            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
             button.draw(window);
             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
             mouse.setFillColor(sf::Color(241, 200, 14));
@@ -154,4 +165,30 @@ void Menu::constructor_menu(sf::Window &window) {
     for (auto &map_name: saved_maps) {
 //        buttons.emplace_back(start_x, start_y, );
     }
+}
+
+Menu::scrolling_menu::scrolling_menu(const std::string &filename) {
+    std::ifstream file(filename);
+    std::string map_name;
+    while (std::getline(file, map_name)) {
+        list_of_maps.emplace_back(map_name);
+    }
+    for (int i = 0; i < std::min(MAX_SIZE, list_of_maps.size()); i++) {
+        blocks.emplace_back(sf::Vector2f(40, 10));
+        blocks[i].setPosition(0, (float)i * 10);
+    }
+}
+
+void Menu::scrolling_menu::push(sf::Vector2f mouse) {
+    for (const auto &block : blocks) {
+        if (block.getPosition().x >= mouse.x && block.getPosition().x <=
+    }
+}
+
+void Menu::scrolling_menu::scroll_up() {
+
+}
+
+void Menu::scrolling_menu::scroll_down() {
+
 }

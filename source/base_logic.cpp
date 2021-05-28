@@ -9,6 +9,10 @@ void BL::Game_session::increase_health(int bonus) {
     health = health > 200 ? health - (health % MAX_HEALTH) : health;
 }
 
+void BL::Game_session::set_health(int health_point) {
+    health = health_point;
+}
+
 void BL::Game_session::decrease_health(int damage) {
     if (health > 0) {
         health -= damage;
@@ -27,6 +31,10 @@ void BL::Game_session::increase_combo(unsigned long long combo_point) {
         return;
     }
     combo_status += combo_point;
+}
+
+void BL::Game_session::set_combo(unsigned long long compo_point) {
+    combo_status = compo_point;
 }
 
 [[maybe_unused]] unsigned long long BL::Game_session::get_combo() const {

@@ -69,6 +69,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     clock.restart();
     sf::CircleShape mouse(5.f);
     mouse.setFillColor(sf::Color(241, 200, 14));
+    music.play();
 
     while (true) {
         window.draw(rect);
@@ -76,9 +77,14 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
         window.draw(mouse);
 
-        if (game_session.get_health() == 0) game_session.set_game_status(BL::Game_status::DEFEAT);
+        if (game_session.get_health() == 0
+                && game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
+            game_session.set_game_status(BL::Game_status::DEFEAT);
+        }
         if (map_objects.back()->get_start_time() +
-                map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()) {
+                map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()
+                - sf::seconds(0.5)
+            && game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
             game_session.set_game_status(BL::Game_status::VICTORY);
         }
 
@@ -189,12 +195,19 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             }
 
             case BL::Game_status::PAUSE: {
+                music.pause();
                 past_time += clock.getElapsedTime();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
                 Menu::stop_menu(window, game_session);
                 clock.restart();
-                if (game_session.get_game_status() != BL::Game_status::ACTION) {
+                if (game_session.get_game_status() == BL::Game_status::NEED_TO_RETRY) {
+                    past_time -= past_time;
+                    break;
+                }
+                if (game_session.get_game_status() == BL::Game_status::ACTION) {
+                    music.play();
+                } else {
                     return;
                 }
             } break;
@@ -203,10 +216,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     if (window.pollEvent(event)) {
                         if (event.key.code == sf::Keyboard::Space) {
                             field.get_field_objects().clear();
-                            map_objects.clear();
                             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                             window.draw(mouse);
                             Menu::stop_menu(window, game_session);
+                            if (game_session.get_game_status() == BL::Game_status::NEED_TO_RETRY) {
+                                break;
+                            }
                             return;
                         }
                     }
@@ -216,15 +231,29 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     window.draw(mouse);
                     window.display();
                 }
-            }
+            } break;
             case BL::Game_status::DEFEAT: {
+                music.stop();
                 field.get_field_objects().clear();
-                map_objects.clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
                 Menu::stop_menu(window, game_session);
+                if (game_session.get_game_status() == BL::Game_status::NEED_TO_RETRY) {
+                    break;
+                }
                 return;
             }
+            case BL::Game_status::NEED_TO_RETRY: {
+                game_session.set_health(MAX_HEALTH);
+                game_session.set_combo(1);
+                game_session.nullify_score();
+                music.stop();
+                field.get_field_objects().clear();
+                game_session.set_game_status(BL::Game_status::ACTION);
+                current_object_it = map_objects.begin();
+                music.play();
+                clock.restart();
+            } break;
             default: {
                 continue;
             }

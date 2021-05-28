@@ -14,6 +14,7 @@ namespace USO {
 
 struct Map {
 protected:
+    std::string mode;
     std::string map_name;
     std::string author_name;
     std::string music_address;
