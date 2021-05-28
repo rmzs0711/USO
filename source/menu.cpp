@@ -214,12 +214,12 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
         get_input(window);
 
         if (list_of_data[0] == "Aim") {
-            USO::Aim_map test(list_of_data[0], list_of_data[1],
+            /*USO::Aim_map test(list_of_data[0], list_of_data[1],
                               list_of_data[2], R"(data\music\)" + list_of_data[3] ,
                               list_of_data[4], R"(data\img\)" + list_of_data[5],
-                              R"(data\fonts\)" + list_of_data[6], R"(data\sounds\)" + list_of_data[7]); // запуск конструктора карт !!!
+                              R"(data\fonts\)" + list_of_data[6], R"(data\sounds\)" + list_of_data[7]); */// запуск конструктора карт !!!
             add_new_map(list_of_data[1]);
-            test.constructor_run(window);
+            //test.constructor_run(window);
         } else if (list_of_data[0] == "Conveyor") {
             USO::Conveyor_map test(list_of_data[0], list_of_data[1],
                               list_of_data[2], R"(data\music\)" + list_of_data[3] ,
@@ -318,11 +318,13 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
 void Menu::scrolling_menu::add_new_map(const std::string &map_name) {
     list_of_maps.emplace_back(map_name);
     std::ofstream file(filename);
-    file << map_name;
+    file << map_name << std::endl;
     std::size_t size_of_table = std::min(MAX_SIZE, list_of_maps.size());
     if (blocks_of_maps_name.size() < size_of_table) {
         blocks_of_maps_name.emplace_back(sf::Vector2f(600, 100));
         blocks_of_maps_name[blocks_of_maps_name.size() - 1].setPosition(0, (float)(size_of_table - 1) * 100);
+        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setOutlineThickness(5);
+        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setOutlineColor(sf::Color(0, 0, 0));
     }
 }
 
@@ -337,6 +339,7 @@ void Menu::scrolling_menu::get_input(sf::RenderWindow &window) {
 //    list_of_data[5] = "stronger.png";
 //    list_of_data[6] = "GistLight.otf";
 //    list_of_data[7] = "click.ogg";  // check !!!
+//    return;
     sf::CircleShape mouse(5.f);
     int index = -1;
     list_of_data.resize(8);
