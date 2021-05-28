@@ -14,7 +14,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     USO::Field field(window, {});
     sf::Clock clock;
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
-                         // останавливать часы
+    // останавливать часы
     window.setMouseCursorVisible(false);
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
@@ -46,49 +46,45 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 
     // WARNING: lambda zone
     auto handle_click = [&]() -> void {
-        drag = true;  //Зажимаю мышку
-        if (field.get_field_objects().empty()) {
-            return;
-        }
-        USO::Map_object &back_object =
-            *(field.get_field_objects().back().get());
-        if (!(*(field.get_field_objects().back()))
-                 .check_event(
-                     static_cast<sf::Vector2f>(sf::Mouse::getPosition()),
-                     game_session, past_time + clock.getElapsedTime())) {
-            return;
-        }
-        if (typeid(back_object) != typeid(USO::Aim_slider) &&
-            typeid(back_object) != typeid(USO::Aim_spinner)) {
-            field.get_field_objects().pop_back();
-        }
-        sound.play();
+      drag = true;  //Зажимаю мышку
+      if (field.get_field_objects().empty()) {
+          return;
+      }
+      USO::Map_object &back_object =
+          *(field.get_field_objects().back().get());
+      if (!(*(field.get_field_objects().back()))
+          .check_event(
+              static_cast<sf::Vector2f>(sf::Mouse::getPosition()),
+              game_session, past_time + clock.getElapsedTime())) {
+          return;
+      }
+      if (typeid(back_object) != typeid(USO::Aim_slider) &&
+          typeid(back_object) != typeid(USO::Aim_spinner)) {
+          field.get_field_objects().pop_back();
+      }
+      sound.play();
     };
     // lambda zone ends
 
     clock.restart();
     sf::CircleShape mouse(5.f);
     mouse.setFillColor(sf::Color(241, 200, 14));
-
+    music.play();
     while (true) {
         window.draw(rect);
         game_session.table_of_scores(window, font);
         mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
         window.draw(mouse);
 
+
         if (game_session.get_health() == 0
-                && game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
+            && game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
             game_session.set_game_status(BL::Game_status::DEFEAT);
         }
         if (map_objects.back()->get_start_time() +
-                map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()
-                - sf::seconds(0.5)
+            map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()
+                                                      - sf::seconds(0.5)
             && game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
-        if (game_session.get_health() == 0) {
-            game_session.set_game_status(BL::Game_status::DEFEAT);
-        }
-        if (!map_objects.empty() && map_objects.back()->get_start_time() +
-                map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()) {
             game_session.set_game_status(BL::Game_status::VICTORY);
         }
 
@@ -97,8 +93,9 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             case BL::Game_status::ACTION: {
                 if (current_object_it != map_objects.end()) {
                     if (*current_object_it) {
-                        field.push_front(current_object_it,
-                                         past_time + clock.getElapsedTime());
+                        field.push_front(
+                            current_object_it,
+                            past_time + clock.getElapsedTime());
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;
                         return;
@@ -126,7 +123,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 switch (event.type) {
                     case sf::Event::KeyPressed:
                         if (event.key.code == sf::Keyboard::Escape) {
-                            game_session.set_game_status(BL::Game_status::PAUSE);
+                            game_session.set_game_status(
+                                BL::Game_status::PAUSE);
                             continue;
                         }
                         if (event.key.code != sf::Keyboard::Z &&
@@ -144,9 +142,11 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             event.mouseButton.button != sf::Mouse::Right) {
                             break;
                         }
-                        if (!dragged_mouse_button[event.mouseButton.button]) {
+                        if (!dragged_mouse_button[event.mouseButton
+                            .button]) {
                             number_of_dragged_buttons++;
-                            dragged_mouse_button[event.mouseButton.button] = 1;
+                            dragged_mouse_button[event.mouseButton.button] =
+                                1;
                         }
                         handle_click();
                         break;
@@ -169,8 +169,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         if (!drag) {
                             break;
                         }
-                        if (dragged_mouse_button[event.mouseButton.button] ==
-                            0) {
+                        if (dragged_mouse_button[event.mouseButton
+                            .button] == 0) {
                             break;
                         }
                         dragged_mouse_button[event.mouseButton.button] = 0;
@@ -185,7 +185,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                                 *(field.get_field_objects().back().get());
                             if (typeid(back_object) !=
                                 typeid(USO::Aim_slider) &&
-                                typeid(back_object) != typeid(USO::Aim_spinner)) {
+                                typeid(back_object) !=
+                                typeid(USO::Aim_spinner)) {
                                 break;
                             }
                             back_object.check_event(
@@ -205,11 +206,13 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 window.draw(mouse);
                 Menu::stop_menu(window, game_session);
                 clock.restart();
-                if (game_session.get_game_status() == BL::Game_status::NEED_TO_RETRY) {
+                if (game_session.get_game_status() ==
+                    BL::Game_status::NEED_TO_RETRY) {
                     past_time -= past_time;
                     break;
                 }
-                if (game_session.get_game_status() == BL::Game_status::ACTION) {
+                if (game_session.get_game_status() ==
+                    BL::Game_status::ACTION) {
                     music.play();
                 } else {
                     return;
@@ -220,11 +223,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     if (window.pollEvent(event)) {
                         if (event.key.code == sf::Keyboard::Space) {
                             field.get_field_objects().clear();
-                            map_objects.clear();
-                            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                            mouse.setPosition(
+                                (sf::Vector2f)sf::Mouse::getPosition());
                             window.draw(mouse);
                             Menu::stop_menu(window, game_session);
-                            if (game_session.get_game_status() == BL::Game_status::NEED_TO_RETRY) {
+                            if (game_session.get_game_status() ==
+                                BL::Game_status::NEED_TO_RETRY) {
                                 break;
                             }
                             return;
@@ -232,7 +236,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                     }
                     window.draw(rect);
                     game_session.table_of_scores(window, font);
-                    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+                    mouse.setPosition(
+                        (sf::Vector2f)sf::Mouse::getPosition());
                     window.draw(mouse);
                     window.display();
                 }
@@ -240,11 +245,11 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             case BL::Game_status::DEFEAT: {
                 music.stop();
                 field.get_field_objects().clear();
-                map_objects.clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
                 Menu::stop_menu(window, game_session);
-                if (game_session.get_game_status() == BL::Game_status::NEED_TO_RETRY) {
+                if (game_session.get_game_status() ==
+                    BL::Game_status::NEED_TO_RETRY) {
                     break;
                 }
                 return;
@@ -266,3 +271,4 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         }
     }
 }
+

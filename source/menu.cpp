@@ -181,7 +181,7 @@ Menu::scrolling_menu::scrolling_menu(const std::string &filename) {
 
 void Menu::scrolling_menu::push(sf::Vector2f mouse) {
     for (const auto &block : blocks) {
-        if (block.getPosition().x >= mouse.x && block.getPosition().x <=
+       /* if (block.getPosition().x >= mouse.x && block.getPosition().x <=*/
     }
 }
 

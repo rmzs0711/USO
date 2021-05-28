@@ -225,7 +225,7 @@ bool USO::Aim_spinner::check_event(sf::Vector2f mouse_pos,
     if (current_time <= start_time + duration_time) {
         sum_of_radians += calc_delta(mouse_pos, start_radian);
         if (check_sum_of_radians(sum_of_radians)) {
-            game_session.increase_score(100, game_session.get_combo());
+            game_session.decrease_health(100);//increase_score(100, game_session.get_combo());
         }
         return true;
     }

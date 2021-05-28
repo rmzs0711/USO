@@ -21,16 +21,16 @@ void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse, BL
             case EXIT: {
                 window.close();
             } break;
-            /*case OPEN_AIM: {
+            case OPEN_AIM: {
                 USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
                 test.run(window);
-            } break;*/
+            } break;
             case RETRY: {
                 gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
             } break;
-            case OPEN_AIM: {
+            /*case OPEN_AIM: {
                 //list_of_maps(window);
-            } break;
+            } break;*/
             case OPEN_CONVEYOR: {
                 USO::Conveyor_map test(R"(input.txt)");
                 test.run(window);
