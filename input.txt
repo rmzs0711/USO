@@ -5,9 +5,9 @@ Gold
 data\img\stronger.png
 data\fonts\aller.ttf
 data\music\click_sound.ogg
-200
+300
 0
-150
+250
 900
 500 2000
 0

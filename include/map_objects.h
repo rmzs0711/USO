@@ -206,12 +206,14 @@ public:
 // };
 
 struct Conveyor_line {
+private:
 public:
     sf::Vector2f pos;
     sf::Vector2f sizes;
     sf::Vector2f beat_pos;
     sf::Vector2f beat_sizes;
     bool dragged = false;
+    bool missed = false;
     int index;
     Conveyor_line(sf::Vector2f pos_, sf::Vector2f sizes_, int index_)
         : pos(pos_), sizes(sizes_), index(index_) {
@@ -227,13 +229,14 @@ public:
 struct Conveyor_note : Map_object {
 private:
     Conveyor_line line;
+    bool is_valid = true;
 
 public:
     static bool is_note_correct_click(const sf::Vector2f& mouse_pos,
                                const sf::Vector2f& pos,
                                const USO::Conveyor_line& line_) {
-        if (mouse_pos == line_.beat_pos && pos.y >= line_.beat_pos.y - 10 &&
-            pos.y <= line_.beat_pos.y + 10) {
+        if (mouse_pos == line_.beat_pos && pos.y >= line_.beat_pos.y - 100 &&
+            pos.y <= line_.beat_pos.y + 100) {
             return true;
         }
         return false;

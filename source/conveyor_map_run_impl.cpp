@@ -13,8 +13,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
     USO::Field field(window, {});
     sf::Clock clock;
     sf::SoundBuffer press_sound;
-    sf::Time past_time;  // костыль для паузы, так как sfml не умеет
-    // останавливать часы
+    sf::Time past_time;
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
     sf::Music music;
@@ -28,14 +27,13 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
     sound.setBuffer(press_sound);
 
     sf::Texture img;
-    check_file_load(
-        img.loadFromFile(R"(data\img\lucifer.png)"),
-        R"(data\img\lucifer.png)");  //Тут нужно сделать загрузку названия из
-    //карты, если карта содержит в себе фон
+    check_file_load(img.loadFromFile(R"(data\img\lucifer.png)"),
+                    R"(data\img\lucifer.png)");
 
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
     rect.setTexture(&img);
+    rect.setFillColor(sf::Color(255, 255, 255, 40));
 
     sf::Font font;
     check_file_load(font.loadFromFile(R"(data\fonts\GistLight.otf)"),
@@ -67,7 +65,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                 if (current_object_it != map_objects.end()) {
                     if (*current_object_it) {
                         field.push_front(current_object_it,
-                                   past_time + clock.getElapsedTime());
+                                         past_time + clock.getElapsedTime());
                     } else {
                         std::cerr << "invalid object iterator" << std::endl;
                         current_object_it++;
@@ -76,19 +74,19 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
 
                 field.change_state(past_time + clock.getElapsedTime());
 
-                if (!field.get_field_objects().empty() &&
-                    !field.get_field_objects().back()->change_state(
-                        past_time + clock.getElapsedTime())) {
-                    field.get_field_objects().pop_back();
-                    game_session.decrease_health(game_session.damage());
-                }
-
                 sf::Event event{};
                 for (auto &line : lines) {
                     line->draw(window);
                 }
                 field.draw(font);
 
+                if (!field.get_field_objects().empty() &&
+                    !field.get_field_objects().back()->change_state(
+                        past_time + clock.getElapsedTime())) {
+                    field.get_field_objects().back()->draw(window, font);
+                    field.get_field_objects().pop_back();
+                    game_session.decrease_health(game_session.damage());
+                }
                 window.display();
 
                 if (!window.pollEvent(event) && !drag) {
@@ -98,34 +96,36 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                 // WARNING: lambda zone
                 auto handle_click = [&]() -> void {
                     drag = true;  //Зажимаю мышку
-                  for (int i = 0; i < NUMBER_OF_LINES; ++i) {
-                      if (dragged_key[note_keys[i]]) {
-                          lines[i]->dragged = true;
-                      }
-                  }
-                    if (field.get_field_objects().empty()) {
-                        return;
+                    for (int i = 0; i < NUMBER_OF_LINES; ++i) {
+                        if (dragged_key[note_keys[i]]) {
+                            lines[i]->dragged = true;
+                        }
                     }
-                    USO::Map_object &front_object =
-                        *(field.get_field_objects().back().get());
-
                     for (int i = 0; i < NUMBER_OF_LINES; ++i) {
                         sf::Vector2f position = lines[i]->beat_pos;
                         if (dragged_key[note_keys[i]]) {
                             lines[i]->dragged = true;
-//                            if (!(*(field.get_field_objects().back()))
-//                                     .check_event(
-//                                         position, game_session,
-//                                         past_time + clock.getElapsedTime())) {
-//                                return;
-//                            }
+                            bool hit = false;
+                            while (!field.get_field_objects().empty()) {
+                                if (field.get_field_objects()
+                                        .back()
+                                        ->check_event(
+                                            position, game_session,
+                                            past_time +
+                                                clock.getElapsedTime())) {
+                                    sound.play();
+                                    field.get_field_objects().pop_back();
+                                    hit = true;
+                                    lines[i]->missed = false;
+                                } else {
+                                    break;
+                                }
+                            }
+                            if (!hit) {
+                                lines[i]->missed = true;
+                            }
                         }
                     }
-                    //                    if (typeid(front_object) !=
-                    //                    typeid(USO::Aim_slider)) {
-                    //                        field.get_field_objects().pop_back();
-                    //                    }
-                    sound.play();
                 };
                 // lambda zone ends
 
@@ -136,8 +136,8 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                             return;
                         }
                         if (!dragged_key[event.key.code]) {
-                             dragged_key[event.key.code] = 1;
-                             number_of_dragged_buttons++;
+                            dragged_key[event.key.code] = 1;
+                            number_of_dragged_buttons++;
                         }
                         handle_click();
                         break;
@@ -148,6 +148,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                         for (int i = 0; i < NUMBER_OF_LINES; ++i) {
                             if (!dragged_key[note_keys[i]]) {
                                 lines[i]->dragged = false;
+                                lines[i]->missed = false;
                             }
                         }
                         if (number_of_dragged_buttons == 0) {
@@ -158,12 +159,6 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                         if (drag && !field.get_field_objects().empty()) {
                             USO::Map_object &front_object =
                                 *(field.get_field_objects().front().get());
-                            //                            if
-                            //                            (typeid(front_object)
-                            //                            !=
-                            //                                typeid(USO::Aim_slider))
-                            //                                { break;
-                            //                            }
                             front_object.check_event(
                                 sf::Vector2f(sf::Mouse::getPosition()),
                                 game_session,
@@ -175,9 +170,6 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
             }
 
             case BL::Game_status::PAUSE: {
-                //когда отожмут паузу, нужно сделать restart
-                // clock, потому что
-                // sfml по пацански не останавливается
                 break;
             }
             case BL::Game_status::DEFEAT: {
