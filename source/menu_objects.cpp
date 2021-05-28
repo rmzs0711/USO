@@ -24,7 +24,7 @@ void Menu::Button::press(sf::RenderWindow &window,
                 window.close();
             } break;
             case OPEN_AIM: {
-                USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
+                USO::Aim_map test(R"(data\maps\editing_map.txt)");
                 test.run(window);
             } break;
             case RETRY: {

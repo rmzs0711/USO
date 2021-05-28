@@ -107,6 +107,7 @@ bool USO::Aim_slider::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
         USO::Aim_circle::change_state(current_time);
     } else if (current_time <= start_time + duration_time + move_time) {
+        is_valid = true;
         float coef = get_time_coefficient(start_time + duration_time, move_time,
                                           current_time);
         active_circle_radius = beat_radius;
@@ -169,6 +170,7 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     window.draw(track);
     window.draw(target_circle);
     window.draw(track2);
+    Aim_circle::is_valid = true;
     Aim_circle::draw(window, font);
 }
 
@@ -211,7 +213,9 @@ bool USO::Aim_spinner::check_event(sf::Vector2f mouse_pos,
     if (current_time <= start_time + duration_time) {
         sum_of_radians += calc_delta(mouse_pos, start_radian);
         if (check_sum_of_radians(sum_of_radians)) {
-            game_session.decrease_health(100);//increase_score(100, game_session.get_combo());
+            game_session.increase_health(20);
+            game_session.increase_combo(1);
+            game_session.increase_score(100, game_session.get_combo());
         }
         return true;
     }
@@ -257,11 +261,11 @@ sf::Vector2f &USO::Aim_slider::get_end_pos() {
     return end_pos;
 }
 std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
-    return std::make_shared<Aim_circle>(Aim_slider(*this));
+    return std::make_shared<Aim_slider>(Aim_slider(*this));
 }
 
 std::shared_ptr<USO::Map_object> USO::Aim_spinner::clone() {
-    return std::make_shared<Aim_circle>(Aim_spinner(*this));
+    return std::make_shared<Aim_spinner>(Aim_spinner(*this));
 }
 
 sf::Vector2f &USO::Aim_slider::get_start_pos() {

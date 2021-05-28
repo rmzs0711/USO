@@ -174,28 +174,30 @@ struct Editing_box {
         text_buf.setFont(font);
 
         sf::CircleShape yes_button((float)window.getSize().x / 10);
-        yes_button.setPosition((float)yes_button.getRadius() * 2,
+        yes_button.setPosition((float)yes_button.getRadius() * 6,
                                (float)window.getSize().y / 2);
-        yes_button.setFillColor(sf::Color::Red);
+        yes_button.setFillColor(sf::Color::Green);
 
         sf::CircleShape no_button(yes_button.getRadius());
-        no_button.setPosition((float)no_button.getRadius() * 6,
+        no_button.setPosition((float)no_button.getRadius() * 2,
                               (float)window.getSize().y / 2);
-        no_button.setFillColor(sf::Color::Green);
+        no_button.setFillColor(sf::Color::Red);
 
         background.setFillColor(sf::Color(100, 100, 100, 10));
         while (true) {
             window.draw(background);
             text_buf.setString(decision);
             text_buf.setFillColor(sf::Color::White);
-            text_buf.setPosition(sf::Vector2f((float)window.getSize().x / 2 - (float) (decision.size() / 4 * text_buf.getCharacterSize()),
-                                              (float)window.getSize().y / 10));
+            text_buf.setPosition(sf::Vector2f(
+                (float)window.getSize().x / 2 -
+                    (float)(decision.size() / 4 * text_buf.getCharacterSize()),
+                (float)window.getSize().y / 10));
             window.draw(text_buf);
 
             window.draw(yes_button);
             window.draw(no_button);
 
-            text_buf.setString("no");
+            text_buf.setString("yes");
             text_buf.setPosition(
                 yes_button.getPosition() +
                 sf::Vector2f(
@@ -203,7 +205,7 @@ struct Editing_box {
                     yes_button.getRadius() - text_buf.getCharacterSize() / 2));
             window.draw(text_buf);
 
-            text_buf.setString("yes");
+            text_buf.setString("no");
             text_buf.setPosition(
                 no_button.getPosition() +
                 sf::Vector2f(
@@ -219,17 +221,17 @@ struct Editing_box {
                 background.setFillColor(sf::Color::White);
                 if (USO::Aim_circle::is_circle_correct_click(
                         sf::Vector2f(sf::Mouse::getPosition(window)),
-                        yes_button.getPosition() +
-                            sf::Vector2f(yes_button.getRadius(),
-                                         yes_button.getRadius()),
-                        yes_button.getRadius())) {
+                        no_button.getPosition() +
+                            sf::Vector2f(no_button.getRadius(),
+                                         no_button.getRadius()),
+                        no_button.getRadius())) {
                     return false;
                 } else if (USO::Aim_circle::is_circle_correct_click(
                                sf::Vector2f(sf::Mouse::getPosition(window)),
-                               no_button.getPosition() +
-                                   sf::Vector2f(no_button.getRadius(),
-                                                no_button.getRadius()),
-                               no_button.getRadius())) {
+                               yes_button.getPosition() +
+                                   sf::Vector2f(yes_button.getRadius(),
+                                                yes_button.getRadius()),
+                               yes_button.getRadius())) {
                     return true;
                 }
             }
@@ -409,7 +411,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
         editing_box.drag = true;
 
-        //        music.pause();
+        //        music.pause(); //TODO
         for (auto i = editing_box.start_draw_iterator;
              i != editing_box.end_draw_iterator; i++) {
             auto &object = **i;
@@ -425,6 +427,13 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                         sf::Vector2f(sf::Mouse::getPosition(window)),
                         (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
                     editing_box.dragged_pos_ptr = &(*i)->get_end_pos();
+                    return;
+                }
+            } else if (typeid(object) == typeid(USO::Aim_spinner)) {
+                if (USO::Aim_circle::is_circle_correct_click(
+                        sf::Vector2f(sf::Mouse::getPosition(window)),
+                        (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
+                    editing_box.dragged_pos_ptr = &(*i)->get_pos();
                     return;
                 }
             }
@@ -470,15 +479,14 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     editing_box.start_draw_iterator,
                     std::make_shared<USO::Aim_spinner>(
                         USO::Aim_spinner(editing_box.current_time -
-                                             USO::const_active_circle_duration,
-                                         USO::const_active_circle_duration,
+                                             USO::const_active_circle_duration * 2.f,
+                                         USO::const_active_circle_duration * 2.f,
                                          (float)window.getSize().x / 2,
                                          (float)window.getSize().y / 2,
-                                         USO::const_active_circle_radius)));
+                                         USO::const_active_circle_radius * 2)));
                 editing_box.start_draw_iterator--;
                 editing_box.dragged_pos_ptr =
-                    &(*editing_box.start_draw_iterator)->get_end_pos();
-                slider_choosing_end = true;
+                    &(*editing_box.start_draw_iterator)->get_pos();
                 break;
         }
     };
@@ -537,6 +545,13 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 fout << i->get_end_pos().x << " " << i->get_end_pos().y
                      << std::endl;
                 fout << i->get_move_time().asMicroseconds() << std::endl;
+            } else if (typeid(object) == typeid(USO::Aim_spinner)) {
+                fout << "Aim_spinner" << std::endl;
+                fout << i->get_start_time().asMicroseconds() << std::endl;
+                fout << i->get_duration_time().asMicroseconds() << std::endl;
+                fout << i->get_pos().x << std::endl;
+                fout << i->get_pos().y << std::endl;
+                fout << const_active_circle_radius * 2 << std::endl;
             }
         }
         map_objects = editing_box.editing_map_objects;
@@ -564,15 +579,17 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     editing_box.music.pause();
                     editing_box.remembered_time = editing_box.current_time;
-                    if (!is_saved && editing_box.draw_yes_and_no_decision(
-                                         "Save?")) {
+                    if (!is_saved &&
+                        editing_box.draw_yes_and_no_decision("Save?")) {
                         save_map();
                     }
                     window.display();
                     if (editing_box.draw_yes_and_no_decision(
-                            "Do you want to leave")) {
+                            "Do you want to leave?")) {
                         return;
                     }
+                    event = sf::Event();
+                    break;
                 }
                 if (event.key.code == sf::Keyboard::Space) {
                     editing_box.play_or_pause();
@@ -762,8 +779,8 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
                 if (event.key.code == sf::Keyboard::Escape) {
                     editing_box.music.pause();
                     editing_box.remembered_time = editing_box.current_time;
-                    if (!is_saved && editing_box.draw_yes_and_no_decision(
-                                         "Save?")) {
+                    if (!is_saved &&
+                        editing_box.draw_yes_and_no_decision("Save?")) {
                         save_map();
                     }
                     window.display();
