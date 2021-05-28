@@ -328,9 +328,7 @@ struct Editing_box {
                 object_rect.setPosition({std::max(road_rect.getPosition().x,
                                                   object_rect.getPosition().x),
                                          object_rect.getPosition().y});
-                if (object_rect.getSize().x < 0) {
-                    std::cout << current_time.asSeconds() <<std::endl;
-                }
+
                 window.draw(object_rect);
             }
             if (break_point_time >= current_time &&

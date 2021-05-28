@@ -5,11 +5,10 @@ Gold
 data\img\stronger.png
 data\fonts\aller.ttf
 data\music\click_sound.ogg
-200
+300
 0
-150
+250
 900
-
 500 2000
 0
 2126 2000
@@ -18,33 +17,23 @@ data\music\click_sound.ogg
 2
 2941 2000
 3
-
 3326 2000
 0
-
 3708 2000
 1
-
 4093 2000
 1
-
 4508 2000
 0
-
 5659 2000
 2
-
 6692 2000
 3
-
 7726 2000
 1
-
 8759 2000
 0
-
 8992 2000
 3
-
 9826 2000
 1

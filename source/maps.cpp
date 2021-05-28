@@ -24,7 +24,9 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
 
     while (!file.eof()) {
         std::string type;
-        file >> type;
+        if (!(file >> type)) {
+            break;
+        }
         sf::Int64 time;
         file >> time;
         sf::Time start_time = sf::microseconds(time);
@@ -109,7 +111,9 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
 
     while (!file.eof()) {
         int32_t time;
-        file >> time;
+        if (!(file >> time)) {
+            break;
+        }
         sf::Time start_time = sf::milliseconds(time);
         file >> time;
         sf::Time duration_time = sf::milliseconds(time);

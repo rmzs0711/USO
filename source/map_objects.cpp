@@ -8,8 +8,9 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(200);
-    return end_time - current_time < epsilon;
+    static sf::Time epsilon = sf::milliseconds(700);
+    return end_time - current_time < epsilon ||
+           current_time - end_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
     return sf::Vector2f(pos.x - radius, pos.y - radius);
@@ -28,7 +29,6 @@ sf::Time &USO::Map_object::get_duration_time() {
 sf::Vector2f &USO::Map_object::get_pos() {
     return pos;
 }
-
 
 bool USO::Aim_circle::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time) {
@@ -173,10 +173,11 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
 }
 
 float USO::Aim_spinner::calc_delta(sf::Vector2f cur_vector,
-                                   float& prev_radian) {
+                                   float &prev_radian) {
     float x_pos = cur_vector.x - get_pos().x;
     float y_pos = get_pos().y - cur_vector.y;
-    if (x_pos * x_pos + y_pos * y_pos > active_circle_radius * active_circle_radius) {
+    if (x_pos * x_pos + y_pos * y_pos >
+        active_circle_radius * active_circle_radius) {
         return 0;
     }
     float radian = x_pos / std::hypot(y_pos, x_pos);
@@ -221,9 +222,10 @@ bool USO::Aim_spinner::check_event_for_draw(sf::Vector2f mouse_pos) {
     float epsilon = 20.f;
     float x_pos = std::abs(mouse_pos.x - get_pos().x);
     float y_pos = std::abs(mouse_pos.y - get_pos().y);
-    if ((std::abs(x_pos - y_pos) < epsilon ||
-         x_pos < epsilon || y_pos < epsilon) &&
-         x_pos * x_pos + y_pos * y_pos <= active_circle_radius * active_circle_radius) {
+    if ((std::abs(x_pos - y_pos) < epsilon || x_pos < epsilon ||
+         y_pos < epsilon) &&
+        x_pos * x_pos + y_pos * y_pos <=
+            active_circle_radius * active_circle_radius) {
         return true;
     }
     return false;
@@ -240,7 +242,8 @@ void USO::Aim_spinner::draw(sf::RenderWindow &window, const sf::Font &font) {
         window.draw(Lines[i]);
     }
 
-    if (USO::Aim_spinner::check_event_for_draw((sf::Vector2f)sf::Mouse::getPosition())) {
+    if (USO::Aim_spinner::check_event_for_draw(
+            (sf::Vector2f)sf::Mouse::getPosition())) {
         sf::CircleShape circle;
         circle.setRadius(10.f);
         circle.setPosition((float)sf::Mouse::getPosition().x - 5,
@@ -261,34 +264,34 @@ std::shared_ptr<USO::Map_object> USO::Aim_spinner::clone() {
     return std::make_shared<Aim_circle>(Aim_spinner(*this));
 }
 
-
-
 sf::Vector2f &USO::Aim_slider::get_start_pos() {
     return start_pos;
 }
 
-
 bool USO::Conveyor_note::change_state(sf::Time current_time) {
-    if (current_time <= start_time + duration_time + sf::milliseconds(0)) {
-        pos.y = line.pos.y + (-line.pos.y + line.beat_pos.y) *
-                                 get_time_coefficient(start_time, duration_time,
-                                                      current_time);
+    if (current_time <= start_time + duration_time) {
+        pos.y =
+            line.pos.y - line.beat_sizes.y +
+            (-line.pos.y + line.beat_sizes.y + line.beat_pos.y) *
+                get_time_coefficient(start_time, duration_time, current_time);
         return true;
     }
+    is_valid = false;
     return false;
 }
-
-
 
 bool USO::Conveyor_note::check_event(sf::Vector2f mouse_pos,
                                      BL::Game_session &game_session,
                                      sf::Time current_time) {
-    if (is_note_correct_click(mouse_pos, pos, line) &&
-        is_click_time(current_time, start_time + duration_time)) {
-        game_session.increase_combo(1);
-        game_session.increase_score(100, game_session.get_combo());
-        game_session.increase_health(100);
-        return true;
+    if (is_note_correct_click(mouse_pos, pos, line)) {
+        if (is_click_time(current_time, start_time + duration_time)) {
+            game_session.increase_combo(1);
+            game_session.increase_score(100, game_session.get_combo());
+            game_session.increase_health(100);
+            return true;
+        } else {
+            is_valid = false;
+        }
     }
     //    game_session.decrease_health(game_session.damage());
     return false;
@@ -296,7 +299,11 @@ bool USO::Conveyor_note::check_event(sf::Vector2f mouse_pos,
 void USO::Conveyor_note::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::RectangleShape rectangle(line.beat_sizes);
     rectangle.setPosition(pos);
-    rectangle.setFillColor(sf::Color::Blue);
+    if (is_valid) {
+        rectangle.setFillColor(sf::Color::Blue);
+    } else {
+        rectangle.setFillColor(sf::Color::Red);
+    }
     rectangle.setOutlineColor(sf::Color::White);
     window.draw(rectangle);
 }
@@ -307,7 +314,7 @@ std::shared_ptr<USO::Map_object> USO::Conveyor_note::clone() {
 void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     sf::RectangleShape fall(sizes);
     fall.setPosition(pos);
-    fall.setFillColor(sf::Color::Magenta);
+    fall.setFillColor(sf::Color(234, 243, 0, 40));
     fall.setOutlineColor(sf::Color::White);
     fall.setOutlineThickness(1);
     window.draw(fall);
@@ -315,7 +322,11 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     sf::RectangleShape beat_rectangle(beat_sizes);
     beat_rectangle.setPosition(beat_pos);
     if (dragged) {
-        beat_rectangle.setFillColor(sf::Color::Cyan);
+        if (!missed) {
+            beat_rectangle.setFillColor(sf::Color::Cyan);
+        } else {
+            beat_rectangle.setFillColor(sf::Color::Red);
+        }
     } else {
         beat_rectangle.setFillColor(sf::Color::Green);
     }
