@@ -16,6 +16,7 @@ enum class Game_status {
     PAUSE,
     VICTORY,
     DEFEAT,
+    REPEAT
 };
 
 struct Game_session {

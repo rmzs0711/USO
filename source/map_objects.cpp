@@ -14,13 +14,7 @@ bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
     return sf::Vector2f(pos.x - radius, pos.y - radius);
 }
-bool is_circle_correct_click(const sf::Vector2f &mouse,
-                             const sf::Vector2f &center,
-                             const float &radius) {
-    return (mouse.x - center.x) * (mouse.x - center.x) +
-               (mouse.y - center.y) * (mouse.y - center.y) <=
-           radius * radius;
-}
+
 }  // namespace
 
 sf::Time &USO::Map_object::get_start_time() {
@@ -54,7 +48,7 @@ bool USO::Aim_circle::change_state(sf::Time current_time) {
 bool USO::Aim_circle::check_event(sf::Vector2f mouse_pos,
                                   BL::Game_session &game_session,
                                   sf::Time current_time) {
-    if (is_circle_correct_click(mouse_pos, pos, beat_radius)) {
+    if (is_circle_correct_click(sf::Vector2f(mouse_pos), pos, beat_radius)) {
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);  // точно так? //Да я думаю
             game_session.increase_score(100, game_session.get_combo());
@@ -284,22 +278,14 @@ bool USO::Conveyor_note::change_state(sf::Time current_time) {
     return false;
 }
 
-bool is_note_correct_click(sf::Vector2f mouse_pos,
-                           sf::Vector2f pos,
-                           USO::Conveyor_line line) {
-    if (mouse_pos == line.beat_pos && pos.y >= line.beat_pos.y - 10 &&
-        pos.y <= line.beat_pos.y + 10) {
-        return true;
-    }
-    return false;
-}
+
 
 bool USO::Conveyor_note::check_event(sf::Vector2f mouse_pos,
                                      BL::Game_session &game_session,
                                      sf::Time current_time) {
     if (is_note_correct_click(mouse_pos, pos, line) &&
         is_click_time(current_time, start_time + duration_time)) {
-        game_session.increase_combo(1);  // точно так? //Да я думаю
+        game_session.increase_combo(1);
         game_session.increase_score(100, game_session.get_combo());
         game_session.increase_health(100);
         return true;
@@ -313,6 +299,9 @@ void USO::Conveyor_note::draw(sf::RenderWindow &window, const sf::Font &font) {
     rectangle.setFillColor(sf::Color::Blue);
     rectangle.setOutlineColor(sf::Color::White);
     window.draw(rectangle);
+}
+std::shared_ptr<USO::Map_object> USO::Conveyor_note::clone() {
+    return std::make_shared<Conveyor_note>(Conveyor_note(*this));
 }
 
 void USO::Conveyor_line::draw(sf::RenderWindow &window) const {

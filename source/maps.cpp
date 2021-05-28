@@ -81,9 +81,12 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
         return;
     }
     file >> map_name;
-    file >> music_address;
     file >> author_name;
+    file >> music_address;
     file >> music_name;
+    file >> image_address;
+    file >> font_address;
+    file >> sound_address;
 
     float pos_x;
     file >> pos_x;
@@ -104,8 +107,6 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
     }
 
     while (!file.eof()) {
-        int index;
-        file >> index;
         int32_t time;
         file >> time;
         sf::Time start_time = sf::milliseconds(time);
@@ -122,9 +123,15 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
 void USO::Map::prelude(sf::Music &music,
                        sf::SoundBuffer &sound_buffer,
                        sf::Texture &image,
-                       sf::Font &font) {
+                       sf::Font &font) const {
     check_file_load(music.openFromFile(music_address), music_address);
     check_file_load(sound_buffer.loadFromFile(sound_address), sound_address);
     check_file_load(image.loadFromFile(image_address), image_address);
     check_file_load(font.loadFromFile(font_address), font_address);
+}
+std::string USO::Map::get_map_name()  {
+    return map_name;
+}
+std::string USO::Map::get_music_name() {
+    return music_name;
 }

@@ -1,14 +1,14 @@
 #ifndef USO_MAPS_H
 #define USO_MAPS_H
 #include <iostream>
+#include <list>
 #include <memory>
 #include <string>
-#include <list>
 #include <utility>
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
-#include "map_objects.h"
 #include "base_logic.h"
+#include "map_objects.h"
 
 namespace USO {
 
@@ -31,13 +31,7 @@ protected:
         }
     }
 
-    void prelude(sf::Music &music,
-                 sf::SoundBuffer &sound_buffer,
-                 sf::Texture &,
-                 sf::Font &);
-
 public:
-    // TODO setters, getters
     Map(std::string map_name_,
         std::string author_name_,
         std::string music_address_,
@@ -54,11 +48,18 @@ public:
           font_address(std::move(font_address_)),
           sound_address(std::move(sound_address_)),
           map_objects(std::move(map_objects_)) {}
+
     virtual ~Map() = default;
+    void prelude(sf::Music &music,
+                 sf::SoundBuffer &sound_buffer,
+                 sf::Texture &,
+                 sf::Font &) const;
+
+    std::string get_map_name();
+    std::string get_music_name();
 
     virtual void run(sf::RenderWindow &) = 0;
-    virtual void constructor_run(sf::RenderWindow &) {};
-
+    virtual void constructor_run(sf::RenderWindow &){};
 
 protected:
     Map() = default;
@@ -91,12 +92,13 @@ struct Aim_map final : Map {
 struct Conveyor_map final : Map {
 private:
     const int NUMBER_OF_LINES = 4;
+
 public:
     explicit Conveyor_map(const std::string &filename);
     std::vector<std::shared_ptr<Conveyor_line>> lines;
 
     void run(sf::RenderWindow &) override;
-    // void construct(sf::RenderWindow &);
+    void constructor_run(sf::RenderWindow &) override;
 };
 
 struct Bulletproof_map final : Map {

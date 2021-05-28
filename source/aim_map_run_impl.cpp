@@ -68,7 +68,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     clock.restart();
     sf::CircleShape mouse(5.f);
     mouse.setFillColor(sf::Color(241, 200, 14));
-
+    music.play();
     while (true) {
         window.draw(rect);
         game_session.table_of_scores(window, font);
@@ -191,6 +191,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             }
 
             case BL::Game_status::PAUSE: {
+                music.pause();
                 past_time += clock.getElapsedTime();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
@@ -220,12 +221,22 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 }
             }
             case BL::Game_status::DEFEAT: {
+                music.stop();
                 field.get_field_objects().clear();
                 map_objects.clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
                 Menu::stop_menu(window, game_session);
                 return;
+            }
+            case BL::Game_status::REPEAT: {
+                music.stop();
+                clock.restart();
+                past_time = sf::Time();
+                music.play();
+                game_session = BL::Game_session();
+                field.get_field_objects().clear();
+                game_session.set_game_status(BL::Game_status::ACTION);
             }
             default: {
                 continue;

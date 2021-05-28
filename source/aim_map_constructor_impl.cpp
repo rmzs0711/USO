@@ -6,17 +6,11 @@
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
 #include "map_management.h"
+#include "map_objects.h"
 #include "maps.h"
 
 namespace {
 enum class OBJECT_TO_CREATE { CIRCLE, SLIDER, SPINNER };
-bool is_circle_correct_click(const sf::Vector2f &mouse,
-                             const sf::Vector2f &center,
-                             const float &radius) {
-    return (mouse.x - center.x) * (mouse.x - center.x) +
-               (mouse.y - center.y) * (mouse.y - center.y) <=
-           radius * radius;
-}
 
 double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
     return std::pow((start_pos.x - end_pos.x) * (start_pos.x - end_pos.x) +
@@ -24,31 +18,17 @@ double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
                     0.5);
 }
 
-}  // namespace
+struct Editing_box {
+    static const int number_of_delta = 10;
 
-namespace USO {
-void Aim_map::constructor_run(sf::RenderWindow &window) {
-    sf::Color purple(100, 5, 94);
-    std::list<std::shared_ptr<Map_object>> editing_map_objects;
-    for (std::shared_ptr<Map_object> &ptr : map_objects) {
-        editing_map_objects.emplace_back(ptr->clone());
-    }
-    auto end_draw_iterator =
-        editing_map_objects.begin();  // итератор на следующий по времени объект
-    auto start_draw_iterator = editing_map_objects.begin();
+    std::list<std::shared_ptr<USO::Map_object>> editing_map_objects;
+    sf::RenderWindow &window;
 
-    sf::Time road_start_time;
-    const int number_of_delta = 10;
-    sf::RectangleShape road_rect(
-        sf::Vector2f((float)window.getSize().x / 2, 80));
-    road_rect.setPosition((float)window.getSize().x / 2,
-                          (float)window.getSize().y - road_rect.getSize().y);
-    road_rect.setFillColor(sf::Color(10, 145, 9, 50));
-    road_rect.setOutlineThickness(2);
-    road_rect.setOutlineColor(purple);
+    std::list<std::shared_ptr<USO::Map_object>>::iterator end_draw_iterator;
+    std::list<std::shared_ptr<USO::Map_object>>::iterator start_draw_iterator;
 
-    sf::Vector2f *dragged_pos_ptr = nullptr;
-
+    sf::RectangleShape background;
+    sf::RectangleShape road_rect;
     sf::Time current_time;
     sf::Time time_delta = sf::microseconds(1e6);
     sf::Time saved_delta = time_delta;
@@ -61,133 +41,58 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
     sf::Texture image;
     sf::Font font;
     sf::Text current_time_text;
-    current_time_text.setCharacterSize(80);
-    current_time_text.setPosition(0, 0);
-    current_time_text.setFont(font);
-    current_time_text.setOutlineThickness(5);
-    current_time_text.setOutlineColor(purple);
-    current_time_text.setFillColor(sf::Color::White);
-
     sf::Text delta_text;
-    delta_text.setCharacterSize(80);
-    delta_text.setPosition(
-        0, sf::Vector2f(window.getSize()).y -
-               static_cast<float>(delta_text.getCharacterSize()));
-    delta_text.setFont(font);
-    delta_text.setFillColor(sf::Color::White);
-    delta_text.setOutlineThickness(5);
-    delta_text.setLetterSpacing(3);
-    delta_text.setOutlineColor(purple);
-
-    prelude(music, sound_buf, image, font);  // Загружает и проверяет
-
-    OBJECT_TO_CREATE object_to_create = OBJECT_TO_CREATE::CIRCLE;
 
     sf::Sound sound;
-    sound.setBuffer(sound_buf);
 
-    sf::RectangleShape rect(sf::Vector2f(window.getSize()));
-    rect.setPosition(0, 0);
-    rect.setTexture(&image);
-
-    std::vector<int> dragged_key(
-        sf::Keyboard::KeyCount);  // чтобы различать какая кнопка зажата
-    std::vector<int> dragged_mouse_button(
-        sf::Mouse::ButtonCount);  // то же самое только про мышку
-
-    bool slider_choosing_end = false;
-    bool is_saved = true;
     bool drag = true;
-    sf::Event event{};
 
-    // WARNING: lambda zone
-    auto handle_left_click = [&]() -> void {
-        if (drag) {
-            return;
+    sf::Vector2f *dragged_pos_ptr = nullptr;
+    OBJECT_TO_CREATE object_to_create = OBJECT_TO_CREATE::CIRCLE;
+
+    Editing_box(std::list<std::shared_ptr<USO::Map_object>> &map_objects,
+                const USO::Map &map,
+                sf::RenderWindow &window_)
+        : window(window_),
+          background(sf::Vector2f(window.getSize())),
+          road_rect(sf::Vector2f((float)window.getSize().x / 2, 80)) {
+        for (std::shared_ptr<USO::Map_object> &ptr : map_objects) {
+            editing_map_objects.emplace_back(ptr->clone());
         }
-        is_saved = false;
-        drag = true;
+        start_draw_iterator = editing_map_objects.begin();
+        end_draw_iterator = editing_map_objects.begin();
+        map.prelude(music, sound_buf, image, font);
+        background.setPosition(0, 0);
+        background.setTexture(&image);
 
-        //        music.pause();
-        for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
-            auto &object = **i;
-            if (typeid(object) == typeid(Aim_circle)) {
-                if (is_circle_correct_click(
-                        sf::Vector2f(sf::Mouse::getPosition(window)),
-                        (*i)->get_pos(), const_circle_beat_radius)) {
-                    dragged_pos_ptr = &(*i)->get_pos();
-                    return;
-                }
-            } else if (typeid(object) == typeid(Aim_slider)) {
-                if (is_circle_correct_click(
-                        sf::Vector2f(sf::Mouse::getPosition(window)),
-                        (*i)->get_end_pos(), const_circle_beat_radius)) {
-                    dragged_pos_ptr = &(*i)->get_end_pos();
-                    return;
-                }
-            }
-        }
-        switch (object_to_create) {
-            case OBJECT_TO_CREATE::CIRCLE:
-                editing_map_objects.insert(
-                    start_draw_iterator,
-                    std::make_shared<Aim_circle>(Aim_circle(
-                        current_time - const_active_circle_duration,
-                        const_active_circle_duration,
-                        (float)sf::Mouse::getPosition(window).x,
-                        (float)sf::Mouse::getPosition(window).y,
-                        const_circle_beat_radius, const_active_circle_radius)));
-                start_draw_iterator--;
-                dragged_pos_ptr = &(*start_draw_iterator)->get_pos();
-                break;
-            case OBJECT_TO_CREATE::SLIDER:
+        road_rect.setPosition(
+            (float)window.getSize().x / 2,
+            (float)window.getSize().y - road_rect.getSize().y);
+        road_rect.setFillColor(sf::Color(10, 145, 9, 50));
+        road_rect.setOutlineThickness(2);
+        road_rect.setOutlineColor(USO::purple);
 
-                editing_map_objects.insert(
-                    start_draw_iterator,
-                    std::make_shared<Aim_slider>(Aim_slider(
-                        current_time - const_active_circle_duration,
-                        const_active_circle_duration,
-                        (float)sf::Mouse::getPosition(window).x,
-                        (float)sf::Mouse::getPosition(window).y,
-                        const_circle_beat_radius, const_active_circle_radius,
-                        (float)sf::Mouse::getPosition(window).x,
-                        (float)sf::Mouse::getPosition(window).y,
-                        sf::seconds(1000))));
-                start_draw_iterator--;
-                dragged_pos_ptr = &(*start_draw_iterator)->get_end_pos();
-                slider_choosing_end = true;
-                break;
-            case OBJECT_TO_CREATE::SPINNER:
-                editing_map_objects.insert(
-                    start_draw_iterator,
-                    std::make_shared<Aim_spinner>(Aim_spinner(
-                        current_time - const_active_circle_duration,
-                        const_active_circle_duration,
-                        (float)window.getSize().x / 2,
-                        (float)window.getSize().y / 2,
-                        const_active_circle_radius)));
-                start_draw_iterator--;
-                dragged_pos_ptr = &(*start_draw_iterator)->get_end_pos();
-                slider_choosing_end = true;
-                break;
-        }
-    };
+        current_time_text.setCharacterSize(80);
+        current_time_text.setPosition(0, 0);
+        current_time_text.setFont(font);
+        current_time_text.setOutlineThickness(5);
+        current_time_text.setOutlineColor(USO::purple);
+        current_time_text.setFillColor(sf::Color::White);
 
-    auto handle_right_click = [&]() {
-        for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
-            if (is_circle_correct_click(
-                    sf::Vector2f(sf::Mouse::getPosition(window)),
-                    (*i)->get_pos(), const_circle_beat_radius)) {
-                if (i == start_draw_iterator) {
-                    start_draw_iterator++;
-                }
-                editing_map_objects.erase(i);
-                return;
-            }
-        }
-    };
+        delta_text.setCharacterSize(80);
+        delta_text.setPosition(
+            0, sf::Vector2f(window.getSize()).y -
+                   static_cast<float>(delta_text.getCharacterSize()));
+        delta_text.setFont(font);
+        delta_text.setFillColor(sf::Color::White);
+        delta_text.setOutlineThickness(5);
+        delta_text.setLetterSpacing(3);
+        delta_text.setOutlineColor(USO::purple);
 
-    auto inc_time = [&]() {
+        sound.setBuffer(sound_buf);
+    }
+
+    void inc_time() {
         current_time += time_delta;
         if (time_delta > sf::seconds(0) &&
             music.getStatus() == sf::Music::Playing) {
@@ -212,8 +117,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             end_draw_iterator++;
         }
     };
-
-    auto dec_time = [&]() {
+    void dec_time() {
         current_time -= time_delta;
         if (current_time < sf::seconds(0)) {
             current_time = sf::seconds(0);
@@ -264,8 +168,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         }
         end_draw_iterator++;
     };
-
-    auto draw_yes_and_no_decision = [&](const std::string &decision) {
+    bool draw_yes_and_no_decision(const std::string &decision) {
         sf::Text text_buf;
         text_buf.setCharacterSize(80);
         text_buf.setFont(font);
@@ -280,12 +183,12 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                               (float)window.getSize().y / 2);
         no_button.setFillColor(sf::Color::Green);
 
-        rect.setFillColor(sf::Color(100, 100, 100, 10));
+        background.setFillColor(sf::Color(100, 100, 100, 10));
         while (true) {
-            window.draw(rect);
+            window.draw(background);
             text_buf.setString(decision);
             text_buf.setFillColor(sf::Color::White);
-            text_buf.setPosition(sf::Vector2f((float)window.getSize().x / 3,
+            text_buf.setPosition(sf::Vector2f((float)window.getSize().x / 2 - (float) (decision.size() / 4 * text_buf.getCharacterSize()),
                                               (float)window.getSize().y / 10));
             window.draw(text_buf);
 
@@ -308,19 +211,20 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     yes_button.getRadius() - text_buf.getCharacterSize() / 2));
             window.draw(text_buf);
             window.display();
+            sf::Event event{};
             if (!window.pollEvent(event)) {
                 continue;
             }
             if (event.type == sf::Event::MouseButtonPressed) {
-                rect.setFillColor(sf::Color::White);
-                if (is_circle_correct_click(
+                background.setFillColor(sf::Color::White);
+                if (USO::Aim_circle::is_circle_correct_click(
                         sf::Vector2f(sf::Mouse::getPosition(window)),
                         yes_button.getPosition() +
                             sf::Vector2f(yes_button.getRadius(),
                                          yes_button.getRadius()),
                         yes_button.getRadius())) {
                     return false;
-                } else if (is_circle_correct_click(
+                } else if (USO::Aim_circle::is_circle_correct_click(
                                sf::Vector2f(sf::Mouse::getPosition(window)),
                                no_button.getPosition() +
                                    sf::Vector2f(no_button.getRadius(),
@@ -330,9 +234,11 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 }
             }
         }
-    };
-    auto draw_input_text_box = [&](sf::Time &time, std::string time_name) {
+    }
+
+    void draw_input_text_box(sf::Time &time, std::string time_name) {
         sf::Event event{};
+        music.pause();
         time_name += "=";
         sf::RectangleShape input_field(
             sf::Vector2f((float)window.getSize().x / 4, 90));
@@ -375,59 +281,20 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             window.draw(genius_text);
             window.display();
         }
-    };
-    auto save_map = [&]() {
-        std::fstream fout;
-        fout.open(R"(data/maps/editing_map.txt)",
-                  std::ios::out | std::ios::trunc);
-        if (!fout) {
-            std::cerr << "File not found" << std::endl;
-            return;
-        }
-        is_saved = true;
-        fout << map_name << std::endl;
-        fout << author_name << std::endl;
-        fout << music_address << std::endl;
-        fout << music_name << std::endl;
-        fout << image_address << std::endl;
-        fout << font_address << std::endl;
-        fout << sound_address << std::endl;
-        for (auto &i : editing_map_objects) {
-            auto &object = *i;
-            if (typeid(object) == typeid(USO::Aim_circle)) {
-                fout << "Aim_circle" << std::endl;
-                fout << i->get_start_time().asMicroseconds() << std::endl;
-                fout << i->get_duration_time().asMicroseconds() << std::endl;
-                fout << i->get_pos().x << std::endl;
-                fout << i->get_pos().y << std::endl;
-                fout << const_circle_beat_radius << " "
-                     << const_active_circle_radius << std::endl;
-            } else if (typeid(object) == typeid(USO::Aim_slider)) {
-                fout << "Aim_slider" << std::endl;
-                fout << i->get_start_time().asMicroseconds() << std::endl;
-                fout << i->get_duration_time().asMicroseconds() << std::endl;
-                fout << i->get_pos().x << std::endl;
-                fout << i->get_pos().y << std::endl;
-                fout << const_circle_beat_radius << " "
-                     << const_active_circle_radius << std::endl;
-                fout << i->get_end_pos().x << " " << i->get_end_pos().y
-                     << std::endl;
-                fout << i->get_move_time().asMicroseconds() << std::endl;
-            }
-        }
-        fout.close();
-    };
-    // lambda zone ends
+    }
 
-    while (true) {
+    void change_state() {
         if (music.getStatus() == sf::Music::Playing) {
             current_time = clock.getElapsedTime() + remembered_time;
             time_delta = sf::seconds(0);
             inc_time();
             time_delta = saved_delta;
         }
-        window.draw(rect);
-
+    }
+    void draw_background() {
+        window.draw(background);
+    }
+    void draw_objects() {
         for (auto i = start_draw_iterator; i != end_draw_iterator; i++) {
             if ((*i)->get_start_time() > current_time) {
                 continue;
@@ -452,6 +319,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 object_rect.setPosition({road_rect.getPosition().x +
                                              pos_coef * road_rect.getSize().x,
                                          road_rect.getPosition().y});
+
                 object_rect.setSize(
                     {std::max(10.f, width_coef * road_rect.getSize().x) +
                          std::min(0.f, object_rect.getPosition().x -
@@ -460,6 +328,9 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 object_rect.setPosition({std::max(road_rect.getPosition().x,
                                                   object_rect.getPosition().x),
                                          object_rect.getPosition().y});
+                if (object_rect.getSize().x < 0) {
+                    std::cout << current_time.asSeconds() <<std::endl;
+                }
                 window.draw(object_rect);
             }
             if (break_point_time >= current_time &&
@@ -495,83 +366,250 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         delta_text.setString("Delta = " +
                              std::to_string(time_delta.asMilliseconds()));
         window.draw(delta_text);
+    }
+    void play_or_pause() {
+        if (music.getStatus() == sf::Music::Paused ||
+            music.getStatus() == sf::Music::Stopped) {
+            remembered_time = current_time;
+            saved_delta = time_delta;
+            clock.restart();
+            music.setPlayingOffset(current_time);
+            music.play();
+        } else {
+            time_delta = saved_delta;
+            music.pause();
+        }
+    }
+    void return_to_breakpoint() {
+        remembered_time = break_point_time;
+        clock.restart();
+        current_time = remembered_time;
+        saved_delta = time_delta;
+        time_delta = sf::seconds(0);
+        dec_time();
+        inc_time();
+        time_delta = saved_delta;
+    }
+};
 
+}  // namespace
+
+namespace USO {
+void Aim_map::constructor_run(sf::RenderWindow &window) {
+    Editing_box editing_box(map_objects, *this, window);
+
+    bool slider_choosing_end = false;
+
+    sf::Event event{};
+    bool is_saved;
+
+    // WARNING: lambda zone
+    auto handle_left_click = [&]() {
+        if (editing_box.drag) {
+            return;
+        }
+        is_saved = false;
+        editing_box.drag = true;
+
+        //        music.pause();
+        for (auto i = editing_box.start_draw_iterator;
+             i != editing_box.end_draw_iterator; i++) {
+            auto &object = **i;
+            if (typeid(object) == typeid(USO::Aim_circle)) {
+                if (USO::Aim_circle::is_circle_correct_click(
+                        sf::Vector2f(sf::Mouse::getPosition(window)),
+                        (*i)->get_pos(), USO::const_circle_beat_radius)) {
+                    editing_box.dragged_pos_ptr = &(*i)->get_pos();
+                    return;
+                }
+            } else if (typeid(object) == typeid(USO::Aim_slider)) {
+                if (USO::Aim_circle::is_circle_correct_click(
+                        sf::Vector2f(sf::Mouse::getPosition(window)),
+                        (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
+                    editing_box.dragged_pos_ptr = &(*i)->get_end_pos();
+                    return;
+                }
+            }
+        }
+        switch (editing_box.object_to_create) {
+            case OBJECT_TO_CREATE::CIRCLE:
+                editing_box.editing_map_objects.insert(
+                    editing_box.start_draw_iterator,
+                    std::make_shared<USO::Aim_circle>(
+                        USO::Aim_circle(editing_box.current_time -
+                                            USO::const_active_circle_duration,
+                                        USO::const_active_circle_duration,
+                                        (float)sf::Mouse::getPosition(window).x,
+                                        (float)sf::Mouse::getPosition(window).y,
+                                        USO::const_circle_beat_radius,
+                                        USO::const_active_circle_radius)));
+                editing_box.start_draw_iterator--;
+                editing_box.dragged_pos_ptr =
+                    &(*editing_box.start_draw_iterator)->get_pos();
+                break;
+            case OBJECT_TO_CREATE::SLIDER:
+
+                editing_box.editing_map_objects.insert(
+                    editing_box.start_draw_iterator,
+                    std::make_shared<USO::Aim_slider>(
+                        USO::Aim_slider(editing_box.current_time -
+                                            USO::const_active_circle_duration,
+                                        USO::const_active_circle_duration,
+                                        (float)sf::Mouse::getPosition(window).x,
+                                        (float)sf::Mouse::getPosition(window).y,
+                                        USO::const_circle_beat_radius,
+                                        USO::const_active_circle_radius,
+                                        (float)sf::Mouse::getPosition(window).x,
+                                        (float)sf::Mouse::getPosition(window).y,
+                                        sf::seconds(1000))));
+                editing_box.start_draw_iterator--;
+                editing_box.dragged_pos_ptr =
+                    &(*editing_box.start_draw_iterator)->get_end_pos();
+                slider_choosing_end = true;
+                break;
+            case OBJECT_TO_CREATE::SPINNER:
+                editing_box.editing_map_objects.insert(
+                    editing_box.start_draw_iterator,
+                    std::make_shared<USO::Aim_spinner>(
+                        USO::Aim_spinner(editing_box.current_time -
+                                             USO::const_active_circle_duration,
+                                         USO::const_active_circle_duration,
+                                         (float)window.getSize().x / 2,
+                                         (float)window.getSize().y / 2,
+                                         USO::const_active_circle_radius)));
+                editing_box.start_draw_iterator--;
+                editing_box.dragged_pos_ptr =
+                    &(*editing_box.start_draw_iterator)->get_end_pos();
+                slider_choosing_end = true;
+                break;
+        }
+    };
+
+    auto handle_right_click = [&]() {
+        is_saved = false;
+        for (auto i = editing_box.start_draw_iterator;
+             i != editing_box.end_draw_iterator; i++) {
+            if (USO::Aim_circle::is_circle_correct_click(
+                    sf::Vector2f(sf::Mouse::getPosition(window)),
+                    (*i)->get_pos(), USO::const_circle_beat_radius)) {
+                if (i == editing_box.start_draw_iterator) {
+                    editing_box.start_draw_iterator++;
+                }
+                editing_box.editing_map_objects.erase(i);
+                return;
+            }
+        }
+    };
+
+    auto save_map = [&]() {
+        std::fstream fout;
+        fout.open(R"(data/maps/editing_map.txt)",
+                  std::ios::out | std::ios::trunc);
+        if (!fout) {
+            std::cerr << "File not found" << std::endl;
+            return;
+        }
+        is_saved = true;
+        fout << "Aim" << std::endl;
+        fout << map_name << std::endl;
+        fout << author_name << std::endl;
+        fout << music_address << std::endl;
+        fout << music_name << std::endl;
+        fout << image_address << std::endl;
+        fout << font_address << std::endl;
+        fout << sound_address << std::endl;
+        for (auto &i : editing_box.editing_map_objects) {
+            auto &object = *i;
+            if (typeid(object) == typeid(USO::Aim_circle)) {
+                fout << "Aim_circle" << std::endl;
+                fout << i->get_start_time().asMicroseconds() << std::endl;
+                fout << i->get_duration_time().asMicroseconds() << std::endl;
+                fout << i->get_pos().x << std::endl;
+                fout << i->get_pos().y << std::endl;
+                fout << const_circle_beat_radius << " "
+                     << const_active_circle_radius << std::endl;
+            } else if (typeid(object) == typeid(USO::Aim_slider)) {
+                fout << "Aim_slider" << std::endl;
+                fout << i->get_start_time().asMicroseconds() << std::endl;
+                fout << i->get_duration_time().asMicroseconds() << std::endl;
+                fout << i->get_pos().x << std::endl;
+                fout << i->get_pos().y << std::endl;
+                fout << const_circle_beat_radius << " "
+                     << const_active_circle_radius << std::endl;
+                fout << i->get_end_pos().x << " " << i->get_end_pos().y
+                     << std::endl;
+                fout << i->get_move_time().asMicroseconds() << std::endl;
+            }
+        }
+        map_objects = editing_box.editing_map_objects;
+        fout.close();
+    };
+    // lambda zone ends
+
+    while (true) {
+        editing_box.change_state();
+        editing_box.draw_background();
+        editing_box.draw_objects();
         window.display();
 
-        if (!window.pollEvent(event) && !drag) {
+        if (!window.pollEvent(event) && !editing_box.drag) {
             continue;
         }
 
         switch (event.type) {
             case sf::Event::KeyPressed:
-                if (dragged_pos_ptr && drag) {
-                    *dragged_pos_ptr =
+                if (editing_box.dragged_pos_ptr && editing_box.drag) {
+                    *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition(window));
                     break;
                 }
                 if (event.key.code == sf::Keyboard::Escape) {
-                    music.pause();
-                    remembered_time = current_time;
-                    if (!is_saved && draw_yes_and_no_decision("Do you want to save?")) {
+                    editing_box.music.pause();
+                    editing_box.remembered_time = editing_box.current_time;
+                    if (!is_saved && editing_box.draw_yes_and_no_decision(
+                                         "Save?")) {
                         save_map();
                     }
                     window.display();
-                    if (draw_yes_and_no_decision("Do you want to leave")) {
+                    if (editing_box.draw_yes_and_no_decision(
+                            "Do you want to leave")) {
                         return;
                     }
                 }
                 if (event.key.code == sf::Keyboard::Space) {
-                    if (music.getStatus() == sf::Music::Paused ||
-                        music.getStatus() == sf::Music::Stopped) {
-                        remembered_time = current_time;
-                        saved_delta = time_delta;
-                        clock.restart();
-                        music.setPlayingOffset(current_time);
-                        music.play();
-                    } else {
-                        time_delta = saved_delta;
-                        music.pause();
-                    }
+                    editing_box.play_or_pause();
                     break;
                 }
                 if (event.key.code == sf::Keyboard::Right) {
-                    inc_time();
+                    editing_box.inc_time();
                 } else if (event.key.code == sf::Keyboard::Left) {
-                    dec_time();
+                    editing_box.dec_time();
                 } else if (event.key.code == sf::Keyboard::Z) {
-                    dragged_key[event.key.code] = 1;
                     handle_left_click();
                 } else if (event.key.code == sf::Keyboard::X) {
                     handle_right_click();
                 } else if (event.key.code == sf::Keyboard::D) {
-                    music.pause();
-                    draw_input_text_box(time_delta, "delta");
+                    editing_box.draw_input_text_box(editing_box.time_delta,
+                                                    "delta");
                 } else if (event.key.code == sf::Keyboard::B) {
-                    break_point_time = current_time;
+                    editing_box.break_point_time = editing_box.current_time;
                 } else if (event.key.code == sf::Keyboard::R) {
-                    remembered_time = break_point_time;
-                    clock.restart();
-                    current_time = remembered_time;
-                    saved_delta = time_delta;
-                    time_delta = sf::seconds(0);
-                    dec_time();
-                    inc_time();
-                    time_delta = saved_delta;
+                    editing_box.return_to_breakpoint();
                 } else if (event.key.code == sf::Keyboard::S) {
                     if (!is_saved) {
                         save_map();
                     }
                 } else if (event.key.code == sf::Keyboard::Num1) {
-                    object_to_create = OBJECT_TO_CREATE::CIRCLE;
+                    editing_box.object_to_create = OBJECT_TO_CREATE::CIRCLE;
                 } else if (event.key.code == sf::Keyboard::Num2) {
-                    object_to_create = OBJECT_TO_CREATE::SLIDER;
+                    editing_box.object_to_create = OBJECT_TO_CREATE::SLIDER;
                 } else if (event.key.code == sf::Keyboard::Num3) {
-                    object_to_create = OBJECT_TO_CREATE::SPINNER;
+                    editing_box.object_to_create = OBJECT_TO_CREATE::SPINNER;
                 }
                 break;
             case sf::Event::MouseMoved:
-                if (dragged_pos_ptr && drag) {
-                    *dragged_pos_ptr =
+                if (editing_box.dragged_pos_ptr && editing_box.drag) {
+                    *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition(window));
                     break;
                 }
@@ -582,65 +620,199 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     break;
                 }
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    dragged_key[event.key.code] = 1;
                     handle_left_click();
-                    dragged_mouse_button[event.mouseButton.button] = 1;
                 } else {
                     handle_right_click();
                 }
                 break;
             case sf::Event::KeyReleased:
-                if (!drag) {
+                if (!editing_box.drag) {
                     break;
                 }
                 if (event.key.code != sf::Keyboard::Z &&
                     event.key.code != sf::Keyboard::X) {
                     break;
                 }
-                if (dragged_key[event.key.code] == 0) {
-                    break;
-                }
-                dragged_key[event.key.code] = 0;
-                drag = false;
-                dragged_pos_ptr = nullptr;
+                editing_box.drag = false;
+                editing_box.dragged_pos_ptr = nullptr;
                 break;
             case sf::Event::MouseButtonReleased:
-                if (!drag) {
+                if (!editing_box.drag) {
                     break;
                 }
-                if (dragged_mouse_button[event.mouseButton.button] == 0) {
-                    break;
-                }
-                dragged_mouse_button[event.mouseButton.button] = 0;
-                drag = false;
-                if (object_to_create == OBJECT_TO_CREATE::SLIDER) {
-                    if (!dragged_pos_ptr) {
+                editing_box.drag = false;
+                if (editing_box.object_to_create == OBJECT_TO_CREATE::SLIDER) {
+                    if (!editing_box.dragged_pos_ptr) {
                         break;
                     }
-                    *dragged_pos_ptr = sf::Vector2f(sf::Mouse::getPosition());
-                    (*start_draw_iterator)->get_move_time() =
-                        sf::seconds(static_cast<float>(
-                            get_dist(dynamic_cast<Aim_slider &>(
-                                         **start_draw_iterator)
-                                         .get_start_pos(),
-                                     (*start_draw_iterator)->get_end_pos()) *
-                            time_per_pixels / 1000));
-                    dragged_pos_ptr = nullptr;
+                    *editing_box.dragged_pos_ptr =
+                        sf::Vector2f(sf::Mouse::getPosition());
+                    (*editing_box.start_draw_iterator)
+                        ->get_move_time() = sf::seconds(static_cast<float>(
+                        get_dist(
+                            dynamic_cast<Aim_slider &>(
+                                **editing_box.start_draw_iterator)
+                                .get_start_pos(),
+                            (*editing_box.start_draw_iterator)->get_end_pos()) *
+                        time_per_pixels / 1000));
+                    editing_box.dragged_pos_ptr = nullptr;
                 }
                 slider_choosing_end = false;
                 break;
             case sf::Event::MouseWheelMoved:
                 if (event.mouseWheel.delta > 0) {
-                    inc_time();
+                    editing_box.inc_time();
                 } else {
-                    dec_time();
+                    editing_box.dec_time();
                 }
                 break;
             default:
-                if (drag && slider_choosing_end) {
-                    (**start_draw_iterator).get_end_pos() =
+                break;
+        }
+    }
+}
+void Conveyor_map::constructor_run(sf::RenderWindow &window) {
+    Editing_box editing_box(map_objects, *this, window);
+
+    sf::Event event{};
+    bool is_saved;
+
+    // WARNING: lambda zone
+    auto handle_left_click = [&](USO::Conveyor_line &line) {
+        if (line.dragged) {
+            return;
+        }
+        line.dragged = true;
+        is_saved = false;
+
+        editing_box.music.pause();
+        for (auto i = editing_box.start_draw_iterator;
+             i != editing_box.end_draw_iterator; i++) {
+            auto &object = **i;
+            if (USO::Conveyor_note::is_note_correct_click(
+                    sf::Vector2f(sf::Mouse::getPosition(window)),
+                    (*i)->get_pos(), line)) {
+                editing_box.editing_map_objects.erase(i);
+                return;
+            }
+        }
+        editing_box.editing_map_objects.insert(
+            editing_box.start_draw_iterator,
+            std::make_shared<USO::Conveyor_note>(USO::Conveyor_note(
+                editing_box.current_time - USO::const_active_note_duration,
+                USO::const_active_note_duration, line)));
+        editing_box.start_draw_iterator--;
+    };
+
+    auto save_map = [&]() {
+        std::fstream fout;
+        fout.open(R"(data/maps/test__map.txt)",
+                  std::ios::out | std::ios::trunc);
+        if (!fout) {
+            std::cerr << "File not found" << std::endl;
+            return;
+        }
+        is_saved = true;
+        fout << "Conveyor" << std::endl;
+        fout << map_name << std::endl;
+        fout << author_name << std::endl;
+        fout << music_address << std::endl;
+        fout << music_name << std::endl;
+        fout << image_address << std::endl;
+        fout << font_address << std::endl;
+        fout << sound_address << std::endl;
+        fout << const_line_pos.x << std::endl;
+        fout << const_line_pos.y << std::endl;
+        fout << const_line_size.x << std::endl;
+        fout << const_line_size.y << std::endl;
+
+        for (auto &i : editing_box.editing_map_objects) {
+            auto &object = *i;
+            fout << i->get_start_time().asMicroseconds() << std::endl;
+            fout << i->get_duration_time().asMicroseconds() << std::endl;
+            fout << i->get_pos().x << std::endl;
+            fout << i->get_pos().y << std::endl;
+            fout << const_circle_beat_radius << " "
+                 << const_active_circle_radius << std::endl;
+        }
+        map_objects = editing_box.editing_map_objects;
+        fout.close();
+    };
+    // lambda zone ends
+
+    while (true) {
+        editing_box.change_state();
+
+        editing_box.draw_background();
+        for (auto &line : lines) {
+            line->draw(window);
+        }
+        editing_box.draw_objects();
+        window.display();
+
+        if (!window.pollEvent(event)) {
+            continue;
+        }
+
+        switch (event.type) {
+            case sf::Event::KeyPressed:
+                if (editing_box.dragged_pos_ptr && editing_box.drag) {
+                    *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition(window));
+                    break;
                 }
+                if (event.key.code == sf::Keyboard::Escape) {
+                    editing_box.music.pause();
+                    editing_box.remembered_time = editing_box.current_time;
+                    if (!is_saved && editing_box.draw_yes_and_no_decision(
+                                         "Save?")) {
+                        save_map();
+                    }
+                    window.display();
+                    if (editing_box.draw_yes_and_no_decision(
+                            "Do you want to leave")) {
+                        return;
+                    }
+                }
+                if (event.key.code == sf::Keyboard::Space) {
+                    editing_box.play_or_pause();
+                    break;
+                }
+                if (event.key.code == sf::Keyboard::Right) {
+                    editing_box.inc_time();
+                } else if (event.key.code == sf::Keyboard::Left) {
+                    editing_box.dec_time();
+                } else if (event.key.code == sf::Keyboard::D) {
+                    editing_box.draw_input_text_box(editing_box.time_delta,
+                                                    "delta");
+                } else if (event.key.code == sf::Keyboard::B) {
+                    editing_box.break_point_time = editing_box.current_time;
+                } else if (event.key.code == sf::Keyboard::R) {
+                    editing_box.return_to_breakpoint();
+                } else if (event.key.code == sf::Keyboard::S) {
+                    if (!is_saved) {
+                        save_map();
+                    }
+                } else if (event.key.code >= sf::Keyboard::Num1 &&
+                           event.key.code <= sf::Keyboard::Num4) {
+                    handle_left_click(
+                        *lines[event.key.code - sf::Keyboard::Num1]);
+                }
+                break;
+            case sf::Event::KeyReleased:
+                if (event.key.code >= sf::Keyboard::Num1 &&
+                    event.key.code <= sf::Keyboard::Num4) {
+                    lines[event.key.code - sf::Keyboard::Num1]->dragged = false;
+                }
+                break;
+            case sf::Event::MouseWheelMoved:
+                if (event.mouseWheel.delta > 0) {
+                    editing_box.inc_time();
+                } else {
+                    editing_box.dec_time();
+                }
+                break;
+            default:
                 break;
         }
     }

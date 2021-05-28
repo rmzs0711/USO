@@ -1,65 +1,50 @@
-Stronger
+ff
+Rama
 data\music\stronger.ogg
-RMZS
-stronk
-
+Gold
+data\img\stronger.png
+data\fonts\aller.ttf
+data\music\click_sound.ogg
 200
 0
 150
 900
 
-0
 500 2000
 0
-
-1
 2126 2000
 1
-
-2
 2541 2000
 2
-
-3
 2941 2000
 3
 
-4
 3326 2000
 0
 
-5
 3708 2000
 1
 
-6
 4093 2000
 1
 
-7
 4508 2000
 0
 
-8
 5659 2000
 2
 
-9
 6692 2000
 3
 
-10
 7726 2000
 1
 
-11
 8759 2000
 0
 
-12
 8992 2000
 3
 
-13
 9826 2000
 1

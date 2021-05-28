@@ -15,20 +15,24 @@ void Menu::Button::guidance(const sf::Vector2f &mouse) {
     }
 }
 
-void Menu::Button::press(sf::RenderWindow &window, const sf::Vector2f &mouse, BL::Game_session &gameSession) {
+void Menu::Button::press(sf::RenderWindow &window,
+                         const sf::Vector2f &mouse,
+                         BL::Game_session &gameSession) {
     if (is_circle_correct_click(mouse)) {
         switch (event) {
             case EXIT: {
                 window.close();
             } break;
-            case OPEN_AIM:
-            case RETRY: {
-                USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
+            case OPEN_AIM: {
+                USO::Aim_map test(R"(data\maps\editing_map.txt)");
                 test.run(window);
             } break;
-//            case OPEN_AIM: {
-//                // show_maps();
-//            } break;
+            case RETRY: {
+                gameSession.set_game_status(BL::Game_status::REPEAT);
+            } break;
+                //            case OPEN_AIM: {
+                //                // show_maps();
+                //            } break;
             case OPEN_CONVEYOR: {  // soon
                 USO::Conveyor_map test(R"(input.txt)");
                 test.run(window);
