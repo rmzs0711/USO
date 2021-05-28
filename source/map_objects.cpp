@@ -272,11 +272,16 @@ std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
     return std::make_shared<Aim_circle>(Aim_slider(*this));
 }
 
+std::shared_ptr<USO::Map_object> USO::Aim_spinner::clone() {
+    return std::make_shared<Aim_circle>(Aim_spinner(*this));
+}
+
+
+
 sf::Vector2f &USO::Aim_slider::get_start_pos() {
     return start_pos;
 }
 
-// CONVEYOR
 
 bool USO::Conveyor_note::change_state(sf::Time current_time) {
     if (current_time <= start_time + duration_time + sf::milliseconds(0)) {

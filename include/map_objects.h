@@ -44,7 +44,7 @@ public:
     virtual sf::Time &get_duration_time();
     virtual sf::Vector2f &get_pos();
     virtual sf::Vector2f &get_end_pos() {return pos;}
-    virtual std::shared_ptr<Map_object> clone() { return nullptr;}
+    virtual std::shared_ptr<Map_object> clone() { return nullptr; }
     virtual void reset() {}
     virtual sf::Time &get_move_time() {
         return move_time;
@@ -183,6 +183,7 @@ public:
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     static bool check_sum_of_radians(float &);
     bool check_event_for_draw(sf::Vector2f);
+    std::shared_ptr<Map_object> clone() override;
 };
 
 //struct Star : Map_object {

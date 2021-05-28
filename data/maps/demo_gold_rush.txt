@@ -1,9 +1,11 @@
-GoldRush
-data\music\gold_rush.ogg
-RMZS
-GoldRussian???
+ff
+Rama
+data\music\stronger.ogg
+Gold
+data\img\stronger.png
+data\fonts\aller.ttf
+data\music\click_sound.ogg
 Aim_spinner
-0
-0 100000
+0 100000000
 900 500
 500
