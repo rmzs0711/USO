@@ -477,13 +477,13 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             case OBJECT_TO_CREATE::SPINNER:
                 editing_box.editing_map_objects.insert(
                     editing_box.start_draw_iterator,
-                    std::make_shared<USO::Aim_spinner>(
-                        USO::Aim_spinner(editing_box.current_time -
-                                             USO::const_active_circle_duration * 2.f,
-                                         USO::const_active_circle_duration * 2.f,
-                                         (float)window.getSize().x / 2,
-                                         (float)window.getSize().y / 2,
-                                         USO::const_active_circle_radius * 2)));
+                    std::make_shared<USO::Aim_spinner>(USO::Aim_spinner(
+                        editing_box.current_time -
+                            USO::const_active_circle_duration * 2.f,
+                        USO::const_active_circle_duration * 2.f,
+                        (float)window.getSize().x / 2,
+                        (float)window.getSize().y / 2,
+                        USO::const_active_circle_radius * 2)));
                 editing_box.start_draw_iterator--;
                 editing_box.dragged_pos_ptr =
                     &(*editing_box.start_draw_iterator)->get_pos();

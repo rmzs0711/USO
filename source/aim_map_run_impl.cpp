@@ -105,16 +105,19 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 if (!field.get_field_objects().empty() &&
                     !field.get_field_objects().back()->change_state(
                         past_time + clock.getElapsedTime())) {
-                    if (typeid(field.get_field_objects().back()) ==
-                        typeid(USO::Aim_circle)) {
+                    USO::Map_object &back_object =
+                        *(field.get_field_objects().back());
+                    if (typeid(back_object) == typeid(USO::Aim_circle)) {
                         field.draw(font);
+                        window.draw(mouse);
                         window.display();
+                        game_session.decrease_health(game_session.damage());
                     }
                     field.get_field_objects().pop_back();
-                    game_session.decrease_health(game_session.damage());
                 }
 
                 field.draw(font);
+                window.draw(mouse);
                 window.display();
 
                 if (!window.pollEvent(event) && !drag) {
