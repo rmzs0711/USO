@@ -1,7 +1,3 @@
-//
-// Created by Aigerim on 15.04.2021.
-//
-
 #include "menu_objects.h"
 #include "menu.h"
 

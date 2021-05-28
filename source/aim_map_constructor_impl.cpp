@@ -160,6 +160,17 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                 slider_choosing_end = true;
                 break;
             case OBJECT_TO_CREATE::SPINNER:
+                editing_map_objects.insert(
+                    start_draw_iterator,
+                    std::make_shared<Aim_spinner>(Aim_spinner(
+                        current_time - const_active_circle_duration,
+                        const_active_circle_duration,
+                        (float)window.getSize().x / 2,
+                        (float)window.getSize().y / 2,
+                        const_active_circle_radius)));
+                start_draw_iterator--;
+                dragged_pos_ptr = &(*start_draw_iterator)->get_end_pos();
+                slider_choosing_end = true;
                 break;
         }
     };

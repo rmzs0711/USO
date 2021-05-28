@@ -34,7 +34,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     rect.setTexture(&image);
     rect.setFillColor(sf::Color(255, 255, 255, 70));
 
-    assert(game_session.get_game_status() == BL::Game_status::ACTION);
     bool drag = false;
     int number_of_dragged_buttons = 0;
     std::vector<int> dragged_key(
@@ -76,8 +75,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
         window.draw(mouse);
 
-        if (game_session.get_health() == 0) game_session.set_game_status(BL::Game_status::DEFEAT);
-        if (map_objects.back()->get_start_time() +
+        if (game_session.get_health() == 0) {
+            game_session.set_game_status(BL::Game_status::DEFEAT);
+        }
+        if (!map_objects.empty() && map_objects.back()->get_start_time() +
                 map_objects.back()->get_duration_time() < past_time + clock.getElapsedTime()) {
             game_session.set_game_status(BL::Game_status::VICTORY);
         }
