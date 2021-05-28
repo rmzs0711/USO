@@ -33,15 +33,18 @@ protected:
     }
 
 public:
-    Map(std::string map_address_,
+    // TODO setters, getters
+    Map(std::string mode_,
         std::string map_name_,
+        std::string map_address_,
         std::string music_address_,
         std::string music_name_,
         std::string image_address_,
         std::string font_address_,
         std::string sound_address_,
         std::list<std::shared_ptr<Map_object>> map_objects_ = {})
-        : map_name(std::move(map_name_)),
+        : mode(std::move(mode_)),
+          map_name(std::move(map_name_)),
           map_address(std::move(map_address_)),
           music_address(std::move(music_address_)),
           music_name(std::move(music_name_)),
@@ -62,12 +65,15 @@ public:
     virtual void run(sf::RenderWindow &) = 0;
     virtual void constructor_run(sf::RenderWindow &){};
 
+
 protected:
     Map() = default;
 };
 
 struct Aim_map final : Map {
-    Aim_map(std::string map_name_,
+    Aim_map() = default;
+    Aim_map(std::string mode_,
+            std::string map_name_,
             std::string map_address_,
             std::string music_address_,
             std::string music_name_,
@@ -75,7 +81,8 @@ struct Aim_map final : Map {
             std::string font_address_,
             std::string sound_address_,
             std::list<std::shared_ptr<Map_object>> map_objects_ = {})
-        : Map(std::move(map_name_),
+        : Map(std::move(mode_),
+              std::move(map_name_),
               std::move(map_address_),
               std::move(music_address_),
               std::move(music_name_),
@@ -95,6 +102,25 @@ private:
     const int NUMBER_OF_LINES = 4;
 
 public:
+    Conveyor_map(std::string mode_,
+    std::string map_name_,
+        std::string map_address_,
+    std::string music_address_,
+        std::string music_name_,
+    std::string image_address_,
+        std::string font_address_,
+    std::string sound_address_,
+        std::list<std::shared_ptr<Map_object>> map_objects_ = {})
+    : Map(std::move(mode_),
+        std::move(map_name_),
+        std::move(map_address_),
+        std::move(music_address_),
+        std::move(music_name_),
+        std::move(image_address_),
+        std::move(font_address_),
+        std::move(sound_address_),
+        std::move(map_objects_)) {}
+
     explicit Conveyor_map(const std::string &filename);
     std::vector<std::shared_ptr<Conveyor_line>> lines;
 
