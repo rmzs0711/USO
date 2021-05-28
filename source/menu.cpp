@@ -26,6 +26,15 @@ std::vector<std::string> get_vector_of_saved_maps_names() {
     }
     return res;
 }
+void draw_menu(sf::RenderWindow &window) {
+    sf::Texture img;
+    img.loadFromFile(R"(data\img\back.png)");
+    sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
+    rect.setTexture(&img);
+    rect.setPosition(0, 0);
+//    rect.setFillColor(sf::Color(255, 255, 255, 40));
+    window.draw(rect);
+}
 }  // namespace
 
 sf::RenderWindow &Menu::set_settings() {
@@ -41,16 +50,24 @@ sf::RenderWindow &Menu::set_settings() {
 
 void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
     std::vector<Menu::Button> buttons;
-    buttons.emplace_back(400, 400, 200, Menu::OPEN_AIM);
-    buttons.emplace_back(0, 0, 100, Menu::EXIT, sf::Color::Cyan);
-    buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS, sf::Color::Green);
+    std::vector<sf::Texture> textures(4);
+    textures[0].loadFromFile(R"(data\img\5.png)");
+    textures[1].loadFromFile(R"(data\img\6.png)");
+    textures[2].loadFromFile(R"(data\img\7.png)");
+    textures[3].loadFromFile(R"(data\img\1.png)");
+
+    buttons.emplace_back(400, 400, 200, Menu::OPEN_AIM, textures[0]);
+    buttons.emplace_back(0, 0, 100, Menu::EXIT, textures[1]);
+    buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS,
+                         textures[2]);
     buttons.emplace_back(900, 400, 200, Menu::OPEN_CONVEYOR,
-                         sf::Color::Magenta);
+                         textures[3]);
 
     sf::CircleShape mouse(5.f);
 
     while (window.isOpen()) {
         window.clear();
+        draw_menu(window);
         sf::Event event{};
         if (window.pollEvent(event)) {
             switch (event.type) {
@@ -99,10 +116,14 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
 
 void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
     std::vector<Menu::Button> buttons;
-    buttons.emplace_back(400, 400, 200, Menu::RETRY);
-    buttons.emplace_back(0, 0, 100, Menu::BACK_TO_MENU, sf::Color::Cyan);
+    std::vector<sf::Texture> textures(3);
+    textures[0].loadFromFile(R"(data\img\1.png)");
+    textures[1].loadFromFile(R"(data\img\2.png)");
+    textures[2].loadFromFile(R"(data\img\3.png)");
+    buttons.emplace_back(400, 400, 200, Menu::RETRY, textures[0]);
+    buttons.emplace_back(0, 0, 100, Menu::BACK_TO_MENU, textures[1]);
     if (gameSession.get_game_status() == BL::Game_status::PAUSE) {
-        buttons.emplace_back(900, 400, 100, Menu::CONTINUE, sf::Color::Magenta);
+        buttons.emplace_back(900, 400, 100, Menu::CONTINUE, textures[2]);
     }
 
     sf::CircleShape mouse(5.f);
@@ -112,6 +133,7 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
             gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         sf::Event event{};
         window.clear();
+        draw_menu(window);
         if (window.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::KeyPressed: {
