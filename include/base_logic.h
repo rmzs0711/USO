@@ -16,7 +16,7 @@ enum class Game_status {
     PAUSE,
     VICTORY,
     DEFEAT,
-    REPEAT
+    NEED_TO_RETRY
 };
 
 struct Game_session {
@@ -42,9 +42,11 @@ public:
 
     void increase_combo(unsigned long long);
     [[nodiscard]] unsigned long long get_combo() const;
+    void set_combo(unsigned long long);
 
     void increase_health(int);
     void decrease_health(int);
+    void set_health(int);
     [[maybe_unused]] void lock_combo();
     [[maybe_unused]] void unlock_combo();
     [[maybe_unused]] void lock_score();

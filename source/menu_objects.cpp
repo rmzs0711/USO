@@ -24,16 +24,14 @@ void Menu::Button::press(sf::RenderWindow &window,
                 window.close();
             } break;
             case OPEN_AIM: {
-                USO::Aim_map test(R"(data\maps\editing_map.txt)");
+                USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
                 test.run(window);
             } break;
             case RETRY: {
-                gameSession.set_game_status(BL::Game_status::REPEAT);
+                gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
             } break;
-                //            case OPEN_AIM: {
-                //                // show_maps();
-                //            } break;
-            case OPEN_CONVEYOR: {  // soon
+
+            case OPEN_CONVEYOR: {
                 USO::Conveyor_map test(R"(input.txt)");
                 test.run(window);
             } break;
@@ -42,12 +40,10 @@ void Menu::Button::press(sf::RenderWindow &window,
             } break;
             case CONTINUE: {
                 gameSession.set_game_status(BL::Game_status::ACTION);
-                return;
-            }
+            } break;
             case BACK_TO_MENU: {
                 menu(window, gameSession);
-                return;
-            }
+            } break;
         }
     }
 }

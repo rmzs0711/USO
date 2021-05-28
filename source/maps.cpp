@@ -13,6 +13,7 @@ USO::Aim_map::Aim_map(const std::string &filename) : Map() {
         std::cerr << "File not found\n";
         std::exit(3);
     }
+    file >> mode;
     file >> map_name;
     file >> author_name;
     file >> music_address;
