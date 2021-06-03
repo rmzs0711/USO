@@ -1,13 +1,9 @@
-//
-// Created by Aigerim on 15.04.2021.
-//
-
 #include "menu.h"
 #include <fstream>
+#include <string>
 #include <vector>
 #include "maps.h"
 #include "menu_objects.h"
-#include <string>
 
 namespace {
 int transparent_lvl = 0;
@@ -34,7 +30,8 @@ void draw_menu(sf::RenderWindow &window) {
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setTexture(&img);
     rect.setPosition(0, 0);
-    rect.setFillColor(sf::Color(255, 255, 255, transparent_lvl > 255 ? 255 : transparent_lvl++));
+    rect.setFillColor(sf::Color(
+        255, 255, 255, transparent_lvl > 255 ? 255 : transparent_lvl++));
     window.draw(rect);
 }
 }  // namespace
@@ -58,12 +55,9 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
     textures[2].loadFromFile(R"(data\img\7.png)");
     textures[3].loadFromFile(R"(data\img\1.png)");
 
-    buttons.emplace_back(400, 400, 200, Menu::OPEN_AIM, textures[0]);
-    buttons.emplace_back(0, 0, 100, Menu::EXIT, textures[1]);
-    buttons.emplace_back(700, 50, 100, Menu::OPEN_SETTINGS,
-                         textures[2]);
-    buttons.emplace_back(900, 400, 200, Menu::OPEN_CONVEYOR,
-                         textures[3]);
+    buttons.emplace_back(400, 400, 300, Menu::OPEN_AIM, textures[0]);
+    buttons.emplace_back(10, 10, 100, Menu::EXIT, textures[1]);
+    buttons.emplace_back(1100, 400, 250, Menu::OPEN_CONVEYOR, textures[3]);
 
     sf::CircleShape mouse(5.f);
 
@@ -123,10 +117,10 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
     textures[0].loadFromFile(R"(data\img\1.png)");
     textures[1].loadFromFile(R"(data\img\2.png)");
     textures[2].loadFromFile(R"(data\img\3.png)");
-    buttons.emplace_back(400, 400, 200, Menu::RETRY, textures[0]);
-    buttons.emplace_back(0, 0, 100, Menu::BACK_TO_MENU, textures[1]);
+    buttons.emplace_back(400, 400, 150, Menu::RETRY, textures[0]);
+    buttons.emplace_back(0, 0, 200, Menu::BACK_TO_MENU, textures[1]);
     if (gameSession.get_game_status() == BL::Game_status::PAUSE) {
-        buttons.emplace_back(900, 400, 100, Menu::CONTINUE, textures[2]);
+        buttons.emplace_back(900, 400, 130, Menu::CONTINUE, textures[2]);
     }
 
     sf::CircleShape mouse(5.f);
@@ -191,7 +185,8 @@ void Menu::constructor_menu(sf::Window &window) {
     }
 }
 
-Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
+Menu::scrolling_menu::scrolling_menu(std::string filename_)
+    : filename(std::move(filename_)) {
     transparent_lvl = 0;
     std::ifstream file(filename);
     std::string map_name;
@@ -228,20 +223,23 @@ Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move
 
 bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
     if (construct_new_map.getPosition().x <= mouse.x &&
-        construct_new_map.getPosition().x +
-        construct_new_map.getSize().x >= mouse.x &&
-        construct_new_map.getPosition().y +
-        construct_new_map.getSize().y >= mouse.y &&
+        construct_new_map.getPosition().x + construct_new_map.getSize().x >=
+            mouse.x &&
+        construct_new_map.getPosition().y + construct_new_map.getSize().y >=
+            mouse.y &&
         construct_new_map.getPosition().y <= mouse.y) {
         get_input(window);
 
         if (list_of_data[0] == "Aim") {
             add_new_map(list_of_data[1]);
         } else if (list_of_data[0] == "Conveyor") {
-            USO::Conveyor_map test(list_of_data[0], list_of_data[1],
-                              list_of_data[2], R"(data\music\)" + list_of_data[3] ,
-                              list_of_data[4], R"(data\img\)" + list_of_data[5],
-                              R"(data\fonts\)" + list_of_data[6], R"(data\sounds\)" + list_of_data[7]); // запуск конструктора карт !!!
+            USO::Conveyor_map test(
+                list_of_data[0], list_of_data[1], list_of_data[2],
+                R"(data\music\)" + list_of_data[3], list_of_data[4],
+                R"(data\img\)" + list_of_data[5],
+                R"(data\fonts\)" + list_of_data[6],
+                R"(data\sounds\)" +
+                    list_of_data[7]);  // запуск конструктора карт !!!
             add_new_map(list_of_data[1]);
             test.constructor_run(window);
         }
@@ -250,9 +248,11 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
     for (int i = 0; i < blocks_of_maps_name.size(); i++) {
         if (blocks_of_maps_name[i].getPosition().x <= mouse.x &&
             blocks_of_maps_name[i].getPosition().x +
-                    blocks_of_maps_name[i].getSize().x >= mouse.x &&
+                    blocks_of_maps_name[i].getSize().x >=
+                mouse.x &&
             blocks_of_maps_name[i].getPosition().y +
-                    blocks_of_maps_name[i].getSize().y >= mouse.y &&
+                    blocks_of_maps_name[i].getSize().y >=
+                mouse.y &&
             blocks_of_maps_name[i].getPosition().y <= mouse.y) {
             USO::Aim_map test(R"(data\maps\)" + list_of_maps[i + delta]);
             test.run(window);
@@ -267,7 +267,8 @@ int Menu::scrolling_menu::get_delta() const {
 }
 
 void Menu::scrolling_menu::scrolling_down() {
-    if (delta + std::min(MAX_SIZE, list_of_maps.size()) < list_of_maps.size() - 1) {
+    if (delta + std::min(MAX_SIZE, list_of_maps.size()) <
+        list_of_maps.size() - 1) {
         increase_delta();
     }
 }
@@ -295,7 +296,8 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
             switch (event.type) {
                 case sf::Event::MouseButtonPressed: {
                     if (event.mouseButton.button == sf::Mouse::Left) {
-                        if (push(window, (sf::Vector2f)sf::Mouse::getPosition())) {
+                        if (push(window,
+                                 (sf::Vector2f)sf::Mouse::getPosition())) {
                             return;
                         }
                     }
@@ -339,24 +341,25 @@ void Menu::scrolling_menu::add_new_map(const std::string &map_name) {
     std::size_t size_of_table = std::min(MAX_SIZE, list_of_maps.size());
     if (blocks_of_maps_name.size() < size_of_table) {
         blocks_of_maps_name.emplace_back(sf::Vector2f(600, 100));
-        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setPosition(0, (float)(size_of_table - 1) * 100);
-        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setOutlineThickness(5);
-        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setOutlineColor(sf::Color(0, 0, 0));
+        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setPosition(
+            0, (float)(size_of_table - 1) * 100);
+        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setOutlineThickness(
+            5);
+        blocks_of_maps_name[blocks_of_maps_name.size() - 1].setOutlineColor(
+            sf::Color(0, 0, 0));
     }
 }
 
-
-
 void Menu::scrolling_menu::get_input(sf::RenderWindow &window) {
-//    list_of_data[0] = "Aim";
-//    list_of_data[1] = "my_map";
-//    list_of_data[2] = "Sasha";
-//    list_of_data[3] = "drum_go_dum.ogg";
-//    list_of_data[4] = "my_music";
-//    list_of_data[5] = "stronger.png";
-//    list_of_data[6] = "GistLight.otf";
-//    list_of_data[7] = "click.ogg";  // check !!!
-//    return;
+    //    list_of_data[0] = "Aim";
+    //    list_of_data[1] = "my_map";
+    //    list_of_data[2] = "Sasha";
+    //    list_of_data[3] = "drum_go_dum.ogg";
+    //    list_of_data[4] = "my_music";
+    //    list_of_data[5] = "stronger.png";
+    //    list_of_data[6] = "GistLight.otf";
+    //    list_of_data[7] = "click.ogg";  // check !!!
+    //    return;
     sf::CircleShape mouse(5.f);
     int index = -1;
     list_of_data.resize(8);
@@ -436,9 +439,11 @@ int Menu::scrolling_menu::get_id(sf::Vector2f mouse) const {
     for (int i = 0; i < 8; i++) {
         if (blocks_of_maps_data[i].getPosition().x <= mouse.x &&
             blocks_of_maps_data[i].getPosition().x +
-            blocks_of_maps_data[i].getSize().x >= mouse.x &&
+                    blocks_of_maps_data[i].getSize().x >=
+                mouse.x &&
             blocks_of_maps_data[i].getPosition().y +
-            blocks_of_maps_data[i].getSize().y >= mouse.y &&
+                    blocks_of_maps_data[i].getSize().y >=
+                mouse.y &&
             blocks_of_maps_data[i].getPosition().y <= mouse.y) {
             return i;
         }
@@ -446,7 +451,7 @@ int Menu::scrolling_menu::get_id(sf::Vector2f mouse) const {
     return -1;
 }
 
-//Menu::data::data(std::string mode_,
+// Menu::data::data(std::string mode_,
 //                 std::string map_name_,
 //                 std::string author_name_,
 //                 std::string music_address_,
@@ -464,6 +469,6 @@ int Menu::scrolling_menu::get_id(sf::Vector2f mouse) const {
 //          sound_address(std::move(sound_address_)) {
 //
 //}
-//void Menu::data::input() {
+// void Menu::data::input() {
 //
 //}

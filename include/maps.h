@@ -65,7 +65,6 @@ public:
     virtual void run(sf::RenderWindow &) = 0;
     virtual void constructor_run(sf::RenderWindow &){};
 
-
 protected:
     Map() = default;
 };
@@ -103,23 +102,23 @@ private:
 
 public:
     Conveyor_map(std::string mode_,
-    std::string map_name_,
-        std::string map_address_,
-    std::string music_address_,
-        std::string music_name_,
-    std::string image_address_,
-        std::string font_address_,
-    std::string sound_address_,
-        std::list<std::shared_ptr<Map_object>> map_objects_ = {})
-    : Map(std::move(mode_),
-        std::move(map_name_),
-        std::move(map_address_),
-        std::move(music_address_),
-        std::move(music_name_),
-        std::move(image_address_),
-        std::move(font_address_),
-        std::move(sound_address_),
-        std::move(map_objects_)) {}
+                 std::string map_name_,
+                 std::string map_address_,
+                 std::string music_address_,
+                 std::string music_name_,
+                 std::string image_address_,
+                 std::string font_address_,
+                 std::string sound_address_,
+                 std::list<std::shared_ptr<Map_object>> map_objects_ = {})
+        : Map(std::move(mode_),
+              std::move(map_name_),
+              std::move(map_address_),
+              std::move(music_address_),
+              std::move(music_name_),
+              std::move(image_address_),
+              std::move(font_address_),
+              std::move(sound_address_),
+              std::move(map_objects_)) {}
 
     explicit Conveyor_map(const std::string &filename);
     std::vector<std::shared_ptr<Conveyor_line>> lines;
