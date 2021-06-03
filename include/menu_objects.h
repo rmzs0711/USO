@@ -6,8 +6,8 @@
 #include "windows.h"
 namespace Menu {
 enum Event {
-    OPEN_AIM,
-    OPEN_CONVEYOR,
+    CHOOSE_THE_MAP,
+    CREATE_NEW_MAP,
     OPEN_SETTINGS,
     OPEN_CONSTRUCTOR,
     EXIT,
@@ -33,7 +33,6 @@ struct Button {
         circle.setPosition(x, y);
         circle.setOutlineThickness(0.5);
         circle.setOutlineColor(sf::Color::Magenta);
-
     }
 
     bool is_circle_correct_click(const sf::Vector2f &mouse);

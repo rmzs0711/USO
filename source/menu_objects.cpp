@@ -23,20 +23,16 @@ void Menu::Button::press(sf::RenderWindow &window,
             case EXIT: {
                 window.close();
             } break;
-            /*case OPEN_AIM: {
-                USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
-                test.run(window);
-            } break;*/
             case RETRY: {
                 gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
             } break;
-            case OPEN_AIM: {
+            case CHOOSE_THE_MAP: {
                 Menu::scrolling_menu scrollingMenu(R"(data\maps\saved_maps.txt)");
                 scrollingMenu.draw(window);
             } break;
-            case OPEN_CONVEYOR: {
-                USO::Conveyor_map test(R"(input.txt)");
-                test.run(window);
+            case CREATE_NEW_MAP: {
+                Menu::map_creation_menu mapCreationMenu(R"(data\maps\saved_maps.txt)");
+                mapCreationMenu.draw(window);
             } break;
             case OPEN_SETTINGS: {  // soon
                 circle.getRadius();
@@ -65,11 +61,11 @@ void Menu::Button::draw(sf::RenderWindow &window) {
         case EXIT:
             name_of_button = "Exit";
             break;
-        case OPEN_AIM:
-            name_of_button = "Aim mode";
+        case CHOOSE_THE_MAP:
+                name_of_button = "Choose the map";
             break;
-        case OPEN_CONVEYOR:
-            name_of_button = "Conveyor mode";
+        case CREATE_NEW_MAP:
+            name_of_button = "Create new map";
             break;
         case OPEN_SETTINGS:
             name_of_button = "Settings";

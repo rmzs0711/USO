@@ -1,14 +1,14 @@
 #ifndef USO_MAPS_H
 #define USO_MAPS_H
 #include <iostream>
-#include <list>
 #include <memory>
 #include <string>
+#include <list>
 #include <utility>
 #include "SFML/Audio.hpp"
 #include "SFML/Graphics.hpp"
-#include "base_logic.h"
 #include "map_objects.h"
+#include "base_logic.h"
 
 namespace USO {
 
@@ -104,7 +104,7 @@ private:
 public:
     Conveyor_map(std::string mode_,
     std::string map_name_,
-        std::string map_address_,
+        std::string map_adress,
     std::string music_address_,
         std::string music_name_,
     std::string image_address_,
@@ -113,7 +113,7 @@ public:
         std::list<std::shared_ptr<Map_object>> map_objects_ = {})
     : Map(std::move(mode_),
         std::move(map_name_),
-        std::move(map_address_),
+        std::move(map_adress),
         std::move(music_address_),
         std::move(music_name_),
         std::move(image_address_),
