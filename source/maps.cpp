@@ -1,11 +1,6 @@
-//
-// Created by Aigerim on 18.02.2021.
-//
 #include "maps.h"
-#include <cassert>
 #include <fstream>
 #include <iostream>
-#include "SFML/System/Time.hpp"
 
 USO::Aim_map::Aim_map(const std::string &filename) : Map() {
     map_address = filename;
@@ -135,10 +130,4 @@ void USO::Map::prelude(sf::Music &music,
     check_file_load(sound_buffer.loadFromFile(sound_address), sound_address);
     check_file_load(image.loadFromFile(image_address), image_address);
     check_file_load(font.loadFromFile(font_address), font_address);
-}
-std::string USO::Map::get_map_name() {
-    return map_name;
-}
-std::string USO::Map::get_music_name() {
-    return music_name;
 }

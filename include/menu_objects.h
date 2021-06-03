@@ -1,4 +1,3 @@
-
 #ifndef USO_MENU_OBJECTS_H
 #define USO_MENU_OBJECTS_H
 #include "SFML/Graphics.hpp"
@@ -8,7 +7,6 @@ namespace Menu {
 enum Event {
     OPEN_AIM,
     OPEN_CONVEYOR,
-    OPEN_SETTINGS,
     OPEN_CONSTRUCTOR,
     EXIT,
     RETRY,
@@ -21,19 +19,13 @@ struct Button {
     Event event;
     State state = State::QUIET;
 
-
-    Button(float x,
-           float y,
-           float r,
-           Event event_,
-           sf::Texture &img)
+    Button(float x, float y, float r, Event event_, sf::Texture &img)
         : event(event_) {
         circle.setTexture(&img);
         circle.setRadius(r);
         circle.setPosition(x, y);
         circle.setOutlineThickness(0.5);
         circle.setOutlineColor(sf::Color::Magenta);
-
     }
 
     bool is_circle_correct_click(const sf::Vector2f &mouse);

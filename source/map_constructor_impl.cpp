@@ -11,8 +11,6 @@
 namespace {
 enum class OBJECT_TO_CREATE { CIRCLE, SLIDER, SPINNER };
 
-
-
 struct Editing_box {
     static const int number_of_delta = 10;
 
@@ -640,7 +638,8 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     }
                     *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition());
-                    for (auto i = editing_box.start_draw_iterator; i != editing_box.end_draw_iterator; i++) {
+                    for (auto i = editing_box.start_draw_iterator;
+                         i != editing_box.end_draw_iterator; i++) {
                         (*i)->reset();
                     }
                     editing_box.dragged_pos_ptr = nullptr;
