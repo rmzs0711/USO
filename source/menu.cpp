@@ -236,12 +236,7 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
         get_input(window);
 
         if (list_of_data[0] == "Aim") {
-            /*USO::Aim_map test(list_of_data[0], list_of_data[1],
-                              list_of_data[2], R"(data\music\)" + list_of_data[3] ,
-                              list_of_data[4], R"(data\img\)" + list_of_data[5],
-                              R"(data\fonts\)" + list_of_data[6], R"(data\sounds\)" + list_of_data[7]); */// запуск конструктора карт !!!
             add_new_map(list_of_data[1]);
-            //test.constructor_run(window);
         } else if (list_of_data[0] == "Conveyor") {
             USO::Conveyor_map test(list_of_data[0], list_of_data[1],
                               list_of_data[2], R"(data\music\)" + list_of_data[3] ,

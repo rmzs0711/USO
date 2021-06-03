@@ -80,10 +80,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
             game_session.set_game_status(BL::Game_status::DEFEAT);
         }
-        if (map_objects.empty() || map_objects.back()->get_start_time() +
-                    map_objects.back()->get_duration_time() <
-                past_time + clock.getElapsedTime() - sf::seconds(0.5) &&
-            game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
+        if (map_objects.empty() ||
+            map_objects.back()->get_start_time() +
+                        map_objects.back()->get_duration_time() <
+                    past_time + clock.getElapsedTime() - sf::seconds(0.5) &&
+                game_session.get_game_status() !=
+                    BL::Game_status::NEED_TO_RETRY) {
             game_session.set_game_status(BL::Game_status::VICTORY);
         }
 
@@ -220,30 +222,37 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 }
             } break;
             case BL::Game_status::VICTORY: {
-
                 static sf::Text victory_text;
                 victory_text.setFont(font);
                 victory_text.setString("VICTORY");
                 victory_text.setFillColor(sf::Color::White);
                 victory_text.setCharacterSize(160);
-                victory_text.setOrigin(victory_text.getCharacterSize() * victory_text.getString().getSize()/4, victory_text.getCharacterSize() / 2);
-                victory_text.setPosition(
-                    sf::Vector2f(window.getSize()) / 2.f);
+                victory_text.setOrigin(victory_text.getCharacterSize() *
+                                           victory_text.getString().getSize() /
+                                           4,
+                                       victory_text.getCharacterSize() / 2);
+                victory_text.setPosition(sf::Vector2f(window.getSize()) / 2.f);
 
                 static sf::Text press_escape_text = victory_text;
                 press_escape_text.setString("press ESC to leave");
-                press_escape_text.setOrigin(press_escape_text.getCharacterSize() * press_escape_text.getString().getSize()/4, press_escape_text.getCharacterSize() / 2);
-                press_escape_text.setPosition(
-                    sf::Vector2f(window.getSize().x / 2, window.getSize().y - press_escape_text.getCharacterSize()) );
-
-
+                press_escape_text.setOrigin(
+                    press_escape_text.getCharacterSize() *
+                        press_escape_text.getString().getSize() / 4,
+                    press_escape_text.getCharacterSize() / 2);
+                press_escape_text.setPosition(sf::Vector2f(
+                    window.getSize().x / 2,
+                    window.getSize().y - press_escape_text.getCharacterSize()));
 
                 while (true) {
                     static int transparent_lvl = 0;
                     window.draw(victory_text);
                     window.draw(press_escape_text);
-                    victory_text.setFillColor(sf::Color(255, 255, 255, transparent_lvl > 255 ? transparent_lvl = 10 : transparent_lvl++));
-                    press_escape_text.setFillColor(sf::Color(255, 255, 255, transparent_lvl));
+                    victory_text.setFillColor(
+                        sf::Color(255, 255, 255,
+                                  transparent_lvl > 255 ? transparent_lvl = 10
+                                                        : transparent_lvl++));
+                    press_escape_text.setFillColor(
+                        sf::Color(255, 255, 255, transparent_lvl));
                     if (window.pollEvent(event)) {
                         if (event.key.code == sf::Keyboard::Escape) {
                             music.stop();

@@ -40,9 +40,6 @@ void BL::Game_session::set_combo(unsigned long long compo_point) {
 
 void BL::Game_session::increase_score(unsigned long long score_point,
                                       unsigned long long combo_bonus) {
-    //    if (is_score_locked) {
-    //        return;
-    //    }
     score += (score_point * combo_bonus) / 25;
 }
 
@@ -87,7 +84,6 @@ void BL::Game_session::table_of_scores(sf::RenderWindow &window,
     sf::Text text;
     text.setFont(font);
     text.setCharacterSize(30);
-    //    text.setFillColor(sf::Color::White);
     text.setStyle(sf::Text::Bold);
     text.setString("SCORE: " + std::to_string(get_score()));
     window.draw(text);
