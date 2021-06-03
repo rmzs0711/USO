@@ -1,7 +1,7 @@
-demo_drum_go_dum.txt 1
-demo_gold_rush.txt 2
-demo_unity.txt 3
-editing_map.txt 4
-editting_map.txt 5
-stronger.txt 6
-test_map_longer.txt 7
+demo_drum_go_dum.txt
+demo_gold_rush.txt
+demo_unity.txt
+editing_map.txt
+editting_map.txt
+stronger.txt
+test_map_longer.txt

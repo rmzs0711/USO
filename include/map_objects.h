@@ -7,21 +7,18 @@
 #include "base_logic.h"
 namespace USO {
 
-const int const_circle_beat_radius = 65;
-const int const_active_circle_radius = 300;
-const sf::Time const_active_circle_duration = sf::seconds(0.7);
-const sf::Color purple(100, 5, 94);
-const sf::Time const_active_note_duration = sf::seconds(2);
-const sf::Vector2f const_line_pos = {300, 0};
-const sf::Vector2f const_line_size = {250, 900};
+inline const int const_circle_beat_radius = 65;
+inline const int const_active_circle_radius = 300;
+inline const sf::Time const_active_circle_duration = sf::seconds(0.7);
+inline const sf::Color purple(100, 5, 94);
+inline const sf::Time const_active_note_duration = sf::seconds(2);
+inline const sf::Vector2f const_line_pos = {300, 0};
+inline const sf::Vector2f const_line_size = {250, 900};
 
 const double time_per_pixels = 2;
 
 enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
 
-// enum class Conveyor_objects { NOTE, HOLD_NOTE };
-
-// enum class Bulletproof_objects { SHAPE };
 
 struct Map_object {
 protected:
@@ -41,7 +38,7 @@ public:
                              BL::Game_session &game_session,
                              const sf::Time&) = 0;
     virtual void draw(sf::RenderWindow &window, const sf::Font &font) = 0;
-    virtual ~Map_object() = default;
+    virtual  ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
     [[nodiscard]] virtual const sf::Vector2f &get_pos () const;

@@ -17,9 +17,6 @@ void BL::Game_session::decrease_health(int damage) {
     if (health > 0) {
         health -= damage;
     }
-    //    if (game_status == Game_status::ACTION && health < 0) {
-    //        game_status = Game_status::DEFEAT;
-    //    }
 }
 
 int BL::Game_session::get_health() const {
@@ -87,12 +84,6 @@ void BL::Game_session::set_game_status(BL::Game_status game_status_) {
 
 void BL::Game_session::table_of_scores(sf::RenderWindow &window,
                                        sf::Font &font) const {
-    /*sf::RectangleShape table;
-    table.setSize(sf::Vector2f(250.f, 120.f));
-    table.setFillColor(sf::Color::Blue);
-    table.setOutlineThickness(5.f);
-    table.setOutlineColor(sf::Color);
-    window.draw(table);*/
     sf::Text text;
     text.setFont(font);
     text.setCharacterSize(30);

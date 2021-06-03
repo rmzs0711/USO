@@ -1,5 +1,5 @@
 #include "map_objects.h"
-#include <sstream>
+#include <cmath>
 #include "base_logic.h"
 namespace {
 float get_time_coefficient(const sf::Time &start,
@@ -8,14 +8,17 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(700);
-    return end_time - current_time < epsilon ||
-           current_time - end_time < epsilon;
+    static sf::Time epsilon = sf::milliseconds(100);
+    return end_time - current_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
     return sf::Vector2f(pos.x - radius, pos.y - radius);
 }
-
+double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
+    return std::pow((start_pos.x - end_pos.x) * (start_pos.x - end_pos.x) +
+                        (start_pos.y - end_pos.y) * (start_pos.y - end_pos.y),
+                    0.5);
+}
 }  // namespace
 
 sf::Time &USO::Map_object::get_start_time() {
@@ -72,7 +75,7 @@ bool USO::Aim_circle::check_event(const sf::Vector2f &mouse_pos,
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);  // точно так? //Да я думаю
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(100);
+            game_session.increase_health(10);
             return true;
         } else {
             is_valid = false;
@@ -188,29 +191,23 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
         delta_y = beat_radius;
     }
 
-    track1.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
-    track1.setPoint(1, sf::Vector2<float>(pos.x - delta_x + 0.5, pos.y - delta_y + 0.5));
-    track1.setPoint(
-        2, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
-    track1.setPoint(
-        3, sf::Vector2<float>(end_pos.x - delta_x - 0.5, end_pos.y - delta_y - 0.5));
+    auto dist = static_cast<float>(get_dist(start_pos, end_pos));
+    float sinus = (start_pos.y - end_pos.y) / dist;
+    float cosinus = (end_pos.x - start_pos.x) / dist;
 
-    track2.setPoint(0, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
-    track2.setPoint(1, sf::Vector2<float>(pos.x + delta_x + 0.5, pos.y + delta_y + 0.5));
-    track2.setPoint(
-        2, sf::Vector2<float>(end_pos.x + delta_x, end_pos.y + delta_y));
-    track2.setPoint(
-        3, sf::Vector2<float>(end_pos.x + delta_x - 0.5, end_pos.y + delta_y - 0.5));
+    sf::Vertex line1[2];
 
-    track1.setFillColor(sf::Color(253, 151, 114));
-    track1.setOutlineThickness(1.f);
-    track1.setOutlineColor(sf::Color::White);
-    track2.setFillColor(sf::Color(253, 151, 114));
-    track2.setOutlineThickness(1.f);
-    track2.setOutlineColor(sf::Color::White);
+    line1[0] = sf::Vertex(sf::Vector2f(pos.x - sinus * beat_radius,
+                                       pos.y - cosinus * beat_radius));
+    line1[1] = sf::Vertex(sf::Vector2f(end_pos.x - sinus * beat_radius,
+                                       end_pos.y - cosinus * beat_radius));
+    sf::Vertex line2[2];
 
-    window.draw(track1);
-    window.draw(track2);
+    line2[0] = sf::Vertex(pos * 2.f - line1[0].position);
+    line2[1] = sf::Vertex(end_pos * 2.f - line1[1].position);
+    window.draw(line1, 2, sf::Lines);
+    window.draw(line2, 2, sf::Lines);
+
     window.draw(target_circle);
     Aim_circle::is_valid = true;
     Aim_circle::draw(window, font);
@@ -255,7 +252,7 @@ bool USO::Aim_spinner::check_event(const sf::Vector2f &mouse_pos,
     if (current_time <= start_time + duration_time) {
         sum_of_radians += calc_delta(mouse_pos, start_radian);
         if (check_sum_of_radians(sum_of_radians)) {
-            game_session.increase_health(20);
+            game_session.increase_health(10);
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
         }
@@ -311,6 +308,8 @@ std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
 void USO::Aim_slider::reset() {
     active_circle_radius = active_circle_start_radius;
     pos = start_pos;
+    set_move_time(sf::seconds(static_cast<float>(
+        get_dist(get_start_pos(), get_end_pos()) * time_per_pixels / 1000)));
 }
 
 std::shared_ptr<USO::Map_object> USO::Aim_spinner::clone() {
@@ -387,7 +386,7 @@ bool USO::Conveyor_note::check_event(const sf::Vector2f &mouse_pos,
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(100);
+            game_session.increase_health(10);
             return true;
         } else {
             is_valid = false;
@@ -426,7 +425,7 @@ bool USO::Conveyor_note::is_note_correct_click(
 }
 USO::Conveyor_note::Conveyor_note(const sf::Time &start_time_,
                                   const sf::Time &duration_time_,
-                                   USO::Conveyor_line &line_)
+                                  USO::Conveyor_line &line_)
     : Map_object(start_time_,
                  duration_time_,
                  line_.pos.x,

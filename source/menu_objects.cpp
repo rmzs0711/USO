@@ -23,10 +23,6 @@ void Menu::Button::press(sf::RenderWindow &window,
             case EXIT: {
                 window.close();
             } break;
-            /*case OPEN_AIM: {
-                USO::Aim_map test(R"(data\maps\demo_gold_rush.txt)");
-                test.run(window);
-            } break;*/
             case RETRY: {
                 gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
             } break;

@@ -4,13 +4,13 @@
 
 #include "menu.h"
 #include <fstream>
-#include <utility>
 #include <vector>
 #include "maps.h"
 #include "menu_objects.h"
 #include <string>
 
 namespace {
+int transparent_lvl = 0;
 std::string list_of_saved_maps_file_name() {
     static std::string saved_maps = R"(data\saved_maps)";
     return saved_maps;
@@ -29,11 +29,12 @@ std::vector<std::string> get_vector_of_saved_maps_names() {
     return res;
 }
 void draw_menu(sf::RenderWindow &window) {
-    sf::Texture img;
+    static sf::Texture img;
     img.loadFromFile(R"(data\img\back.png)");
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setTexture(&img);
     rect.setPosition(0, 0);
+    rect.setFillColor(sf::Color(255, 255, 255, transparent_lvl > 255 ? 255 : transparent_lvl++));
     window.draw(rect);
 }
 }  // namespace
@@ -44,12 +45,12 @@ sf::RenderWindow &Menu::set_settings() {
     static sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
                                    sf::Style::Fullscreen, setting);
     window.setMouseCursorVisible(false);
-    window.setVerticalSyncEnabled(true);
     window.display();
     return window;
 }
 
 void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
+    transparent_lvl = 0;
     std::vector<Menu::Button> buttons;
     std::vector<sf::Texture> textures(4);
     textures[0].loadFromFile(R"(data\img\5.png)");
@@ -116,6 +117,7 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
 }
 
 void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
+    transparent_lvl = 0;
     std::vector<Menu::Button> buttons;
     std::vector<sf::Texture> textures(3);
     textures[0].loadFromFile(R"(data\img\1.png)");
@@ -133,7 +135,6 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
             gameSession.get_game_status() == BL::Game_status::DEFEAT ||
             gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         sf::Event event{};
-        window.clear();
         draw_menu(window);
         if (window.pollEvent(event)) {
             switch (event.type) {
@@ -191,6 +192,7 @@ void Menu::constructor_menu(sf::Window &window) {
 }
 
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
+    transparent_lvl = 0;
     std::ifstream file(filename);
     std::string map_name;
     while (std::getline(file, map_name)) {
@@ -257,7 +259,7 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
             blocks_of_maps_name[i].getPosition().y +
                     blocks_of_maps_name[i].getSize().y >= mouse.y &&
             blocks_of_maps_name[i].getPosition().y <= mouse.y) {
-            USO::Aim_map test(R"(data\maps\)" + list_of_maps[i + delta] + ".txt");
+            USO::Aim_map test(R"(data\maps\)" + list_of_maps[i + delta]);
             test.run(window);
             return false;
         }

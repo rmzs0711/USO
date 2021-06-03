@@ -3,7 +3,7 @@
 #include <iostream>
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include "map_management.h"
+#include "map_objects_management.h"
 #include "maps.h"
 
 namespace {}  // namespace

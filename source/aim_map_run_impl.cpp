@@ -3,13 +3,14 @@
 #include <iostream>
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include "map_management.h"
+#include "map_objects_management.h"
 #include "maps.h"
 #include "menu.h"
 
 namespace {}  // namespace
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
+    window.clear();
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
@@ -32,7 +33,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
     rect.setTexture(&image);
-    rect.setFillColor(sf::Color(255, 255, 255, 70));
+    rect.setFillColor(sf::Color(255, 255, 255, 20));
 
     bool drag = false;
     int number_of_dragged_buttons = 0;
@@ -59,9 +60,9 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         }
         if (typeid(back_object) != typeid(USO::Aim_slider) &&
             typeid(back_object) != typeid(USO::Aim_spinner)) {
+            sound.play();
             field.get_field_objects().pop_back();
         }
-        sound.play();
     };
     // lambda zone ends
 
@@ -79,14 +80,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
             game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
             game_session.set_game_status(BL::Game_status::DEFEAT);
         }
-        if (map_objects.back()->get_start_time() +
+        if (map_objects.empty() || map_objects.back()->get_start_time() +
                     map_objects.back()->get_duration_time() <
                 past_time + clock.getElapsedTime() - sf::seconds(0.5) &&
             game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
             game_session.set_game_status(BL::Game_status::VICTORY);
         }
-
-        sf::Event event{};
 
         switch (game_session.get_game_status()) {
             case BL::Game_status::ACTION: {
@@ -210,6 +209,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 clock.restart();
                 if (game_session.get_game_status() ==
                     BL::Game_status::NEED_TO_RETRY) {
+                    music.stop();
                     past_time -= past_time;
                     break;
                 }
@@ -220,9 +220,33 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 }
             } break;
             case BL::Game_status::VICTORY: {
+
+                static sf::Text victory_text;
+                victory_text.setFont(font);
+                victory_text.setString("VICTORY");
+                victory_text.setFillColor(sf::Color::White);
+                victory_text.setCharacterSize(160);
+                victory_text.setOrigin(victory_text.getCharacterSize() * victory_text.getString().getSize()/4, victory_text.getCharacterSize() / 2);
+                victory_text.setPosition(
+                    sf::Vector2f(window.getSize()) / 2.f);
+
+                static sf::Text press_escape_text = victory_text;
+                press_escape_text.setString("press ESC to leave");
+                press_escape_text.setOrigin(press_escape_text.getCharacterSize() * press_escape_text.getString().getSize()/4, press_escape_text.getCharacterSize() / 2);
+                press_escape_text.setPosition(
+                    sf::Vector2f(window.getSize().x / 2, window.getSize().y - press_escape_text.getCharacterSize()) );
+
+
+
                 while (true) {
+                    static int transparent_lvl = 0;
+                    window.draw(victory_text);
+                    window.draw(press_escape_text);
+                    victory_text.setFillColor(sf::Color(255, 255, 255, transparent_lvl > 255 ? transparent_lvl = 10 : transparent_lvl++));
+                    press_escape_text.setFillColor(sf::Color(255, 255, 255, transparent_lvl));
                     if (window.pollEvent(event)) {
-                        if (event.key.code == sf::Keyboard::Space) {
+                        if (event.key.code == sf::Keyboard::Escape) {
+                            music.stop();
                             field.get_field_objects().clear();
                             mouse.setPosition(
                                 (sf::Vector2f)sf::Mouse::getPosition());
