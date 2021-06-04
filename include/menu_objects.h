@@ -1,8 +1,7 @@
-
 #ifndef USO_MENU_OBJECTS_H
 #define USO_MENU_OBJECTS_H
 #include "SFML/Graphics.hpp"
-#include "map_management.h"
+#include "map_objects_management.h"
 #include "windows.h"
 namespace Menu {
 enum Event {
@@ -21,12 +20,7 @@ struct Button {
     Event event;
     State state = State::QUIET;
 
-
-    Button(float x,
-           float y,
-           float r,
-           Event event_,
-           sf::Texture &img)
+    Button(float x, float y, float r, Event event_, sf::Texture &img)
         : event(event_) {
         circle.setTexture(&img);
         circle.setRadius(r);

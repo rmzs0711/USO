@@ -5,18 +5,11 @@
 #include <iostream>
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include "map_management.h"
 #include "map_objects.h"
 #include "maps.h"
 
 namespace {
 enum class OBJECT_TO_CREATE { CIRCLE, SLIDER, SPINNER };
-
-double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
-    return std::pow((start_pos.x - end_pos.x) * (start_pos.x - end_pos.x) +
-                        (start_pos.y - end_pos.y) * (start_pos.y - end_pos.y),
-                    0.5);
-}
 
 struct Editing_box {
     static const int number_of_delta = 10;
@@ -411,31 +404,15 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
         editing_box.drag = true;
 
-        editing_box.music.pause();
+                editing_box.music.pause();
         for (auto i = editing_box.start_draw_iterator;
              i != editing_box.end_draw_iterator; i++) {
             auto &object = **i;
-            if (typeid(object) == typeid(USO::Aim_circle)) {
-                if (USO::Aim_circle::is_circle_correct_click(
-                        sf::Vector2f(sf::Mouse::getPosition(window)),
-                        (*i)->get_pos(), USO::const_circle_beat_radius)) {
-                    editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
-                    return;
-                }
-            } else if (typeid(object) == typeid(USO::Aim_slider)) {
-                if (USO::Aim_circle::is_circle_correct_click(
-                        sf::Vector2f(sf::Mouse::getPosition(window)),
-                        (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
-                    editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
-                    return;
-                }
-            } else if (typeid(object) == typeid(USO::Aim_spinner)) {
-                if (USO::Aim_circle::is_circle_correct_click(
-                        sf::Vector2f(sf::Mouse::getPosition(window)),
-                        (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
-                    editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
-                    return;
-                }
+            if (USO::Aim_circle::is_circle_correct_click(
+                    sf::Vector2f(sf::Mouse::getPosition(window)),
+                    (*i)->get_end_pos(), USO::const_circle_beat_radius)) {
+                editing_box.dragged_pos_ptr = (*i)->get_end_pos_ptr();
+                return;
             }
         }
         switch (editing_box.object_to_create) {
@@ -509,7 +486,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto save_map = [&]() {
         std::fstream fout;
-        fout.open(map_address, std::ios::out | std::ios::trunc);
+        fout.open("data/maps/" + map_address, std::ios::out | std::ios::trunc);
         if (!fout) {
             std::cerr << "File not found" << std::endl;
             return;
@@ -648,7 +625,20 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     break;
                 }
                 editing_box.drag = false;
-                editing_box.dragged_pos_ptr = nullptr;
+                if (editing_box.object_to_create == OBJECT_TO_CREATE::SLIDER) {
+                    if (!editing_box.dragged_pos_ptr) {
+                        break;
+                    }
+                    *editing_box.dragged_pos_ptr =
+                        sf::Vector2f(sf::Mouse::getPosition());
+                    for (auto i = editing_box.start_draw_iterator;
+                         i != editing_box.end_draw_iterator; i++) {
+                        (*i)->reset();
+                    }
+                    editing_box.dragged_pos_ptr = nullptr;
+                }
+                slider_choosing_end = false;
+                break;
                 break;
             case sf::Event::MouseButtonReleased:
                 if (!editing_box.drag) {
@@ -661,14 +651,10 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     }
                     *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition());
-                    (*editing_box.start_draw_iterator)
-                        ->set_move_time(sf::seconds(static_cast<float>(
-                            get_dist(dynamic_cast<Aim_slider &>(
-                                         **editing_box.start_draw_iterator)
-                                         .get_start_pos(),
-                                     (*editing_box.start_draw_iterator)
-                                         ->get_end_pos()) *
-                            time_per_pixels / 1000)));
+                    for (auto i = editing_box.start_draw_iterator;
+                         i != editing_box.end_draw_iterator; i++) {
+                        (*i)->reset();
+                    }
                     editing_box.dragged_pos_ptr = nullptr;
                 }
                 slider_choosing_end = false;
@@ -689,7 +675,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
     Editing_box editing_box(map_objects, *this, window);
 
     sf::Event event{};
-    bool is_saved;
+    bool is_saved = false;
 
     // WARNING: lambda zone
     auto handle_click = [&](USO::Conveyor_line &line) {
@@ -700,7 +686,9 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
 
         editing_box.music.pause();
-        if (USO::Conveyor_note::is_note_correct_click(
+        if (editing_box.start_draw_iterator !=
+                editing_box.editing_map_objects.end() &&
+            USO::Conveyor_note::is_note_correct_click(
                 line.beat_pos, (*editing_box.start_draw_iterator)->get_pos(),
                 dynamic_cast<USO::Conveyor_note &>(
                     **editing_box.start_draw_iterator)
@@ -735,10 +723,6 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
         fout << image_address << std::endl;
         fout << font_address << std::endl;
         fout << sound_address << std::endl;
-        fout << const_line_pos.x << std::endl;
-        fout << const_line_pos.y << std::endl;
-        fout << const_line_size.x << std::endl;
-        fout << const_line_size.y << std::endl;
 
         for (auto &i : editing_box.editing_map_objects) {
             auto &object = *i;

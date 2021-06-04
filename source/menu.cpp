@@ -1,7 +1,3 @@
-//
-// Created by Aigerim on 15.04.2021.
-//
-
 #include "menu.h"
 #include <fstream>
 #include <utility>
@@ -13,6 +9,7 @@
 #include <random>
 
 namespace {
+int transparent_lvl = 0;
 std::string list_of_saved_maps_file_name() {
     static std::string saved_maps = R"(data\saved_maps)";
     return saved_maps;
@@ -31,11 +28,13 @@ std::vector<std::string> get_vector_of_saved_maps_names() {
     return res;
 }
 void draw_menu(sf::RenderWindow &window) {
-    sf::Texture img;
+    static sf::Texture img;
     img.loadFromFile(R"(data\img\back.png)");
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setTexture(&img);
     rect.setPosition(0, 0);
+    rect.setFillColor(sf::Color(
+        255, 255, 255, transparent_lvl > 255 ? 255 : transparent_lvl++));
     window.draw(rect);
 }
 
@@ -50,13 +49,14 @@ sf::RenderWindow &Menu::set_settings() {
     setting.antialiasingLevel = 8;
     static sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
                                    sf::Style::Fullscreen, setting);
-    //window.setMouseCursorVisible(false);
+    window.setMouseCursorVisible(false);
     window.setVerticalSyncEnabled(true);
     window.display();
     return window;
 }
 
 void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
+    transparent_lvl = 0;
     std::vector<Menu::Button> buttons;
     std::vector<sf::Texture> textures(4);
     textures[0].loadFromFile(R"(data\img\5.png)");
@@ -70,6 +70,9 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
                          textures[2]);
     buttons.emplace_back(900, 400, 200, Menu::CREATE_NEW_MAP,
                          textures[3]);
+    buttons.emplace_back(400, 400, 300, Menu::OPEN_AIM, textures[0]);
+    buttons.emplace_back(10, 10, 100, Menu::EXIT, textures[1]);
+    buttons.emplace_back(1100, 400, 250, Menu::OPEN_CONVEYOR, textures[3]);
 
     sf::CircleShape mouse(5.f);
 
@@ -123,15 +126,16 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
 }
 
 void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
+    transparent_lvl = 0;
     std::vector<Menu::Button> buttons;
     std::vector<sf::Texture> textures(3);
     textures[0].loadFromFile(R"(data\img\1.png)");
     textures[1].loadFromFile(R"(data\img\2.png)");
     textures[2].loadFromFile(R"(data\img\3.png)");
-    buttons.emplace_back(400, 400, 200, Menu::RETRY, textures[0]);
-    buttons.emplace_back(0, 0, 100, Menu::BACK_TO_MENU, textures[1]);
+    buttons.emplace_back(400, 400, 150, Menu::RETRY, textures[0]);
+    buttons.emplace_back(0, 0, 200, Menu::BACK_TO_MENU, textures[1]);
     if (gameSession.get_game_status() == BL::Game_status::PAUSE) {
-        buttons.emplace_back(900, 400, 100, Menu::CONTINUE, textures[2]);
+        buttons.emplace_back(900, 400, 130, Menu::CONTINUE, textures[2]);
     }
 
     sf::CircleShape mouse(5.f);
@@ -140,7 +144,7 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
             gameSession.get_game_status() == BL::Game_status::DEFEAT ||
             gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         sf::Event event{};
-        window.clear();
+        ////////window.clear();
         draw_menu(window);
         if (window.pollEvent(event)) {
             switch (event.type) {
@@ -196,6 +200,9 @@ void Menu::constructor_menu(sf::Window &window) {
     }
 }
 
+Menu::scrolling_menu::scrolling_menu(std::string filename_)
+    : filename(std::move(filename_)) {
+    transparent_lvl = 0;
 
 
 

@@ -7,21 +7,15 @@
 #include "base_logic.h"
 namespace USO {
 
-const int const_circle_beat_radius = 65;
-const int const_active_circle_radius = 300;
-const sf::Time const_active_circle_duration = sf::seconds(0.7);
-const sf::Color purple(100, 5, 94);
-const sf::Time const_active_note_duration = sf::seconds(2);
-const sf::Vector2f const_line_pos = {300, 0};
-const sf::Vector2f const_line_size = {250, 900};
+inline const int const_circle_beat_radius = 65;
+inline const int const_active_circle_radius = 300;
+inline const sf::Time const_active_circle_duration = sf::seconds(0.7);
+inline const sf::Color purple(100, 5, 94);
+inline const sf::Time const_active_note_duration = sf::seconds(2);
+inline const sf::Vector2f const_line_pos = {300, 0};
+inline const sf::Vector2f const_line_size = {250, 900};
 
 const double time_per_pixels = 2;
-
-enum class Aim_objects { CIRCLE, SLIDER, SPINNER, MUDA };
-
-// enum class Conveyor_objects { NOTE, HOLD_NOTE };
-
-// enum class Bulletproof_objects { SHAPE };
 
 struct Map_object {
 protected:
@@ -36,21 +30,21 @@ protected:
                const sf::Time &move_time_);
 
 public:
-    virtual bool change_state(const sf::Time&) = 0;
-    virtual bool check_event(const sf::Vector2f&,
+    virtual bool change_state(const sf::Time &) = 0;
+    virtual bool check_event(const sf::Vector2f &,
                              BL::Game_session &game_session,
-                             const sf::Time&) = 0;
+                             const sf::Time &) = 0;
     virtual void draw(sf::RenderWindow &window, const sf::Font &font) = 0;
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
-    [[nodiscard]] virtual const sf::Vector2f &get_pos () const;
+    [[nodiscard]] virtual const sf::Vector2f &get_pos() const;
     [[nodiscard]] virtual const sf::Vector2f &get_end_pos() const;
-    [[nodiscard]]  virtual sf::Vector2f* get_end_pos_ptr()  = 0;
+    [[nodiscard]] virtual sf::Vector2f *get_end_pos_ptr() = 0;
     virtual std::shared_ptr<Map_object> clone() = 0;
     virtual void reset();
     [[nodiscard]] virtual const sf::Time &get_move_time() const;
-    const void set_move_time(const sf::Time&);
+    void set_move_time(const sf::Time &);
 };
 
 struct Aim_circle : Map_object {
@@ -73,15 +67,14 @@ public:
                float active_circle_radius_,
                const sf::Time &move_time_ = sf::seconds(0));
 
-
     Aim_circle(const Aim_circle &) = default;
 
-    bool change_state(const sf::Time& current_time) override;
-    bool check_event(const sf::Vector2f&,
+    bool change_state(const sf::Time &current_time) override;
+    bool check_event(const sf::Vector2f &,
                      BL::Game_session &game_session,
-                     const sf::Time& current_time) override;
+                     const sf::Time &current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-     sf::Vector2f* get_end_pos_ptr()  override;
+    sf::Vector2f *get_end_pos_ptr() override;
     std::shared_ptr<Map_object> clone() override;
     void reset() override;
 };
@@ -101,17 +94,16 @@ public:
                float x_end_,
                float y_end_,
                const sf::Time &move_time_);
-    bool change_state(const sf::Time& current_time) override;
-    bool check_event(const sf::Vector2f&,
+    bool change_state(const sf::Time &current_time) override;
+    bool check_event(const sf::Vector2f &,
                      BL::Game_session &game_session,
-                     const sf::Time& current_time) override;
+                     const sf::Time &current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     [[nodiscard]] const sf::Vector2f &get_end_pos() const override;
-    [[nodiscard]]  sf::Vector2f* get_end_pos_ptr()  override;
+    [[nodiscard]] sf::Vector2f *get_end_pos_ptr() override;
     std::shared_ptr<Map_object> clone() override;
     [[nodiscard]] const sf::Vector2f &get_start_pos() const;
     void reset() override;
-
 };
 
 struct Aim_spinner : Aim_circle {
@@ -128,20 +120,18 @@ public:
                 float y_,
                 float active_circle_start_radius_);
 
-    float calc_delta(const sf::Vector2f&, float &);
-    bool change_state(const sf::Time& current_time) override;
-    bool check_event(const sf::Vector2f&,
+    float calc_delta(const sf::Vector2f &, float &);
+    bool change_state(const sf::Time &current_time) override;
+    bool check_event(const sf::Vector2f &,
                      BL::Game_session &game_session,
-                     const sf::Time& current_time) override;
+                     const sf::Time &current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     static bool check_sum_of_radians(float &);
-    bool check_event_for_draw(const sf::Vector2f&);
+    bool check_event_for_draw(const sf::Vector2f &);
     std::shared_ptr<Map_object> clone() override;
 };
 
-
 struct Conveyor_line {
-private:
 public:
     sf::Vector2f pos;
     sf::Vector2f sizes;
@@ -150,38 +140,29 @@ public:
     bool dragged = false;
     bool missed = false;
     const int index;
-    Conveyor_line(sf::Vector2f pos_, sf::Vector2f sizes_, int index_)
-        : pos(pos_), sizes(sizes_), index(index_) {
-        beat_sizes.x = sizes.x;
-        beat_sizes.y = sizes.y / 5;
-        beat_pos.x = pos.x;
-        beat_pos.y = pos.y + 4 * sizes.y / 5;
-    }
-
+    Conveyor_line(sf::Vector2f pos_, sf::Vector2f sizes_, int index_);
     void draw(sf::RenderWindow &window) const;
 };
 
 struct Conveyor_note : Map_object {
 private:
-    Conveyor_line& line;
-    bool is_valid = true;
+    Conveyor_line &line;
 
 public:
-    static bool is_note_correct_click(const sf::Vector2f &mouse_pos,
-                                      const sf::Vector2f &pos,
-                                      const USO::Conveyor_line &line_) ;
     Conveyor_note(const sf::Time &start_time_,
                   const sf::Time &duration_time_,
-                   Conveyor_line &line_);
-
-    bool change_state(const sf::Time& current_time) override;
-    bool check_event(const sf::Vector2f&,
+                  Conveyor_line &line_);
+    static bool is_note_correct_click(const sf::Vector2f &mouse_pos,
+                                      const sf::Vector2f &pos,
+                                      const USO::Conveyor_line &line_);
+    bool change_state(const sf::Time &current_time) override;
+    bool check_event(const sf::Vector2f &,
                      BL::Game_session &game_session,
-                     const sf::Time& current_time) override;
+                     const sf::Time &current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
     std::shared_ptr<Map_object> clone() override;
-     sf::Vector2f *get_end_pos_ptr()  override;
-     [[nodiscard]] const USO::Conveyor_line& get_line() const;
+    sf::Vector2f *get_end_pos_ptr() override;
+    [[nodiscard]] const USO::Conveyor_line &get_line() const;
 };
 
 }  // namespace USO

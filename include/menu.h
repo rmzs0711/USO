@@ -1,7 +1,3 @@
-//
-// Created by Aigerim on 15.04.2021.
-//
-
 #ifndef USO_MENU_H
 #define USO_MENU_H
 #include <cstddef>
@@ -30,7 +26,6 @@ private:
     std::vector<sf::RectangleShape> blocks_of_maps_name;
 
 public:
-
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
     void scrolling_down();

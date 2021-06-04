@@ -34,9 +34,6 @@ void Menu::Button::press(sf::RenderWindow &window,
                 Menu::map_creation_menu mapCreationMenu(R"(data\maps\saved_maps.txt)");
                 mapCreationMenu.draw(window);
             } break;
-            case OPEN_SETTINGS: {  // soon
-                circle.getRadius();
-            } break;
             case CONTINUE: {
                 gameSession.set_game_status(BL::Game_status::ACTION);
             } break;
@@ -67,9 +64,6 @@ void Menu::Button::draw(sf::RenderWindow &window) {
         case CREATE_NEW_MAP:
             name_of_button = "Create new map";
             break;
-        case OPEN_SETTINGS:
-            name_of_button = "Settings";
-            break;
         case RETRY:
             name_of_button = "Retry";
             break;
@@ -83,13 +77,13 @@ void Menu::Button::draw(sf::RenderWindow &window) {
 
     sf::Text text;
     sf::Font font;
-    font.loadFromFile(R"(data\fonts\GistLight.otf)");
+    font.loadFromFile(R"(data\fonts\aller.ttf)");
     text.setFont(font);
-    text.setCharacterSize(20);
+    text.setCharacterSize(40);
     text.setStyle(sf::Text::Bold);
     text.setString(name_of_button);
-    text.setPosition(circle.getPosition().x + circle.getRadius() / 2,
-                     circle.getPosition().y + circle.getRadius() / 2);
-    text.setFillColor(sf::Color::Magenta);
+    text.setPosition(circle.getPosition().x + circle.getRadius() - name_of_button.size() * 10,
+                     circle.getPosition().y + circle.getRadius() - 40);
+    text.setFillColor(sf::Color::Black);
     window.draw(text);
 }

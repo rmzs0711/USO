@@ -1,5 +1,5 @@
 #include "map_objects.h"
-#include <sstream>
+#include <cmath>
 #include "base_logic.h"
 namespace {
 float get_time_coefficient(const sf::Time &start,
@@ -8,14 +8,18 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(700);
+    static sf::Time epsilon = sf::milliseconds(200);
     return end_time - current_time < epsilon ||
            current_time - end_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
     return sf::Vector2f(pos.x - radius, pos.y - radius);
 }
-
+double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
+    return std::pow((start_pos.x - end_pos.x) * (start_pos.x - end_pos.x) +
+                        (start_pos.y - end_pos.y) * (start_pos.y - end_pos.y),
+                    0.5);
+}
 }  // namespace
 
 sf::Time &USO::Map_object::get_start_time() {
@@ -46,7 +50,8 @@ USO::Map_object::Map_object(const sf::Time &start_time_,
       duration_time(duration_time_),
       pos(x, y),
       move_time(move_time_) {}
-const void USO::Map_object::set_move_time(const sf::Time &new_time) {
+
+void USO::Map_object::set_move_time(const sf::Time &new_time) {
     move_time = new_time;
 }
 
@@ -68,11 +73,14 @@ bool USO::Aim_circle::change_state(const sf::Time &current_time) {
 bool USO::Aim_circle::check_event(const sf::Vector2f &mouse_pos,
                                   BL::Game_session &game_session,
                                   const sf::Time &current_time) {
+    if (!is_valid) {
+        return false;
+    }
     if (is_circle_correct_click(sf::Vector2f(mouse_pos), pos, beat_radius)) {
         if (is_click_time(current_time, start_time + duration_time)) {
-            game_session.increase_combo(1);  // точно так? //Да я думаю
+            game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(100);
+            game_session.increase_health(10);
             return true;
         } else {
             is_valid = false;
@@ -116,9 +124,11 @@ void USO::Aim_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
         window.draw(denied);
     }
 }
+
 std::shared_ptr<USO::Map_object> USO::Aim_circle::clone() {
     return std::make_shared<Aim_circle>(Aim_circle(*this));
 }
+
 bool USO::Aim_circle::is_circle_correct_click(const sf::Vector2f &mouse,
                                               const sf::Vector2f &center,
                                               const float &radius) {
@@ -126,6 +136,7 @@ bool USO::Aim_circle::is_circle_correct_click(const sf::Vector2f &mouse,
                (mouse.y - center.y) * (mouse.y - center.y) <=
            radius * radius;
 }
+
 USO::Aim_circle::Aim_circle(const sf::Time &start_time_,
                             const sf::Time &duration_time_,
                             float x,
@@ -136,12 +147,37 @@ USO::Aim_circle::Aim_circle(const sf::Time &start_time_,
     : Map_object(start_time_, duration_time_, x, y, move_time_),
       beat_radius(beat_radius_),
       active_circle_start_radius(active_circle_radius_) {}
+
 sf::Vector2f *USO::Aim_circle::get_end_pos_ptr() {
     return &pos;
 }
+
 void USO::Aim_circle::reset() {
     active_circle_radius = active_circle_start_radius;
     is_valid = true;
+}
+
+USO::Aim_slider::Aim_slider(const sf::Time &start_time_,
+                            const sf::Time &duration_time_,
+                            float x,
+                            float y,
+                            float beat_radius_,
+                            float active_circle_start_radius_,
+                            float x_end_,
+                            float y_end_,
+                            const sf::Time &move_time_)
+    : Aim_circle(start_time_,
+                 duration_time_,
+                 x,
+                 y,
+                 beat_radius_,
+                 active_circle_start_radius_,
+                 move_time_),
+      start_pos(x, y),
+      end_pos(x_end_, y_end_) {}
+
+const sf::Vector2f &USO::Aim_slider::get_start_pos() const {
+    return start_pos;
 }
 
 bool USO::Aim_slider::change_state(const sf::Time &current_time) {
@@ -159,6 +195,7 @@ bool USO::Aim_slider::change_state(const sf::Time &current_time) {
     }
     return true;
 }
+
 bool USO::Aim_slider::check_event(const sf::Vector2f &mouse_pos,
                                   BL::Game_session &game_session,
                                   const sf::Time &current_time) {
@@ -170,6 +207,7 @@ bool USO::Aim_slider::check_event(const sf::Vector2f &mouse_pos,
     }
     return false;
 }
+
 void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::CircleShape target_circle(beat_radius);
     target_circle.setOutlineThickness(5.f);
@@ -177,43 +215,48 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
     target_circle.setFillColor(sf::Color(253, 151, 114));
 
-    sf::ConvexShape track1;
-    track1.setPointCount(4);
-    sf::ConvexShape track2;
-    track2.setPointCount(4);
-    float delta_x = beat_radius;
-    float delta_y = 0;
-    if (std::abs(pos.x - end_pos.x) > std::abs(pos.y - end_pos.y)) {
-        delta_x = 0;
-        delta_y = beat_radius;
-    }
+    auto dist = static_cast<float>(get_dist(start_pos, end_pos));
+    float sinus = (start_pos.y - end_pos.y) / dist;
+    float cosinus = (end_pos.x - start_pos.x) / dist;
 
-    track1.setPoint(0, sf::Vector2<float>(pos.x - delta_x, pos.y - delta_y));
-    track1.setPoint(1, sf::Vector2<float>(pos.x - delta_x + 0.5, pos.y - delta_y + 0.5));
-    track1.setPoint(
-        2, sf::Vector2<float>(end_pos.x - delta_x, end_pos.y - delta_y));
-    track1.setPoint(
-        3, sf::Vector2<float>(end_pos.x - delta_x - 0.5, end_pos.y - delta_y - 0.5));
+    sf::Vertex line1[2];
 
-    track2.setPoint(0, sf::Vector2<float>(pos.x + delta_x, pos.y + delta_y));
-    track2.setPoint(1, sf::Vector2<float>(pos.x + delta_x + 0.5, pos.y + delta_y + 0.5));
-    track2.setPoint(
-        2, sf::Vector2<float>(end_pos.x + delta_x, end_pos.y + delta_y));
-    track2.setPoint(
-        3, sf::Vector2<float>(end_pos.x + delta_x - 0.5, end_pos.y + delta_y - 0.5));
+    line1[0] = sf::Vertex(sf::Vector2f(pos.x - sinus * beat_radius,
+                                       pos.y - cosinus * beat_radius));
+    line1[1] = sf::Vertex(sf::Vector2f(end_pos.x - sinus * beat_radius,
+                                       end_pos.y - cosinus * beat_radius));
+    sf::Vertex line2[2];
 
-    track1.setFillColor(sf::Color(253, 151, 114));
-    track1.setOutlineThickness(1.f);
-    track1.setOutlineColor(sf::Color::White);
-    track2.setFillColor(sf::Color(253, 151, 114));
-    track2.setOutlineThickness(1.f);
-    track2.setOutlineColor(sf::Color::White);
+    line2[0] = sf::Vertex(pos * 2.f - line1[0].position);
+    line2[1] = sf::Vertex(end_pos * 2.f - line1[1].position);
+    line1[0].color = purple;
+    line2[0].color = purple;
 
-    window.draw(track1);
-    window.draw(track2);
+    window.draw(line1, 2, sf::Lines);
+    window.draw(line2, 2, sf::Lines);
+
     window.draw(target_circle);
     Aim_circle::is_valid = true;
     Aim_circle::draw(window, font);
+}
+
+const sf::Vector2f &USO::Aim_slider::get_end_pos() const {
+    return end_pos;
+}
+
+sf::Vector2f *USO::Aim_slider::get_end_pos_ptr() {
+    return &end_pos;
+}
+
+std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
+    return std::make_shared<Aim_slider>(Aim_slider(*this));
+}
+
+void USO::Aim_slider::reset() {
+    active_circle_radius = active_circle_start_radius;
+    pos = start_pos;
+    set_move_time(sf::seconds(static_cast<float>(
+        get_dist(get_start_pos(), get_end_pos()) * time_per_pixels / 1000)));
 }
 
 float USO::Aim_spinner::calc_delta(const sf::Vector2f &cur_vector,
@@ -255,7 +298,7 @@ bool USO::Aim_spinner::check_event(const sf::Vector2f &mouse_pos,
     if (current_time <= start_time + duration_time) {
         sum_of_radians += calc_delta(mouse_pos, start_radian);
         if (check_sum_of_radians(sum_of_radians)) {
-            game_session.increase_health(20);
+            game_session.increase_health(10);
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
         }
@@ -299,23 +342,11 @@ void USO::Aim_spinner::draw(sf::RenderWindow &window, const sf::Font &font) {
     }
     Aim_circle::draw(window, font);
 }
-const sf::Vector2f &USO::Aim_slider::get_end_pos() const {
-    return end_pos;
-}
-sf::Vector2f *USO::Aim_slider::get_end_pos_ptr() {
-    return &end_pos;
-}
-std::shared_ptr<USO::Map_object> USO::Aim_slider::clone() {
-    return std::make_shared<Aim_slider>(Aim_slider(*this));
-}
-void USO::Aim_slider::reset() {
-    active_circle_radius = active_circle_start_radius;
-    pos = start_pos;
-}
 
 std::shared_ptr<USO::Map_object> USO::Aim_spinner::clone() {
     return std::make_shared<Aim_spinner>(Aim_spinner(*this));
 }
+
 USO::Aim_spinner::Aim_spinner(const sf::Time &start_time_,
                               const sf::Time &duration_time_,
                               float x_,
@@ -346,27 +377,15 @@ USO::Aim_spinner::Aim_spinner(const sf::Time &start_time_,
     Lines[7].setFillColor(sf::Color(193, 199, 101));
 }
 
-const sf::Vector2f &USO::Aim_slider::get_start_pos() const {
-    return start_pos;
+USO::Conveyor_line::Conveyor_line(sf::Vector2f pos_,
+                                  sf::Vector2f sizes_,
+                                  int index_)
+    : pos(pos_), sizes(sizes_), index(index_) {
+    beat_sizes.x = sizes.x;
+    beat_sizes.y = sizes.y / 5;
+    beat_pos.x = pos.x;
+    beat_pos.y = pos.y + 4 * sizes.y / 5;
 }
-USO::Aim_slider::Aim_slider(const sf::Time &start_time_,
-                            const sf::Time &duration_time_,
-                            float x,
-                            float y,
-                            float beat_radius_,
-                            float active_circle_start_radius_,
-                            float x_end_,
-                            float y_end_,
-                            const sf::Time &move_time_)
-    : Aim_circle(start_time_,
-                 duration_time_,
-                 x,
-                 y,
-                 beat_radius_,
-                 active_circle_start_radius_,
-                 move_time_),
-      start_pos(x, y),
-      end_pos(x_end_, y_end_) {}
 
 bool USO::Conveyor_note::change_state(const sf::Time &current_time) {
     if (current_time <= start_time + duration_time) {
@@ -376,7 +395,6 @@ bool USO::Conveyor_note::change_state(const sf::Time &current_time) {
                 get_time_coefficient(start_time, duration_time, current_time);
         return true;
     }
-    is_valid = false;
     return false;
 }
 
@@ -387,26 +405,23 @@ bool USO::Conveyor_note::check_event(const sf::Vector2f &mouse_pos,
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(100);
+            game_session.increase_health(10);
             return true;
         } else {
-            is_valid = false;
             game_session.decrease_health(game_session.damage());
         }
     }
     return false;
 }
+
 void USO::Conveyor_note::draw(sf::RenderWindow &window, const sf::Font &font) {
     sf::RectangleShape rectangle(line.beat_sizes);
     rectangle.setPosition(pos);
-    if (is_valid) {
-        rectangle.setFillColor(sf::Color::Blue);
-    } else {
-        rectangle.setFillColor(sf::Color::Red);
-    }
+    rectangle.setFillColor(sf::Color::Blue);
     rectangle.setOutlineColor(sf::Color::White);
     window.draw(rectangle);
 }
+
 sf::Vector2f *USO::Conveyor_note::get_end_pos_ptr() {
     return &pos;
 }
@@ -414,25 +429,27 @@ sf::Vector2f *USO::Conveyor_note::get_end_pos_ptr() {
 std::shared_ptr<USO::Map_object> USO::Conveyor_note::clone() {
     return std::make_shared<Conveyor_note>(Conveyor_note(*this));
 }
+
 bool USO::Conveyor_note::is_note_correct_click(
     const sf::Vector2f &mouse_pos,
     const sf::Vector2f &pos,
     const USO::Conveyor_line &line_) {
-    if (mouse_pos == line_.beat_pos && pos.y >= line_.beat_pos.y - 100 &&
-        pos.y <= line_.beat_pos.y + 100) {
+    if (mouse_pos == line_.beat_pos && pos.y >= line_.beat_pos.y - 120) {
         return true;
     }
     return false;
 }
+
 USO::Conveyor_note::Conveyor_note(const sf::Time &start_time_,
                                   const sf::Time &duration_time_,
-                                   USO::Conveyor_line &line_)
+                                  USO::Conveyor_line &line_)
     : Map_object(start_time_,
                  duration_time_,
                  line_.pos.x,
                  line_.pos.y,
                  sf::Time()),
       line(line_) {}
+
 const USO::Conveyor_line &USO::Conveyor_note::get_line() const {
     return line;
 }
@@ -440,8 +457,8 @@ const USO::Conveyor_line &USO::Conveyor_note::get_line() const {
 void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     sf::RectangleShape fall(sizes);
     fall.setPosition(pos);
-    fall.setFillColor(sf::Color(234, 243, 0, 40));
-    fall.setOutlineColor(sf::Color::White);
+    fall.setFillColor(sf::Color(51, 73, 82, 40));
+    fall.setOutlineColor(sf::Color(0, 0, 137));
     fall.setOutlineThickness(1);
     window.draw(fall);
 
@@ -449,12 +466,12 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     beat_rectangle.setPosition(beat_pos);
     if (dragged) {
         if (!missed) {
-            beat_rectangle.setFillColor(sf::Color::Cyan);
+            beat_rectangle.setFillColor(sf::Color(0, 255, 0, 40));
         } else {
-            beat_rectangle.setFillColor(sf::Color::Red);
+            beat_rectangle.setFillColor(sf::Color(255, 0, 0, 40));
         }
     } else {
-        beat_rectangle.setFillColor(sf::Color::Green);
+        beat_rectangle.setFillColor(sf::Color(0, 0, 86));
     }
     beat_rectangle.setOutlineColor(sf::Color::White);
     beat_rectangle.setOutlineThickness(1);

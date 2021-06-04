@@ -1,4 +1,14 @@
-Stronger
-data\music\gold_rush.ogg
-RMZS
-newSliderGold
+Aim
+ff
+editing_map.txt
+data\music\stronger.ogg
+Gold
+data\img\stronger.png
+data\fonts\aller.ttf
+data\sounds\soft_snap.wav
+Aim_circle
+4216720
+700000
+589
+430
+65 300

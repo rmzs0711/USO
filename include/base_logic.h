@@ -21,7 +21,6 @@ private:
     unsigned long long score;
     unsigned long long combo_status;
     bool is_combo_locked = false;
-    bool is_score_locked = false;
 
 public:
     Game_session()
@@ -42,15 +41,10 @@ public:
     void increase_health(int);
     void decrease_health(int);
     void set_health(int);
-    [[maybe_unused]] void lock_combo();
-    [[maybe_unused]] void unlock_combo();
-    [[maybe_unused]] void lock_score();
-    [[maybe_unused]] void unlock_score();
     [[nodiscard]] int get_health() const;
     [[nodiscard]] int damage() const;
     void set_game_status(BL::Game_status);
     Game_status get_game_status();
-    [[maybe_unused]] void pause_session();
     void table_of_scores(sf::RenderWindow &window, sf::Font &font) const;
 };
 
