@@ -1,3 +1,0 @@
-New_map
-New_map(1)
-New_map(2)

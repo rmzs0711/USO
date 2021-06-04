@@ -404,7 +404,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
         editing_box.drag = true;
 
-                editing_box.music.pause();
+        editing_box.music.pause();
         for (auto i = editing_box.start_draw_iterator;
              i != editing_box.end_draw_iterator; i++) {
             auto &object = **i;
@@ -486,7 +486,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
 
     auto save_map = [&]() {
         std::fstream fout;
-        fout.open("data/maps/" + map_address, std::ios::out | std::ios::trunc);
+        fout.open(map_address, std::ios::out | std::ios::trunc);
         if (!fout) {
             std::cerr << "File not found" << std::endl;
             return;

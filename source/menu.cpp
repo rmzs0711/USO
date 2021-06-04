@@ -38,7 +38,6 @@ void draw_menu(sf::RenderWindow &window) {
     window.draw(rect);
 }
 
-
 }  // namespace
 
 static std::random_device r;
@@ -49,7 +48,7 @@ sf::RenderWindow &Menu::set_settings() {
     setting.antialiasingLevel = 8;
     static sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
                                    sf::Style::Fullscreen, setting);
-    window.setMouseCursorVisible(false);
+    //window.setMouseCursorVisible(false);
     window.setVerticalSyncEnabled(true);
     window.display();
     return window;
@@ -70,9 +69,7 @@ void Menu::menu(sf::RenderWindow &window, BL::Game_session gameSession) {
                          textures[2]);
     buttons.emplace_back(900, 400, 200, Menu::CREATE_NEW_MAP,
                          textures[3]);
-    buttons.emplace_back(400, 400, 300, Menu::OPEN_AIM, textures[0]);
-    buttons.emplace_back(10, 10, 100, Menu::EXIT, textures[1]);
-    buttons.emplace_back(1100, 400, 250, Menu::OPEN_CONVEYOR, textures[3]);
+
 
     sf::CircleShape mouse(5.f);
 
@@ -200,18 +197,6 @@ void Menu::constructor_menu(sf::Window &window) {
     }
 }
 
-Menu::scrolling_menu::scrolling_menu(std::string filename_)
-    : filename(std::move(filename_)) {
-    transparent_lvl = 0;
-
-
-
-
-
-
-
-
-
 bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
     if (pos.x <= mouse.x && pos.x + sz.x >= mouse.x &&
         pos.y + sz.y >= mouse.y && pos.y <= mouse.y) {
@@ -221,6 +206,7 @@ bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
 }
 
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
+    transparent_lvl = 0;
     std::ifstream file(filename);
     std::string map_name;
 
@@ -293,15 +279,24 @@ Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std
         list_of_default_data[i][3] = addresses_of_music[rand(e1) % addresses_of_music.size()];
         list_of_default_data[i][4] = addresses_of_images[rand(e1) % addresses_of_images.size()];
     }
-
 }
 
 bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
     for (int i = 0; i < blocks_of_maps_name.size(); i++) {
         if (check_pressing(mouse, blocks_of_maps_name[i].getPosition(),
                            blocks_of_maps_name[i].getSize())) {
-            USO::Aim_map test(R"(data\maps\)" + list_of_maps[i + delta] + ".txt");
-            test.run(window);
+            std::ifstream file(R"(data\maps\)" + list_of_maps[i + delta] + ".txt");
+            std::string mod;
+            std::getline(file, mod);
+            if (mod == "Conveyor") {
+                USO::Conveyor_map test(R"(data\maps\)" +
+                                       list_of_maps[i + delta] + ".txt");
+                test.run(window);
+            } else {
+                USO::Aim_map test(R"(data\maps\)" + list_of_maps[i + delta] +
+                                  ".txt");
+                test.run(window);
+            }
             return false;
         }
     }
@@ -480,7 +475,7 @@ void Menu::map_creation_menu::draw(sf::RenderWindow &window) {
                                                         "data/sounds/click.ogg");
                                                     test.constructor_run(
                                                         window);
-                                                } else if (list_of_data[0] == "C") {
+                                                } else if (list_of_data[0] == "Conveyor") {
                                                     USO::Conveyor_map test(
                                                         "Conveyor",
                                                         list_of_data[2],
