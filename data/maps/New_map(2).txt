@@ -1,39 +1,39 @@
 Aim
-New_map
-data/maps/editing_map.txt
+New_map(2)
+data/maps/New_map(2).txt
 data\music\drum_go_dum.ogg
 drum_go_dum
 data\img\stronger.png
 data/fonts/aller.ttf
 data/sounds/click.ogg
 Aim_circle
-2300000
+-118745
 700000
-1202
-457
+438
+478
 65 300
 Aim_circle
-2300000
+931273
 700000
-688
-672
+763
+643
 65 300
 Aim_circle
-4300000
+1417926
 700000
-696
-424
+1188
+522
 65 300
 Aim_slider
-6300000
+3201025
 700000
-382
-508
+425
+628
 65 300
-1550 570
-2339288
+1737 308
+2700921
 Aim_spinner
-10600000
+6234707
 1400000
 960
 540

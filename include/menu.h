@@ -24,7 +24,7 @@ struct scrolling_menu {
 private:
     std::string filename;
     sf::Text text;
-    sf::Font font; // убрать
+    sf::Font font;
     int delta{};
     std::vector<std::string> list_of_maps;
     std::vector<sf::RectangleShape> blocks_of_maps_name;
@@ -51,14 +51,16 @@ struct map_creation_menu {
     sf::Font font;
     std::vector<sf::RectangleShape> blocks_of_map_data;
     std::vector<std::string> list_of_data;
+    std::vector<std::string> list_of_default_data;
     sf::RectangleShape random_map_block;
     sf::RectangleShape create_block;
+
 
     explicit map_creation_menu(std::string);
     void draw(sf::RenderWindow &);
     int get_id(sf::Vector2f) const;
     void add_new_map(const std::string &) const;
-    CG push(sf::RenderWindow &, sf::Vector2f);
+    CG create_or_generate(sf::RenderWindow &, sf::Vector2f);
     void draw_blocks_of_data(sf::RenderWindow &, sf::CircleShape &);
 };
 

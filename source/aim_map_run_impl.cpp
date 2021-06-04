@@ -16,6 +16,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
     // останавливать часы
     window.setMouseCursorVisible(false);
+    if (map_objects.empty()) {
+
+        return;
+    }
     auto current_object_it =
         map_objects.begin();  // итератор на следующий по времени объект
 
@@ -69,6 +73,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::CircleShape mouse(5.f);
     mouse.setFillColor(sf::Color(241, 200, 14));
     music.play();
+
     while (true) {
         window.draw(rect);
         game_session.table_of_scores(window, font);
