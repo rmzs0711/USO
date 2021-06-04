@@ -1,6 +1,6 @@
 Aim
 ff
-editing_map.txt
+mayday.txt
 data\music\mayday.ogg
 Gold
 data\img\stronger.png

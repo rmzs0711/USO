@@ -33,7 +33,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
     rect.setPosition(0, 0);
     rect.setTexture(&image);
-    rect.setFillColor(sf::Color(255, 255, 255, 20));
+    rect.setFillColor(sf::Color(255, 255, 255, 100));
 
     bool drag = false;
     int number_of_dragged_buttons = 0;

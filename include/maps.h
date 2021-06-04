@@ -100,7 +100,16 @@ struct Conveyor_map final : Map {
 private:
     const int NUMBER_OF_LINES = 4;
     std::vector<std::shared_ptr<Conveyor_line>> lines;
+    void generate_lines() {
+        lines.push_back(std::make_shared<USO::Conveyor_line>(USO::Conveyor_line(
+            const_line_pos, const_line_size, 0)));
 
+        for (int i = 1; i < NUMBER_OF_LINES; ++i) {
+            lines.push_back(std::make_shared<USO::Conveyor_line>(
+                USO::Conveyor_line(sf::Vector2f(const_line_pos.x + (float)i * const_line_size.x, const_line_pos.y),
+                                   const_line_size, i)));
+        }
+    }
 public:
     Conveyor_map(std::string mode_,
     std::string map_name_,
@@ -120,14 +129,7 @@ public:
         std::move(font_address_),
         std::move(sound_address_),
         std::move(map_objects_)) {
-        lines.push_back(std::make_shared<USO::Conveyor_line>(USO::Conveyor_line(
-            const_line_pos, const_line_size, 0)));
-
-        for (int i = 1; i < NUMBER_OF_LINES; ++i) {
-            lines.push_back(std::make_shared<USO::Conveyor_line>(
-                USO::Conveyor_line(sf::Vector2f(const_line_pos.x + (float)i * const_line_size.x, const_line_pos.y),
-                                   const_line_size, i)));
-        }
+        generate_lines();
     }
 
     explicit Conveyor_map(const std::string &filename);

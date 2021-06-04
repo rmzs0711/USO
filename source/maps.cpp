@@ -79,6 +79,7 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
         std::cout << "File not found\n";
         return;
     }
+    generate_lines();
     file >> mode;
     file >> map_name;
     file >> map_address;

@@ -404,7 +404,7 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
         editing_box.drag = true;
 
-        //        editing_box.music.pause();
+                editing_box.music.pause();
         for (auto i = editing_box.start_draw_iterator;
              i != editing_box.end_draw_iterator; i++) {
             auto &object = **i;
@@ -625,7 +625,20 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     break;
                 }
                 editing_box.drag = false;
-                editing_box.dragged_pos_ptr = nullptr;
+                if (editing_box.object_to_create == OBJECT_TO_CREATE::SLIDER) {
+                    if (!editing_box.dragged_pos_ptr) {
+                        break;
+                    }
+                    *editing_box.dragged_pos_ptr =
+                        sf::Vector2f(sf::Mouse::getPosition());
+                    for (auto i = editing_box.start_draw_iterator;
+                         i != editing_box.end_draw_iterator; i++) {
+                        (*i)->reset();
+                    }
+                    editing_box.dragged_pos_ptr = nullptr;
+                }
+                slider_choosing_end = false;
+                break;
                 break;
             case sf::Event::MouseButtonReleased:
                 if (!editing_box.drag) {
