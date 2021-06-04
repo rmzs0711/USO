@@ -8,7 +8,7 @@ float get_time_coefficient(const sf::Time &start,
     return (current - start) / duration;
 }
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
-    static sf::Time epsilon = sf::milliseconds(100);
+    static sf::Time epsilon = sf::milliseconds(200);
     return end_time - current_time < epsilon;
 }
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
@@ -71,6 +71,9 @@ bool USO::Aim_circle::change_state(const sf::Time &current_time) {
 bool USO::Aim_circle::check_event(const sf::Vector2f &mouse_pos,
                                   BL::Game_session &game_session,
                                   const sf::Time &current_time) {
+    if (!is_valid) {
+        return false;
+    }
     if (is_circle_correct_click(sf::Vector2f(mouse_pos), pos, beat_radius)) {
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);  // точно так? //Да я думаю
@@ -180,17 +183,6 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     target_circle.setPosition(fix_circle_pos(end_pos, beat_radius));
     target_circle.setFillColor(sf::Color(253, 151, 114));
 
-    sf::ConvexShape track1;
-    track1.setPointCount(4);
-    sf::ConvexShape track2;
-    track2.setPointCount(4);
-    float delta_x = beat_radius;
-    float delta_y = 0;
-    if (std::abs(pos.x - end_pos.x) > std::abs(pos.y - end_pos.y)) {
-        delta_x = 0;
-        delta_y = beat_radius;
-    }
-
     auto dist = static_cast<float>(get_dist(start_pos, end_pos));
     float sinus = (start_pos.y - end_pos.y) / dist;
     float cosinus = (end_pos.x - start_pos.x) / dist;
@@ -205,6 +197,9 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
 
     line2[0] = sf::Vertex(pos * 2.f - line1[0].position);
     line2[1] = sf::Vertex(end_pos * 2.f - line1[1].position);
+    line1[0].color = purple;
+    line2[0].color = purple;
+
     window.draw(line1, 2, sf::Lines);
     window.draw(line2, 2, sf::Lines);
 

@@ -93,26 +93,8 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
     file >> font_address;
     file >> sound_address;
 
-    float pos_x;
-    file >> pos_x;
-    float pos_y;
-    file >> pos_y;
-    float width;
-    file >> width;
-    float height;
-    file >> height;
-
-    lines.push_back(std::make_shared<USO::Conveyor_line>(USO::Conveyor_line(
-        sf::Vector2f(pos_x, pos_y), sf::Vector2f(width, height), 0)));
-
-    for (int i = 1; i < NUMBER_OF_LINES; ++i) {
-        lines.push_back(std::make_shared<USO::Conveyor_line>(
-            USO::Conveyor_line(sf::Vector2f(pos_x + (float)i * width, pos_y),
-                               sf::Vector2f(width, height), i)));
-    }
-
     while (!file.eof()) {
-        int32_t time;
+        sf::Int64 time;
         if (!(file >> time)) {
             break;
         }

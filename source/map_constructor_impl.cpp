@@ -11,8 +11,6 @@
 namespace {
 enum class OBJECT_TO_CREATE { CIRCLE, SLIDER, SPINNER };
 
-
-
 struct Editing_box {
     static const int number_of_delta = 10;
 
@@ -640,7 +638,8 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
                     }
                     *editing_box.dragged_pos_ptr =
                         sf::Vector2f(sf::Mouse::getPosition());
-                    for (auto i = editing_box.start_draw_iterator; i != editing_box.end_draw_iterator; i++) {
+                    for (auto i = editing_box.start_draw_iterator;
+                         i != editing_box.end_draw_iterator; i++) {
                         (*i)->reset();
                     }
                     editing_box.dragged_pos_ptr = nullptr;
@@ -663,7 +662,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
     Editing_box editing_box(map_objects, *this, window);
 
     sf::Event event{};
-    bool is_saved;
+    bool is_saved = false;
 
     // WARNING: lambda zone
     auto handle_click = [&](USO::Conveyor_line &line) {
@@ -674,7 +673,9 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
         is_saved = false;
 
         editing_box.music.pause();
-        if (USO::Conveyor_note::is_note_correct_click(
+        if (editing_box.start_draw_iterator !=
+                editing_box.editing_map_objects.end() &&
+            USO::Conveyor_note::is_note_correct_click(
                 line.beat_pos, (*editing_box.start_draw_iterator)->get_pos(),
                 dynamic_cast<USO::Conveyor_note &>(
                     **editing_box.start_draw_iterator)
@@ -709,10 +710,6 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
         fout << image_address << std::endl;
         fout << font_address << std::endl;
         fout << sound_address << std::endl;
-        fout << const_line_pos.x << std::endl;
-        fout << const_line_pos.y << std::endl;
-        fout << const_line_size.x << std::endl;
-        fout << const_line_size.y << std::endl;
 
         for (auto &i : editing_box.editing_map_objects) {
             auto &object = *i;
