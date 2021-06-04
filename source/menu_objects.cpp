@@ -27,15 +27,13 @@ void Menu::Button::press(sf::RenderWindow &window,
                 gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
             } break;
             case OPEN_AIM: {
-                Menu::scrolling_menu scrollingMenu(R"(data\maps\saved_maps.txt)");
+                Menu::scrolling_menu scrollingMenu(
+                    R"(data\maps\saved_maps.txt)");
                 scrollingMenu.draw(window);
             } break;
             case OPEN_CONVEYOR: {
                 USO::Conveyor_map test(R"(input.txt)");
                 test.run(window);
-            } break;
-            case OPEN_SETTINGS: {  // soon
-                circle.getRadius();
             } break;
             case CONTINUE: {
                 gameSession.set_game_status(BL::Game_status::ACTION);
@@ -67,9 +65,6 @@ void Menu::Button::draw(sf::RenderWindow &window) {
         case OPEN_CONVEYOR:
             name_of_button = "Conveyor mode";
             break;
-        case OPEN_SETTINGS:
-            name_of_button = "Settings";
-            break;
         case RETRY:
             name_of_button = "Retry";
             break;
@@ -83,13 +78,13 @@ void Menu::Button::draw(sf::RenderWindow &window) {
 
     sf::Text text;
     sf::Font font;
-    font.loadFromFile(R"(data\fonts\GistLight.otf)");
+    font.loadFromFile(R"(data\fonts\aller.ttf)");
     text.setFont(font);
-    text.setCharacterSize(20);
+    text.setCharacterSize(40);
     text.setStyle(sf::Text::Bold);
     text.setString(name_of_button);
-    text.setPosition(circle.getPosition().x + circle.getRadius() / 2,
-                     circle.getPosition().y + circle.getRadius() / 2);
-    text.setFillColor(sf::Color::Magenta);
+    text.setPosition(circle.getPosition().x + circle.getRadius() - name_of_button.size() * 10,
+                     circle.getPosition().y + circle.getRadius() - 40);
+    text.setFillColor(sf::Color::Black);
     window.draw(text);
 }

@@ -14,8 +14,7 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
     sf::Clock clock;
     sf::SoundBuffer press_sound;
     sf::Time past_time;
-    auto current_object_it =
-        map_objects.begin();  // итератор на следующий по времени объект
+    auto current_object_it = map_objects.begin();
     sf::Music music;
 
     check_file_load(press_sound.loadFromFile(R"(data\music\click_sound.ogg)"),
@@ -93,7 +92,6 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                     continue;
                 }
 
-                // WARNING: lambda zone
                 auto handle_click = [&]() -> void {
                     drag = true;  //Зажимаю мышку
                     for (int i = 0; i < NUMBER_OF_LINES; ++i) {
@@ -127,7 +125,6 @@ void USO::Conveyor_map::run(sf::RenderWindow &window) {
                         }
                     }
                 };
-                // lambda zone ends
 
                 switch (event.type) {
                     case sf::Event::KeyPressed:

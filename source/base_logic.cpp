@@ -1,6 +1,5 @@
 #include "base_logic.h"
 #include <SFML/Graphics/Text.hpp>
-#include "SFML/Audio.hpp"
 
 [[maybe_unused]] void BL::play_beat_sound(sf::SoundBuffer &buffer) {}
 
@@ -55,23 +54,6 @@ unsigned long long BL::Game_session::get_score() const {
     return score;
 }
 
-void BL::Game_session::pause_session() {
-    game_status = Game_status::PAUSE;
-}
-
-void BL::Game_session::lock_combo() {
-    is_combo_locked = true;
-}
-void BL::Game_session::unlock_combo() {
-    is_combo_locked = false;
-}
-
-void BL::Game_session::lock_score() {
-    is_score_locked = true;
-}
-void BL::Game_session::unlock_score() {
-    is_score_locked = false;
-}
 BL::Game_status BL::Game_session::get_game_status() {
     return game_status;
 }

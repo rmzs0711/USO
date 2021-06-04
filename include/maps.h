@@ -65,7 +65,6 @@ public:
     virtual void run(sf::RenderWindow &) = 0;
     virtual void constructor_run(sf::RenderWindow &){};
 
-
 protected:
     Map() = default;
 };

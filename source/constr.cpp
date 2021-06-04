@@ -1,5 +1,4 @@
 #include "maps.h"
-#include "menu.h"
 
 int main() {
     sf::ContextSettings setting;

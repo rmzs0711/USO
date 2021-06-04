@@ -1,7 +1,3 @@
-//
-// Created by Aigerim on 15.04.2021.
-//
-
 #ifndef USO_MENU_H
 #define USO_MENU_H
 #include <cstddef>
@@ -16,7 +12,6 @@ const std::size_t MAX_SIZE = 6;
 
 struct scrolling_menu {
 private:
-
     sf::Text text;
     sf::Font font;
     int delta{};
@@ -26,10 +21,10 @@ private:
     std::vector<std::string> list_of_data;
     std::string filename;
     sf::RectangleShape construct_new_map;
-public:
 
+public:
     scrolling_menu() = default;
-    explicit scrolling_menu(std::string );
+    explicit scrolling_menu(std::string);
     void scrolling_down();
     void scrolling_up();
     bool push(sf::RenderWindow &, sf::Vector2f);
@@ -43,8 +38,8 @@ public:
     int get_id(sf::Vector2f) const;
 };
 
-//struct data {
-//private:
+// struct data {
+// private:
 //
 //    std::string mode;
 //    std::string map_name;
@@ -54,7 +49,7 @@ public:
 //    std::string image_address;
 //    std::string font_address;
 //    std::string sound_address;
-//public:
+// public:
 //
 //    data(std::string, std::string, std::string, std::string,
 //         std::string, std::string, std::string, std::string);
