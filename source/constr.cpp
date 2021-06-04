@@ -6,17 +6,30 @@ int main() {
     setting.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
                             sf::Style::Fullscreen, setting);
-    window.setVerticalSyncEnabled(true);
+//    window.setVerticalSyncEnabled(true);
     window.display();
 
     //    USO::Aim_map f("ff", "Rama", R"(data\music\stronger.ogg)", "Gold",
     //                   R"(data\img\stronger.png)", R"(data\fonts\aller.ttf)",
     //                   R"(data\music\click_sound.ogg)");
     //    USO::Aim_map f(R"(data/maps/editing_map.txt)");
-    USO::Conveyor_map f(R"(input.txt)");
-    f.constructor_run(window);
+//    USO::Conveyor_map f(R"(input.txt)");
+//    f.constructor_run(window);
 
     //    USO::Aim_map f(R"(data/maps/editing_map.txt)");
-    //    f.run(window);
+    //    f.run(window)
+    //
+    //    .
+    //    ;
+    USO::Conveyor_map test(
+        "Conveyor",
+        "jejfe",
+        R"(data\maps\fff.txt)",
+    R"(data\music\drum_go_dum.ogg)",
+        "my_m",
+    R"(data\img\back.png)",
+    R"(data\fonts\aller.ttf)",
+        R"(data\sounds\click.ogg)");
+    test.constructor_run(window);
     return 0;
 }

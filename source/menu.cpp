@@ -10,6 +10,7 @@
 #include "menu_objects.h"
 #include <string>
 #include <unordered_map>
+#include <random>
 
 namespace {
 std::string list_of_saved_maps_file_name() {
@@ -37,7 +38,12 @@ void draw_menu(sf::RenderWindow &window) {
     rect.setPosition(0, 0);
     window.draw(rect);
 }
+
+
 }  // namespace
+
+static std::random_device r;
+static std::default_random_engine e1(r());
 
 sf::RenderWindow &Menu::set_settings() {
     sf::ContextSettings setting;
@@ -257,12 +263,30 @@ Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std
     create_block.setOutlineColor(sf::Color(0, 0, 0));
     list_of_data.resize(5);
 
-    list_of_default_data.resize(5);
-    list_of_default_data[0] = "Aim";
-    list_of_default_data[1] = "Anonymous";
-    list_of_default_data[2] = "New_map";
-    list_of_default_data[3] = "drum_go_dum";
-    list_of_default_data[4] = "stronger";
+    std::string address;
+    std::vector<std::string> addresses_of_images, addresses_of_music;
+    std::ifstream file1("data/images.txt"), file2("data/music.txt");
+    while (std::getline(file1, address)) {
+        addresses_of_images.emplace_back(address);
+    }
+    while (std::getline(file2, address)) {
+        addresses_of_music.emplace_back(address);
+    }
+
+    std::random_device r;
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<int> rand(1, 1e4);
+
+    list_of_default_data.resize(10);
+    for (int  i = 0; i < 10; i++) {
+        list_of_default_data[i].resize(5);
+        list_of_default_data[i][0] = rand(e1) % 2 == 0 ? "Aim" : "Conveyor";
+        list_of_default_data[i][1] = "Anonymous";
+        list_of_default_data[i][2] = "New_map";
+        list_of_default_data[i][3] = addresses_of_music[rand(e1) % addresses_of_music.size()];
+        list_of_default_data[i][4] = addresses_of_images[rand(e1) % addresses_of_images.size()];
+    }
+
 }
 
 bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
@@ -367,7 +391,7 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
     file << map_name << std::endl;
 }
 
-[[noreturn]] void Menu::map_creation_menu::draw(sf::RenderWindow &window) {
+void Menu::map_creation_menu::draw(sf::RenderWindow &window) {
     sf::CircleShape mouse(5.f);
     int index = -1;
     while (window.isOpen()) {
@@ -381,7 +405,7 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
                         if (create_or_generate(window, (sf::Vector2f)sf::Mouse::getPosition()) == CREATE) {
                             for (int i = 0 ; i < 5; i++) {
                                 if (list_of_data[i].empty()) {
-                                    list_of_data[i] = list_of_default_data[i];
+                                    list_of_data[i] = list_of_default_data[0][i];
                                 }
                             }
                             bool is_escape_pressed = false;
@@ -398,7 +422,7 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
 
                             while (true) {
                                 window.clear();
-                                draw_blocks_of_data(window, mouse);
+
                                 if (window.pollEvent(event)) {
                                     switch (event.type) {
                                         case sf::Event::KeyPressed: {
@@ -431,14 +455,42 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
                                                     id++;
                                                 }
                                                 add_new_map(list_of_data[2]);
-                                                USO::Aim_map test(list_of_data[0], list_of_data[2],
-                                                                  "data/maps/" + list_of_data[2] + ".txt",
-                                                                  R"(data\music\)" + list_of_data[3] + ".ogg",
-                                                                  list_of_data[3],
-                                                                  R"(data\img\)" + list_of_data[4] + ".png",
-                                                                  "data/fonts/aller.ttf",
-                                                                  "data/sounds/click.ogg");
-                                                test.constructor_run(window);
+                                                if (list_of_data[0] == "Aim") {
+                                                    USO::Aim_map test(
+                                                        list_of_data[0],
+                                                        list_of_data[2],
+                                                        "data/maps/" +
+                                                            list_of_data[2] +
+                                                            ".txt",
+                                                        R"(data\music\)" +
+                                                            list_of_data[3] +
+                                                            ".ogg",
+                                                        list_of_data[3],
+                                                        R"(data\img\)" +
+                                                            list_of_data[4] +
+                                                            ".png",
+                                                        "data/fonts/aller.ttf",
+                                                        "data/sounds/click.ogg");
+                                                    test.constructor_run(
+                                                        window);
+                                                } else if (list_of_data[0] == "C") {
+                                                    USO::Conveyor_map test(
+                                                        "Conveyor",
+                                                        list_of_data[2],
+                                                        "data/maps/" +
+                                                        list_of_data[2] +
+                                                        ".txt",
+                                                        R"(data\music\)" +
+                                                        list_of_data[3] +
+                                                        ".ogg",
+                                                        list_of_data[3],
+                                                        R"(data\img\)" +
+                                                        list_of_data[4] +
+                                                        ".png",
+                                                        "data/fonts/aller.ttf",
+                                                        "data/sounds/click.ogg");
+                                                    test.constructor_run(window);
+                                                }
                                                 return;
                                             } else if (USO::Aim_circle::is_circle_correct_click(
                                                 sf::Vector2f(sf::Mouse::getPosition(window)),
@@ -457,6 +509,8 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
                                 if (is_escape_pressed) {
                                     break;
                                 }
+                                draw_menu(window);
+                                draw_blocks_of_data(window, mouse);
                                 text.setString("Open the map \nconstructor");
                                 text.setFillColor(sf::Color(0, 0, 0));
                                 text.setPosition(constr.getPosition() + sf::Vector2f{100, 140});
@@ -475,7 +529,8 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
                                 window.display();
                             }
                         } else if (create_or_generate(window, (sf::Vector2f)sf::Mouse::getPosition()) == RANDOM_GENERATE) {
-                            list_of_data = list_of_default_data;
+                            std::uniform_int_distribution<int> rand(1, 1e4);
+                            list_of_data = list_of_default_data[rand(e1) % 10];
                             break;
                         } else {
                             break;
@@ -499,7 +554,7 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
                     }
                 } break;
                 case sf::Event::TextEntered: {
-                    if (index != -1 && list_of_data[index].length() <= 26) {
+                    if (index != -1 && list_of_data[index].length() <= 14) {
                         if (event.text.unicode > 33 && event.text.unicode < 127) {
                             list_of_data[index].push_back(
                                 (char)event.text.unicode);
@@ -510,6 +565,7 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
                 } break;
             }
         }
+        draw_menu(window);
         draw_blocks_of_data(window, mouse);
         window.display();
     }

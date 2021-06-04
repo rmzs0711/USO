@@ -1,8 +1,0 @@
-Aim
-New_map(3)
-data/maps/New_map(3).txt
-data\music\drum_go_dum.ogg
-drum_go_dum
-data\img\stronger.png
-data/fonts/aller.ttf
-data/sounds/click.ogg

@@ -1,39 +1,33 @@
 Aim
 New_map(2)
 data/maps/New_map(2).txt
-data\music\drum_go_dum.ogg
-drum_go_dum
-data\img\stronger.png
+data\music\helltaker_rem.ogg
+helltaker_rem
+data\img\gradient.png
 data/fonts/aller.ttf
 data/sounds/click.ogg
 Aim_circle
--118745
+1300000
 700000
-438
-478
+1273
+450
 65 300
 Aim_circle
-931273
+1300000
 700000
-763
-643
-65 300
-Aim_circle
-1417926
-700000
-1188
-522
+728
+485
 65 300
 Aim_slider
-3201025
+4300000
 700000
-425
-628
+438
+563
 65 300
-1737 308
-2700921
+1499 389
+2150346
 Aim_spinner
-6234707
+8600000
 1400000
 960
 540

@@ -51,7 +51,7 @@ struct map_creation_menu {
     sf::Font font;
     std::vector<sf::RectangleShape> blocks_of_map_data;
     std::vector<std::string> list_of_data;
-    std::vector<std::string> list_of_default_data;
+    std::vector<std::vector<std::string>> list_of_default_data;
     sf::RectangleShape random_map_block;
     sf::RectangleShape create_block;
 
