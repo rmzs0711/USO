@@ -48,8 +48,7 @@ sf::RenderWindow &Menu::set_settings() {
     setting.antialiasingLevel = 8;
     static sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
                                    sf::Style::Fullscreen, setting);
-    //window.setMouseCursorVisible(false);
-    window.setVerticalSyncEnabled(true);
+    window.setMouseCursorVisible(true);
     window.display();
     return window;
 }

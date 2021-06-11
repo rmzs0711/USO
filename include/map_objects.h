@@ -12,8 +12,8 @@ inline const int const_active_circle_radius = 300;
 inline const sf::Time const_active_circle_duration = sf::seconds(0.7);
 inline const sf::Color purple(100, 5, 94);
 inline const sf::Time const_active_note_duration = sf::seconds(2);
-inline const sf::Vector2f const_line_pos = {300, 0};
-inline const sf::Vector2f const_line_size = {250, 900};
+inline const sf::Vector2f const_line_pos = {500, 0};
+inline const sf::Vector2f const_line_size = {200, 1100};
 
 const double time_per_pixels = 2;
 

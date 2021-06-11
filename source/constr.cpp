@@ -16,9 +16,9 @@ int main() {
 //                       R"(data\music\click_sound.ogg)");
     USO::Aim_map f(R"(data/maps/mayday.txt)");
 //        USO::Conveyor_map f(R"(input.txt)");
-//    f.constructor_run(window);
+    f.constructor_run(window);
 
 //        USO::Aim_map f(R"(data/maps/editing_map.txt)");
-        f.run(window);
+//        f.run(window);
     return 0;
 }
