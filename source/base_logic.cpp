@@ -43,7 +43,7 @@ void BL::Game_session::increase_score(unsigned long long score_point,
 }
 
 [[nodiscard]] int BL::Game_session::damage() const {
-    return static_cast<int>(0.05 * MAX_HEALTH);
+    return static_cast<int>(0 * MAX_HEALTH);
 }
 
 void BL::Game_session::nullify_score() {
