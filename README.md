@@ -7,7 +7,8 @@ https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64
 
 
 
-Презентация
+Presentation:
 https://docs.google.com/presentation/d/12yYVJionReVVB56HE5aREtbO16RWKRanMa3dOH3aBRM/edit?usp=sharing
 
-[![GG]({https://youtu.be/8bJC_pxhelE})]({https://youtu.be/8bJC_pxhelE} "Link Title")
+Video:
+https://youtu.be/8bJC_pxhelE
