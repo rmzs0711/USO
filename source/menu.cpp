@@ -769,8 +769,6 @@ void Menu::mod_menu::draw(sf::RenderWindow &window) {
         }
         window.display();
     }
-
-
 }
 
 bool Menu::check_color(sf::Text text) {
