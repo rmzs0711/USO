@@ -40,6 +40,10 @@ void Menu::Button::press(sf::RenderWindow &window,
             case BACK_TO_MENU: {
                 menu(window, gameSession);
             } break;
+            case OPEN_LIST_OF_MODS: {
+                mod_menu modMenu;
+                modMenu.draw(window);
+            } break;
         }
     }
 }
@@ -73,6 +77,9 @@ void Menu::Button::draw(sf::RenderWindow &window) {
         case BACK_TO_MENU:
             name_of_button = "Back to menu";
             break;
+        case OPEN_LIST_OF_MODS: {
+            name_of_button  = "Mods";
+        } break;
     }
 
     sf::Text text;
