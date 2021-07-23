@@ -1,8 +1,6 @@
 # Prerequisites
 *.d
 *.idea
-*.clang-format
-*.mp3
 *.jpg
 *jpeg
 
@@ -20,19 +18,12 @@ cmake-build-debug
 *.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
 
 # Fortran module files
 *.mod
 *.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
 
 # Executables
 *.exe

@@ -6,3 +6,33 @@ drum_go_dum
 data\img\stronger.png
 data/fonts/aller.ttf
 data/sounds/click.ogg
+Aim_circle
+2060847
+700000
+783
+585
+65 300
+Aim_circle
+2334306
+700000
+1360
+605
+65 300
+Aim_circle
+2587753
+700000
+866
+457
+65 300
+Aim_circle
+2945232
+700000
+952
+728
+65 300
+Aim_circle
+3243253
+700000
+1220
+525
+65 300

@@ -80,7 +80,7 @@ bool USO::Aim_circle::check_event(const sf::Vector2f &mouse_pos,
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(10);
+            game_session.increase_health(20);
             return true;
         } else {
             is_valid = false;
@@ -298,7 +298,7 @@ bool USO::Aim_spinner::check_event(const sf::Vector2f &mouse_pos,
     if (current_time <= start_time + duration_time) {
         sum_of_radians += calc_delta(mouse_pos, start_radian);
         if (check_sum_of_radians(sum_of_radians)) {
-            game_session.increase_health(10);
+            game_session.increase_health(20);
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
         }
@@ -405,7 +405,7 @@ bool USO::Conveyor_note::check_event(const sf::Vector2f &mouse_pos,
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
-            game_session.increase_health(10);
+            game_session.increase_health(20);
             return true;
         } else {
             game_session.decrease_health(game_session.damage());

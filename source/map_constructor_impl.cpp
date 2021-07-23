@@ -484,7 +484,6 @@ void Aim_map::constructor_run(sf::RenderWindow &window) {
             }
         }
     };
-
     auto save_map = [&]() {
         std::fstream fout;
         fout.open(map_address, std::ios::out | std::ios::trunc);
