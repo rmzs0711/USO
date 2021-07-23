@@ -18,7 +18,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     // останавливать часы
     window.setMouseCursorVisible(false);
     if (map_objects.empty()) {
-
         return;
     }
     auto current_object_it =

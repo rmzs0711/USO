@@ -7,8 +7,7 @@ namespace Menu {
 enum Event {
     CHOOSE_THE_MAP,
     CREATE_NEW_MAP,
-    OPEN_SETTINGS,
-    OPEN_CONSTRUCTOR,
+    OPEN_LIST_OF_MODS,
     EXIT,
     RETRY,
     CONTINUE,
