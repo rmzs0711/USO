@@ -8,11 +8,15 @@
 #include <unordered_map>
 #include <random>
 
+std::string new_map_name;
+
 namespace {
 
 const sf::Color color_for_mouse = sf::Color(241, 200, 14);
 const sf::Color input_color = sf::Color(150, 160, 145);
 const sf::Color text_color = sf::Color(2, 2, 2);
+
+
 float acceleration_factor = 1;
 
 int transparent_lvl = 0;
@@ -404,6 +408,24 @@ void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
     file << map_name << std::endl;
 }
 
+void Menu::map_creation_menu::fix_map_name(std::string &cur_map_name) const {
+    std::unordered_map<std::string, int> names;
+    std::ifstream file(filename);
+    std::string map_name;
+    while (std::getline(file, map_name)) {
+        names[map_name]++;
+    }
+    int id = 1;
+    std:size_t name_size = cur_map_name.length();
+    while (names.find(cur_map_name) != names.end()) {
+        cur_map_name =
+            cur_map_name.substr(0, name_size)
+            + '(' + std::to_string(id) + ')';
+        id++;
+    }
+}
+
+
 void Menu::map_creation_menu::draw(sf::RenderWindow &window) {
     sf::CircleShape mouse(5.f);
     int index = -1;
@@ -453,22 +475,9 @@ void Menu::map_creation_menu::draw(sf::RenderWindow &window) {
                                                                 constr
                                                                     .getRadius()),
                                                         constr.getRadius())) {
-                                                std::unordered_map<std::string, int> names;
-                                                std::ifstream file(filename);
-                                                std::string map_name;
-                                                while (std::getline(file, map_name)) {
-                                                    names[map_name]++;
-                                                }
-                                                int id = 1;
-                                                std:size_t name_size = list_of_data[2].size();
-                                                while (names.find(list_of_data[2]) != names.end()) {
-                                                    list_of_data[2] =
-                                                        list_of_data[2].substr(0, name_size)
-                                                        + "(" + std::to_string(id) + ")";
-                                                    id++;
-                                                }
 
-                                                add_new_map(list_of_data[2]);
+                                                fix_map_name(list_of_data[2]);
+                                                new_map_name = list_of_data[2];
 
                                                 if (list_of_data[0] == "Aim") {
                                                     USO::Aim_map test(

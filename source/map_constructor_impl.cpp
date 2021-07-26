@@ -10,6 +10,7 @@
 #include <menu.h>
 
 namespace {
+bool need_to_add = false;
 enum class OBJECT_TO_CREATE { CIRCLE, SLIDER, SPINNER };
 
 struct Editing_box {
@@ -219,6 +220,9 @@ struct Editing_box {
                             sf::Vector2f(no_button.getRadius(),
                                          no_button.getRadius()),
                         no_button.getRadius())) {
+                    if (decision == "Save?") {
+                        need_to_add = false;
+                    }
                     return false;
                 } else if (USO::Aim_circle::is_circle_correct_click(
                                sf::Vector2f(sf::Mouse::getPosition(window)),
@@ -226,6 +230,16 @@ struct Editing_box {
                                    sf::Vector2f(yes_button.getRadius(),
                                                 yes_button.getRadius()),
                                yes_button.getRadius())) {
+
+                    if (decision == "Save?") {
+                        need_to_add = true;
+                    } else if (decision == "Do you want to leave?") {
+                        if (need_to_add) {
+                            std::ofstream file(R"(data\maps\saved_maps.txt)", std::ios::app);
+                            file << new_map_name << std::endl;
+                        }
+                    }
+
                     return true;
                 }
             }

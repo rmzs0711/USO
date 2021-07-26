@@ -165,5 +165,13 @@ public:
     [[nodiscard]] const USO::Conveyor_line &get_line() const;
 };
 
+struct wake_taiko_line {
+
+};
+
+struct wake_taiko_circle : Map_object {
+
+};
+
 }  // namespace USO
 #endif  // USO_MAP_OBJECTS_H

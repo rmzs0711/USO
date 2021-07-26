@@ -7,6 +7,8 @@
 #include "base_logic.h"
 #include <iostream>
 
+extern std::string new_map_name;
+
 namespace Menu {
 
 enum CG {
@@ -21,6 +23,8 @@ enum MOD {
 
 const std::size_t MAX_SIZE = 6;
 const int NUMBER_OF_MODS = 1;
+
+
 
 struct scrolling_menu {
 private:
@@ -63,6 +67,7 @@ struct map_creation_menu {
     void add_new_map(const std::string &) const;
     CG create_or_generate(sf::RenderWindow &, sf::Vector2f);
     void draw_blocks_of_data(sf::RenderWindow &, sf::CircleShape &);
+    void fix_map_name(std::string &) const;
 };
 
 void draw(sf::RenderWindow &);
@@ -83,7 +88,6 @@ struct mod_menu {
 
 int get_id(std::vector<sf::RectangleShape> &, sf::Vector2f);
 bool check_color(sf::Text);
-
 float return_acceleration(sf::Text);
 void change_speed(const std::string&, float);
 
