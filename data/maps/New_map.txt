@@ -1,116 +1,20 @@
-Aim
+Conveyor
 New_map
 data/maps/New_map.txt
-data\music\helltaker_rem.ogg
-helltaker_rem
-data\img\stronger.png
+data\music\stronger.ogg
+stronger
+data\img\hypno.png
 data/fonts/aller.ttf
 data/sounds/click.ogg
-Aim_circle
-516272
-700000
-554
-542
-65 300
-Aim_circle
-1465844
-700000
-1192
-475
-65 300
-Aim_circle
-2115268
-700000
-627
-476
-65 300
-Aim_circle
-2915280
-700000
-947
-392
-65 300
-Aim_circle
-3747888
-700000
-735
-804
-65 300
-Aim_circle
-4714232
-700000
-1225
-570
-65 300
-Aim_circle
-5596884
-700000
-414
-568
-65 300
-Aim_slider
-6413496
-700000
-350
-650
-65 300
-1667 217
-2772708
-Aim_slider
-9763344
-700000
-344
-288
-65 300
-1579 699
-2603187
-Aim_slider
-13262720
-700000
-304
-644
-65 300
-1557 207
-2654037
-Aim_spinner
-15961796
-1400000
-960
-540
-600
-Aim_spinner
-18227948
-1400000
-960
-540
-600
-Aim_spinner
-20227580
-1400000
-960
-540
-600
-Aim_circle
-22409284
-700000
-470
-622
-65 300
-Aim_circle
-23159516
-700000
-1498
-318
-65 300
-Aim_circle
-24242048
-700000
-526
-270
-65 300
-Aim_circle
-25275260
-700000
-1372
-701
-65 300
+-1845557
+2000000
+0
+-1719596
+2000000
+1
+-1574820
+2000000
+2
+-1396556
+2000000
+3

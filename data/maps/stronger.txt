@@ -1,8 +1,0 @@
-Aim
-ff
-mayday.txt
-data\music\mayday.ogg
-Gold
-data\img\stronger.png
-data\fonts\aller.ttf
-data\sounds\soft_snap.wav

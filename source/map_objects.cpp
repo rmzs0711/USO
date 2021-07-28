@@ -1,25 +1,32 @@
 #include "map_objects.h"
 #include <cmath>
 #include "base_logic.h"
+#include <iostream>
+
 namespace {
+
 float get_time_coefficient(const sf::Time &start,
                            const sf::Time &duration,
                            const sf::Time &current) {
     return (current - start) / duration;
 }
+
 bool is_click_time(const sf::Time &current_time, const sf::Time &end_time) {
     static sf::Time epsilon = sf::milliseconds(200);
     return end_time - current_time < epsilon ||
            current_time - end_time < epsilon;
 }
+
 sf::Vector2f fix_circle_pos(const sf::Vector2f &pos, const float &radius) {
     return sf::Vector2f(pos.x - radius, pos.y - radius);
 }
+
 double get_dist(sf::Vector2f start_pos, sf::Vector2f end_pos) {
     return std::pow((start_pos.x - end_pos.x) * (start_pos.x - end_pos.x) +
                         (start_pos.y - end_pos.y) * (start_pos.y - end_pos.y),
                     0.5);
 }
+
 }  // namespace
 
 sf::Time &USO::Map_object::get_start_time() {
@@ -30,17 +37,19 @@ sf::Time &USO::Map_object::get_duration_time() {
     return duration_time;
 }
 
-const sf::Vector2f &USO::Map_object::get_pos() const {
+sf::Vector2f USO::Map_object::get_pos() const {
     return pos;
 }
-const sf::Vector2f &USO::Map_object::get_end_pos() const {
+sf::Vector2f USO::Map_object::get_end_pos() const {
     return get_pos();
 }
 
 const sf::Time &USO::Map_object::get_move_time() const {
     return move_time;
 }
+
 void USO::Map_object::reset() {}
+
 USO::Map_object::Map_object(const sf::Time &start_time_,
                             const sf::Time &duration_time_,
                             float x,
@@ -240,7 +249,7 @@ void USO::Aim_slider::draw(sf::RenderWindow &window, const sf::Font &font) {
     Aim_circle::draw(window, font);
 }
 
-const sf::Vector2f &USO::Aim_slider::get_end_pos() const {
+sf::Vector2f USO::Aim_slider::get_end_pos() const {
     return end_pos;
 }
 
@@ -393,7 +402,17 @@ bool USO::Conveyor_note::change_state(const sf::Time &current_time) {
             line.pos.y - line.beat_sizes.y +
             (-line.pos.y + line.beat_sizes.y + line.beat_pos.y) *
                 get_time_coefficient(start_time, duration_time, current_time);
+        ///////////  check !!!!!!!!!!!
+
+
+        /////////////////////////////
+        std::cout << "line.pos.y: " << line.pos.y << "\n" << "line.beat_sizes.y: "
+                  << line.beat_sizes.y << "\n" << "line.beat_pos.y: " << line.beat_pos.y << "\n\n";
+
+        std::cout << sf::VideoMode::getFullscreenModes().begin()->height << " "
+                  << sf::VideoMode::getFullscreenModes().begin()->width << "\n";
         return true;
+
     }
     return false;
 }
@@ -476,4 +495,68 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     beat_rectangle.setOutlineColor(sf::Color::White);
     beat_rectangle.setOutlineThickness(1);
     window.draw(beat_rectangle);
+}
+
+USO::taiko_circle::taiko_circle(const sf::Time &start_time_,
+                                const sf::Time &duration_time_,
+                                float x,
+                                float y,
+                                float diam_,
+                                const sf::Time &move_time_)
+    : Map_object(start_time_,
+                 duration_time_,
+                 x,
+                 y,
+                 move_time_),
+                 diam(diam_) {}
+
+bool USO::taiko_circle::is_basket_correct_pressing(
+    sf::Vector2f cur_circle_pos) const {
+    if (cur_circle_pos.x + get_diam() <=
+            get_basket_pos().x + get_basket_diam()
+        && cur_circle_pos.x >= get_pos().x) {
+        return true;
+    }
+    return false;
+}
+
+sf::Vector2f USO::taiko_circle::get_basket_pos() const {
+    return catchZone.backet.getPosition();
+}
+std::size_t USO::taiko_circle::get_diam() const {
+    return diam;
+}
+std::size_t USO::taiko_circle::get_basket_diam() const {
+    return 2 * catchZone.backet.getRadius();
+}
+bool USO::taiko_circle::change_state(const sf::Time &current_time) {
+    if (current_time <= start_time + duration_time) {
+        pos.x =
+            start_pos.x -
+            (line_pos(1).x - get_basket_diam())
+                * get_time_coefficient(start_time, duration_time, current_time);
+        return true;
+    }
+    return false;
+}
+
+bool USO::taiko_circle::check_event(const sf::Vector2f &,
+                 BL::Game_session &game_session,
+                 const sf::Time &current_time) {
+    if (is_basket_correct_pressing(pos)) {
+        if (is_click_time(current_time, start_time + duration_time)) {
+            game_session.increase_combo(1);
+            game_session.increase_score(100, game_session.get_combo());
+            game_session.increase_health(20);
+            return true;
+        }
+        game_session.decrease_health(game_session.damage());
+    }
+    return false;
+}
+void USO::taiko_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
+
+}
+sf::Vector2f USO::taiko_circle::line_pos(int index) const {
+    return catchZone.lines[index].getPosition();
 }

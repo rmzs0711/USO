@@ -1,3 +1,2 @@
-mayday
-editing_map
-mayday2
+New_map
+New_map(1)

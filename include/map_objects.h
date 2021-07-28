@@ -38,8 +38,8 @@ public:
     virtual ~Map_object() = default;
     virtual sf::Time &get_start_time();
     virtual sf::Time &get_duration_time();
-    [[nodiscard]] virtual const sf::Vector2f &get_pos() const;
-    [[nodiscard]] virtual const sf::Vector2f &get_end_pos() const;
+    [[nodiscard]] virtual sf::Vector2f get_pos() const;
+    [[nodiscard]] virtual sf::Vector2f get_end_pos() const;
     [[nodiscard]] virtual sf::Vector2f *get_end_pos_ptr() = 0;
     virtual std::shared_ptr<Map_object> clone() = 0;
     virtual void reset();
@@ -99,7 +99,7 @@ public:
                      BL::Game_session &game_session,
                      const sf::Time &current_time) override;
     void draw(sf::RenderWindow &window, const sf::Font &font) override;
-    [[nodiscard]] const sf::Vector2f &get_end_pos() const override;
+    [[nodiscard]] sf::Vector2f get_end_pos() const override;
     [[nodiscard]] sf::Vector2f *get_end_pos_ptr() override;
     std::shared_ptr<Map_object> clone() override;
     [[nodiscard]] const sf::Vector2f &get_start_pos() const;
@@ -165,12 +165,36 @@ public:
     [[nodiscard]] const USO::Conveyor_line &get_line() const;
 };
 
-struct wake_taiko_line {
-
+struct taiko_catch_zone {
+    sf::CircleShape backet;
+    std::vector<sf::RectangleShape> lines;
 };
 
-struct wake_taiko_circle : Map_object {
+struct taiko_circle : Map_object {
+private:
+    taiko_catch_zone catchZone;
+    std::size_t diam;
+    sf::Vector2f start_pos;
 
+public:
+    sf::Vector2f line_pos(int) const;
+    taiko_circle(taiko_circle &) = default;
+    std::size_t get_diam() const;
+    taiko_circle(const sf::Time &start_time_,
+                 const sf::Time &duration_time_,
+                 float x,
+                 float y,
+                 float diam,
+                 const sf::Time &move_time_ = sf::seconds(0)
+                 );
+    bool is_basket_correct_pressing(sf::Vector2f) const;
+    bool change_state(const sf::Time &current_time) override;
+    bool check_event(const sf::Vector2f &,
+                     BL::Game_session &game_session,
+                     const sf::Time &current_time) override;
+    void draw(sf::RenderWindow &window, const sf::Font &font) override;
+    [[nodiscard]] sf::Vector2f get_basket_pos() const;
+    [[nodiscard]] std::size_t get_basket_diam() const;
 };
 
 }  // namespace USO

@@ -233,7 +233,9 @@ struct Editing_box {
 
                     if (decision == "Save?") {
                         need_to_add = true;
-                    } else if (decision == "Do you want to leave?") {
+                    }
+
+                    if (decision == "Do you want to leave?") {
                         if (need_to_add) {
                             std::ofstream file(R"(data\maps\saved_maps.txt)", std::ios::app);
                             file << new_map_name << std::endl;
@@ -780,7 +782,7 @@ void Conveyor_map::constructor_run(sf::RenderWindow &window) {
                     }
                     window.display();
                     if (editing_box.draw_yes_and_no_decision(
-                            "Do you want to leave")) {
+                            "Do you want to leave?")) {
                         return;
                     }
                 }
