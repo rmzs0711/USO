@@ -105,6 +105,7 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
                 start_time, duration_time, *(lines[line_index]))));
     }
 }
+
 void USO::Map::prelude(sf::Music &music,
                        sf::SoundBuffer &sound_buffer,
                        sf::Texture &image,
@@ -113,4 +114,8 @@ void USO::Map::prelude(sf::Music &music,
     check_file_load(sound_buffer.loadFromFile(sound_address), sound_address);
     check_file_load(image.loadFromFile(image_address), image_address);
     check_file_load(font.loadFromFile(font_address), font_address);
+}
+
+void USO::taiko_map::generate_catch_zone() {
+    std::shared_ptr<taiko_catch_zone> catchZone;
 }

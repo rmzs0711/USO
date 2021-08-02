@@ -166,27 +166,28 @@ public:
 };
 
 struct taiko_catch_zone {
-    sf::CircleShape backet;
+    bool dragged = false;
+    bool missed = false;
+    sf::CircleShape basket;
     std::vector<sf::RectangleShape> lines;
+    void draw(sf::RenderWindow &window) const;
+    taiko_catch_zone();
 };
 
 struct taiko_circle : Map_object {
 private:
     taiko_catch_zone catchZone;
-    std::size_t diam;
-    sf::Vector2f start_pos;
+    float diam;
 
 public:
-    sf::Vector2f line_pos(int) const;
     taiko_circle(taiko_circle &) = default;
-    std::size_t get_diam() const;
+
     taiko_circle(const sf::Time &start_time_,
                  const sf::Time &duration_time_,
                  float x,
                  float y,
                  float diam,
-                 const sf::Time &move_time_ = sf::seconds(0)
-                 );
+                 const sf::Time &move_time_ = sf::seconds(0));
     bool is_basket_correct_pressing(sf::Vector2f) const;
     bool change_state(const sf::Time &current_time) override;
     bool check_event(const sf::Vector2f &,

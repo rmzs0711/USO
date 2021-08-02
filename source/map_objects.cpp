@@ -402,15 +402,6 @@ bool USO::Conveyor_note::change_state(const sf::Time &current_time) {
             line.pos.y - line.beat_sizes.y +
             (-line.pos.y + line.beat_sizes.y + line.beat_pos.y) *
                 get_time_coefficient(start_time, duration_time, current_time);
-        ///////////  check !!!!!!!!!!!
-
-
-        /////////////////////////////
-        std::cout << "line.pos.y: " << line.pos.y << "\n" << "line.beat_sizes.y: "
-                  << line.beat_sizes.y << "\n" << "line.beat_pos.y: " << line.beat_pos.y << "\n\n";
-
-        std::cout << sf::VideoMode::getFullscreenModes().begin()->height << " "
-                  << sf::VideoMode::getFullscreenModes().begin()->width << "\n";
         return true;
 
     }
@@ -512,7 +503,7 @@ USO::taiko_circle::taiko_circle(const sf::Time &start_time_,
 
 bool USO::taiko_circle::is_basket_correct_pressing(
     sf::Vector2f cur_circle_pos) const {
-    if (cur_circle_pos.x + get_diam() <=
+    if (cur_circle_pos.x + diam <=
             get_basket_pos().x + get_basket_diam()
         && cur_circle_pos.x >= get_pos().x) {
         return true;
@@ -521,19 +512,19 @@ bool USO::taiko_circle::is_basket_correct_pressing(
 }
 
 sf::Vector2f USO::taiko_circle::get_basket_pos() const {
-    return catchZone.backet.getPosition();
+    return catchZone.basket.getPosition();
 }
-std::size_t USO::taiko_circle::get_diam() const {
-    return diam;
-}
+//std::size_t USO::taiko_circle::get_diam() const {
+//    return diam;
+//}
 std::size_t USO::taiko_circle::get_basket_diam() const {
-    return 2 * catchZone.backet.getRadius();
+    return 2 * catchZone.basket.getRadius();
 }
 bool USO::taiko_circle::change_state(const sf::Time &current_time) {
     if (current_time <= start_time + duration_time) {
-        pos.x =
-            start_pos.x -
-            (line_pos(1).x - get_basket_diam())
+        ///////////////////  ЗДЕСЬ ТОЧНО ЧТО-ТО НЕ ТАК !!!
+        pos.x = catchZone.lines[0].getSize().x -
+            (catchZone.lines[0].getSize().x - get_basket_diam())
                 * get_time_coefficient(start_time, duration_time, current_time);
         return true;
     }
@@ -554,9 +545,28 @@ bool USO::taiko_circle::check_event(const sf::Vector2f &,
     }
     return false;
 }
+
 void USO::taiko_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
+//    catchZone.draw(window);
+//
+    sf::CircleShape circle(diam / 2);
+    circle.setPosition(pos);
+    circle.setFillColor(sf::Color(255, 0, 0));
+    circle.setOutlineColor(sf::Color(0, 0, 0));
+    window.draw(circle);
+}
+
+USO::taiko_catch_zone::taiko_catch_zone() {
+    basket.setRadius(100);
+    basket.setPosition(10, (float)sf::VideoMode::getFullscreenModes().begin()->height / 2);
+
+    lines.resize(2, sf::RectangleShape(sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width, 5)));
+    lines[0].setPosition(basket.getPosition());
+    lines[1].setPosition(basket.getPosition().x, basket.getPosition().y + 2 * basket.getRadius());
 
 }
-sf::Vector2f USO::taiko_circle::line_pos(int index) const {
-    return catchZone.lines[index].getPosition();
+void USO::taiko_catch_zone::draw(sf::RenderWindow &window) const {
+    window.draw(lines[0]);
+    window.draw(lines[1]);
+    window.draw(basket);
 }

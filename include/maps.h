@@ -138,7 +138,33 @@ public:
     void constructor_run(sf::RenderWindow &) override;
 };
 
-struct Bulletproof_map final : Map {
+struct taiko_map final : Map {
+private:
+
+    std::shared_ptr<taiko_catch_zone> catchZone;
+public:
+
+    taiko_map(std::string mode_,
+        std::string map_name_,
+    std::string map_adress,
+        std::string music_address_,
+    std::string music_name_,
+        std::string image_address_,
+    std::string font_address_,
+        std::string sound_address_,
+    std::list<std::shared_ptr<Map_object>> map_objects_ = {})
+    : Map(std::move(mode_),
+        std::move(map_name_),
+        std::move(map_adress),
+        std::move(music_address_),
+        std::move(music_name_),
+        std::move(image_address_),
+        std::move(font_address_),
+        std::move(sound_address_),
+        std::move(map_objects_)) {
+    }
+
+    void generate_catch_zone();
     void run(sf::RenderWindow &) override;
 };
 
