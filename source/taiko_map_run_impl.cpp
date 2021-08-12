@@ -91,9 +91,32 @@ void USO::taiko_map::run(sf::RenderWindow &window) {
                     continue;
                 }
 
-//                auto handle_click = [&]() -> void {
-//                    TODO;
-//                }
+                auto handle_click = [&]() -> void {
+                    drag = true;
+                    if (dragged_key[note_keys[0]]) {
+                        catchZone->dragged = true;
+                    }
+                  sf::Vector2f position = catchZone->basket.getPosition();
+                  if (dragged_key[note_keys[0]]) {
+                      catchZone->dragged = true;
+                      bool hit = false;
+                      while (!field.get_field_objects().empty()) {
+                          if (field.get_field_objects().back()->check_event(
+                                  position, game_session,
+                                  past_time + clock.getElapsedTime())) {
+                              sound.play();
+                              field.get_field_objects().pop_back();
+                              hit = true;
+                              catchZone->missed = false;
+                          } else {
+                              break;
+                          }
+                      }
+                      if (!hit) {
+                          catchZone->missed = true;
+                      }
+                  }
+                };
 
                 switch (event.type) {
                     case sf::Event::KeyPressed: {
@@ -105,10 +128,31 @@ void USO::taiko_map::run(sf::RenderWindow &window) {
                             dragged_key[event.key.code] = 1;
                             number_of_dragged_buttons++;
                         }
-                        //  handle_click();
-
+                        handle_click();
+                    } break;
+                    case sf::Event::KeyReleased: {
+                        dragged_key[event.key.code] = 0;
+                        number_of_dragged_buttons--;
+                        if (!dragged_key[note_keys[0]]) {
+                            catchZone->dragged = false;
+                            catchZone->missed = false;
+                        }
+                        if (number_of_dragged_buttons == 0) {
+                            drag = false;
+                        }
+                    } break;
+                    default: {
+                        if (drag && !field.get_field_objects().empty()) {
+                            USO::Map_object &front_object =
+                                *(field.get_field_objects().front().get());
+                            front_object.check_event(
+                                sf::Vector2f(sf::Mouse::getPosition()),
+                                game_session,
+                                past_time + clock.getElapsedTime());
+                        }
                     } break;
                 }
+                break;
             }
             case BL::Game_status::PAUSE: {
                 break;

@@ -487,7 +487,7 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     beat_rectangle.setOutlineThickness(1);
     window.draw(beat_rectangle);
 }
-
+/// TAIKO !!!!!!!!!!!!!
 USO::taiko_circle::taiko_circle(const sf::Time &start_time_,
                                 const sf::Time &duration_time_,
                                 float x,
@@ -514,18 +514,19 @@ bool USO::taiko_circle::is_basket_correct_pressing(
 sf::Vector2f USO::taiko_circle::get_basket_pos() const {
     return catchZone.basket.getPosition();
 }
-//std::size_t USO::taiko_circle::get_diam() const {
-//    return diam;
-//}
+
 std::size_t USO::taiko_circle::get_basket_diam() const {
     return 2 * catchZone.basket.getRadius();
 }
 bool USO::taiko_circle::change_state(const sf::Time &current_time) {
     if (current_time <= start_time + duration_time) {
         ///////////////////  ЗДЕСЬ ТОЧНО ЧТО-ТО НЕ ТАК !!!
-        pos.x = catchZone.lines[0].getSize().x -
-            (catchZone.lines[0].getSize().x - get_basket_diam())
-                * get_time_coefficient(start_time, duration_time, current_time);
+        /*pos.x = catchZone.roadway.getSize().x -
+            (catchZone.roadway.getSize().x - get_basket_diam())
+                * get_time_coefficient(start_time, duration_time, current_time);*/
+        float width = catchZone.roadway.getSize().x;
+        pos.x = width - (width + get_basket_diam())
+                            * get_time_coefficient(start_time, duration_time, current_time);
         return true;
     }
     return false;
@@ -547,8 +548,6 @@ bool USO::taiko_circle::check_event(const sf::Vector2f &,
 }
 
 void USO::taiko_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
-//    catchZone.draw(window);
-//
     sf::CircleShape circle(diam / 2);
     circle.setPosition(pos);
     circle.setFillColor(sf::Color(255, 0, 0));
@@ -560,13 +559,21 @@ USO::taiko_catch_zone::taiko_catch_zone() {
     basket.setRadius(100);
     basket.setPosition(10, (float)sf::VideoMode::getFullscreenModes().begin()->height / 2);
 
-    lines.resize(2, sf::RectangleShape(sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width, 5)));
-    lines[0].setPosition(basket.getPosition());
-    lines[1].setPosition(basket.getPosition().x, basket.getPosition().y + 2 * basket.getRadius());
-
+    roadway.setSize(sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width, 50));
+    roadway.setPosition(basket.getPosition());
 }
-void USO::taiko_catch_zone::draw(sf::RenderWindow &window) const {
-    window.draw(lines[0]);
-    window.draw(lines[1]);
+
+void USO::taiko_catch_zone::draw(sf::RenderWindow &window) {
     window.draw(basket);
+    if (dragged) {
+        if (!missed) {
+            roadway.setFillColor(sf::Color(0, 255, 0, 50));
+        } else {
+            roadway.setFillColor(sf::Color(255, 0, 0, 50));
+        }
+    } else {
+        roadway.setFillColor(sf::Color(0, 0, 0, 255));
+    }
+    roadway.setOutlineColor(sf::Color(0, 0, 0));
+    window.draw(roadway);
 }

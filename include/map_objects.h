@@ -169,8 +169,8 @@ struct taiko_catch_zone {
     bool dragged = false;
     bool missed = false;
     sf::CircleShape basket;
-    std::vector<sf::RectangleShape> lines;
-    void draw(sf::RenderWindow &window) const;
+    sf::RectangleShape roadway;
+    void draw(sf::RenderWindow &window);
     taiko_catch_zone();
 };
 

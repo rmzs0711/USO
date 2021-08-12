@@ -140,7 +140,6 @@ public:
 
 struct taiko_map final : Map {
 private:
-
     std::shared_ptr<taiko_catch_zone> catchZone;
 public:
 
