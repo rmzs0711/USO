@@ -15,10 +15,9 @@ namespace {
 const sf::Color color_for_mouse = sf::Color(241, 200, 14);
 const sf::Color input_color = sf::Color(150, 160, 145);
 const sf::Color text_color = sf::Color(2, 2, 2);
-
+sf::Vector2u WINDOW_SIZE;
 
 float acceleration_factor = 1;
-
 int transparent_lvl = 0;
 
 std::string list_of_saved_maps_file_name() {
@@ -59,6 +58,7 @@ sf::RenderWindow &Menu::set_settings() {
     setting.antialiasingLevel = 8;
     static sf::RenderWindow window(sf::VideoMode(1080, 720), "USO!",
                                    sf::Style::Fullscreen, setting);
+    WINDOW_SIZE = window.getSize();
     window.setMouseCursorVisible(true);
     window.display();
     return window;
@@ -224,18 +224,24 @@ Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move
         list_of_maps.emplace_back(map_name);
     }
 
-    for (int i = 0; i < std::min(MAX_SIZE, list_of_maps.size()); i++) {
-        blocks_of_maps_name.emplace_back(sf::Vector2f(400, 70));
-        blocks_of_maps_name[i].setPosition(5, (float)(i + 5) * 70);
+    blocks_of_maps_name.resize(std::min(max_num_of_rec(), (int)list_of_maps.size()),
+                               sf::RectangleShape({BLOCK_SIZE}));
+    float start_y_pos =
+        (WINDOW_SIZE.y - std::min(max_num_of_rec(),
+                                  (int)list_of_maps.size()) * BLOCK_SIZE.y) / 2;
+
+    for (int i = 0; i < std::min(max_num_of_rec(), (int)list_of_maps.size()); i++) {
+        blocks_of_maps_name[i].setPosition(5, start_y_pos + (float)(60 * i));
+        blocks_of_maps_name[i].setFillColor(sf::Color(255, 114, 219, 200));
         blocks_of_maps_name[i].setOutlineThickness(5);
         blocks_of_maps_name[i].setOutlineColor(sf::Color(0, 0, 0));
     }
+
     font.loadFromFile(R"(data\fonts\GistLight.otf)");
     text.setFont(font);
     text.setCharacterSize(40);
     text.setFillColor(sf::Color(34, 46, 137));
     text.setStyle(sf::Text::Bold);
-
     text.setFillColor(sf::Color(2, 2, 2));
     text.setScale(0.7, 0.7);
 }
@@ -325,7 +331,7 @@ int Menu::scrolling_menu::get_delta() const {
 }
 
 void Menu::scrolling_menu::scrolling_down() {
-    if (delta + std::min(MAX_SIZE, list_of_maps.size()) < list_of_maps.size()) {
+    if (delta + std::min(max_num_of_rec(), (int)list_of_maps.size()) < list_of_maps.size()) {
         increase_delta();
     }
 }
@@ -382,6 +388,15 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
                         return;
                     }
                 } break;
+                case sf::Event::MouseMoved: {
+                    for (int i = 0; i < std::min(max_num_of_rec(), (int)list_of_maps.size()); i++)
+                    if (check_pressing(sf::Vector2f(event.mouseMove.x, event.mouseMove.y),
+                                           blocks_of_maps_name[i].getPosition(),
+                                           blocks_of_maps_name[i].getSize())) {
+                        //  движение блока
+
+                    }
+                } break;
                 default: {
                 } break;
             }
@@ -390,10 +405,10 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
         for (auto &button : buttons) {
             button.draw(window);
         }
-        for (int i = 0; i < std::min(MAX_SIZE, list_of_maps.size()); i++) {
+        for (int i = 0; i < std::min(max_num_of_rec(), (int)list_of_maps.size()); i++) {
             window.draw(blocks_of_maps_name[i]);
             text.setString(list_of_maps[i + delta]);
-            text.setPosition(5, (float)(i + 5) * 70);
+            text.setPosition(10, blocks_of_maps_name[0].getPosition().y + 60 * i);
             window.draw(text);
             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
             mouse.setFillColor(color_for_mouse);
@@ -403,9 +418,8 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
     }
 }
 
-void Menu::map_creation_menu::add_new_map(const std::string &map_name) const {
-    std::ofstream file(filename, std::ios::app);
-    file << map_name << std::endl;
+int Menu::scrolling_menu::max_num_of_rec() const {
+    return WINDOW_SIZE.y / BLOCK_SIZE.y;
 }
 
 void Menu::map_creation_menu::fix_map_name(std::string &cur_map_name) const {
@@ -416,7 +430,7 @@ void Menu::map_creation_menu::fix_map_name(std::string &cur_map_name) const {
         names[map_name]++;
     }
     int id = 1;
-    std:size_t name_size = cur_map_name.length();
+    std::size_t name_size = cur_map_name.length();
     while (names.find(cur_map_name) != names.end()) {
         cur_map_name =
             cur_map_name.substr(0, name_size)

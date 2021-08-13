@@ -21,13 +21,12 @@ enum MOD {
     ACCELERATION
 };
 
-const std::size_t MAX_SIZE = 6;
 const int NUMBER_OF_MODS = 1;
-
-
 
 struct scrolling_menu {
 private:
+
+    sf::Vector2f BLOCK_SIZE = {400, 60};
     std::string filename;
     sf::Text text;
     sf::Font font;
@@ -42,12 +41,10 @@ public:
     void scrolling_up();
     bool push(sf::RenderWindow &, sf::Vector2f);
     void draw(sf::RenderWindow &window);
-
-
     [[nodiscard]] int get_delta() const;
     void increase_delta();
     void decrease_delta();
-
+    int max_num_of_rec() const;
 };
 
 struct map_creation_menu {
@@ -64,7 +61,6 @@ struct map_creation_menu {
     explicit map_creation_menu(std::string);
     void draw(sf::RenderWindow &);
     int get_id(sf::Vector2f) const;
-    void add_new_map(const std::string &) const;
     CG create_or_generate(sf::RenderWindow &, sf::Vector2f);
     void draw_blocks_of_data(sf::RenderWindow &, sf::CircleShape &);
     void fix_map_name(std::string &) const;
