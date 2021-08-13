@@ -16,6 +16,7 @@ const sf::Color color_for_mouse = sf::Color(241, 200, 14);
 const sf::Color input_color = sf::Color(150, 160, 145);
 const sf::Color text_color = sf::Color(2, 2, 2);
 sf::Vector2u WINDOW_SIZE;
+sf::Vector2f WINDOW_POSITION = {0, 0};
 
 float acceleration_factor = 1;
 int transparent_lvl = 0;
@@ -196,16 +197,6 @@ void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
     }
 }
 
-void Menu::constructor_menu(sf::Window &window) {
-    std::vector<std::string> saved_maps(get_vector_of_saved_maps_names());
-    sf::Vector2f sizes = get_constructor_menu_buttons_size();
-
-    std::vector<Menu::Button> buttons;
-
-    for (auto &map_name : saved_maps) {
-        //        buttons.emplace_back(start_x, start_y, );
-    }
-}
 
 bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
     if (pos.x <= mouse.x && pos.x + sz.x >= mouse.x &&
@@ -217,6 +208,11 @@ bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
 
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
     transparent_lvl = 0;
+
+    add_block = 2;
+    BLOCK_SIZE = {400, 60};
+    track_speed = 3.f;
+
     std::ifstream file(filename);
     std::string map_name;
 
@@ -224,14 +220,13 @@ Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move
         list_of_maps.emplace_back(map_name);
     }
 
-    blocks_of_maps_name.resize(std::min(max_num_of_rec(), (int)list_of_maps.size()),
+    blocks_of_maps_name.resize(number_of_blocks(),
                                sf::RectangleShape({BLOCK_SIZE}));
     float start_y_pos =
-        (WINDOW_SIZE.y - std::min(max_num_of_rec(),
-                                  (int)list_of_maps.size()) * BLOCK_SIZE.y) / 2;
+        (WINDOW_SIZE.y - (float)number_of_blocks() * BLOCK_SIZE.y) / 2;
 
-    for (int i = 0; i < std::min(max_num_of_rec(), (int)list_of_maps.size()); i++) {
-        blocks_of_maps_name[i].setPosition(5, start_y_pos + (float)(60 * i));
+    for (int i = 0; i < number_of_blocks(); i++) {
+        blocks_of_maps_name[i].setPosition(WINDOW_POSITION.x + 5, start_y_pos + (float)(60 * i));
         blocks_of_maps_name[i].setFillColor(sf::Color(255, 114, 219, 200));
         blocks_of_maps_name[i].setOutlineThickness(5);
         blocks_of_maps_name[i].setOutlineColor(sf::Color(0, 0, 0));
@@ -291,7 +286,7 @@ Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std
         list_of_default_data[i].resize(5);
         list_of_default_data[i][0] = rand(e1) % 2 == 0 ? "Aim" : "Conveyor";
         list_of_default_data[i][1] = "Anonymous";
-        list_of_default_data[i][2] = "New_map";
+        list_of_default_data[i][2] = "New map";
         list_of_default_data[i][3] = addresses_of_music[rand(e1) % addresses_of_music.size()];
         list_of_default_data[i][4] = addresses_of_images[rand(e1) % addresses_of_images.size()];
     }
@@ -326,12 +321,8 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
     return true;
 }
 
-int Menu::scrolling_menu::get_delta() const {
-    return delta;
-}
-
 void Menu::scrolling_menu::scrolling_down() {
-    if (delta + std::min(max_num_of_rec(), (int)list_of_maps.size()) < list_of_maps.size()) {
+    if (delta + number_of_blocks() < list_of_maps.size()) {
         increase_delta();
     }
 }
@@ -388,28 +379,36 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
                         return;
                     }
                 } break;
-                case sf::Event::MouseMoved: {
-                    for (int i = 0; i < std::min(max_num_of_rec(), (int)list_of_maps.size()); i++)
-                    if (check_pressing(sf::Vector2f(event.mouseMove.x, event.mouseMove.y),
-                                           blocks_of_maps_name[i].getPosition(),
-                                           blocks_of_maps_name[i].getSize())) {
-                        //  движение блока
-
-                    }
-                } break;
                 default: {
                 } break;
             }
         }
+
         draw_menu(window);
         for (auto &button : buttons) {
             button.draw(window);
         }
-        for (int i = 0; i < std::min(max_num_of_rec(), (int)list_of_maps.size()); i++) {
+
+        for (int i = 0; i < number_of_blocks(); i++) {
+            sf::RectangleShape &rect = blocks_of_maps_name[i];
+            if (check_pressing((sf::Vector2f)sf::Mouse::getPosition(),
+                               blocks_of_maps_name[i].getPosition(),
+                               blocks_of_maps_name[i].getSize())) {
+                if (rect.getPosition().x <= rect.getSize().x / 6) {
+                    rect.setPosition(rect.getPosition() + sf::Vector2f(track_speed, 0));
+                }
+            } else {
+                if (rect.getPosition().x >= WINDOW_POSITION.x + 5) {
+                    rect.setPosition(rect.getPosition() + sf::Vector2f(-track_speed, 0)); // TODO
+                }
+            }
+
             window.draw(blocks_of_maps_name[i]);
             text.setString(list_of_maps[i + delta]);
-            text.setPosition(10, blocks_of_maps_name[0].getPosition().y + 60 * i);
+            text.setPosition(blocks_of_maps_name[i].getPosition().x + 5,
+                             blocks_of_maps_name[0].getPosition().y + (float)(60 * i));
             window.draw(text);
+
             mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
             mouse.setFillColor(color_for_mouse);
             window.draw(mouse);
@@ -418,8 +417,8 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
     }
 }
 
-int Menu::scrolling_menu::max_num_of_rec() const {
-    return WINDOW_SIZE.y / BLOCK_SIZE.y;
+int Menu::scrolling_menu::number_of_blocks() const {
+    return std::min((int)(WINDOW_SIZE.y / BLOCK_SIZE.y), (int)list_of_maps.size());
 }
 
 void Menu::map_creation_menu::fix_map_name(std::string &cur_map_name) const {

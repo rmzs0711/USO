@@ -25,8 +25,9 @@ const int NUMBER_OF_MODS = 1;
 
 struct scrolling_menu {
 private:
-
-    sf::Vector2f BLOCK_SIZE = {400, 60};
+    int add_block{};
+    float track_speed{};
+    sf::Vector2f BLOCK_SIZE;
     std::string filename;
     sf::Text text;
     sf::Font font;
@@ -37,14 +38,16 @@ private:
 public:
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
+
     void scrolling_down();
     void scrolling_up();
-    bool push(sf::RenderWindow &, sf::Vector2f);
-    void draw(sf::RenderWindow &window);
-    [[nodiscard]] int get_delta() const;
     void increase_delta();
     void decrease_delta();
-    int max_num_of_rec() const;
+
+    bool push(sf::RenderWindow &, sf::Vector2f);
+    void draw(sf::RenderWindow &window);
+
+    int number_of_blocks() const;
 };
 
 struct map_creation_menu {
