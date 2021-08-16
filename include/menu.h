@@ -6,6 +6,7 @@
 #include "SFML/Graphics.hpp"
 #include "base_logic.h"
 #include <iostream>
+#include <functional>
 
 extern std::string new_map_name;
 
@@ -25,29 +26,29 @@ const int NUMBER_OF_MODS = 1;
 
 struct scrolling_menu {
 private:
-    int additional_blocks{};
     float track_speed{};
     float scrolling_speed{};
-    int delta{};
+    float gap{};
+    std::size_t char_size{};
     sf::Vector2f BLOCK_SIZE;
     std::string filename;
-    sf::Text text;
+    std::vector<sf::Text> map_names;
     sf::Font font;
     std::vector<std::string> list_of_maps;
-    std::vector<sf::RectangleShape> blocks_of_maps_name;
+    std::vector<sf::RectangleShape> blocks_of_map_names;
+
+    static sf::Vector2f plus(sf::Vector2f, sf::Vector2f);
+    static sf::Vector2f minus(sf::Vector2f, sf::Vector2f);
+    void scrolling(const std::function<sf::Vector2f(sf::Vector2f, sf::Vector2f)>&);
+    bool push(sf::RenderWindow &, sf::Vector2f);
+
+    int number_of_blocks() const;
+    void block_movement();
 
 public:
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
-
-    void scrolling_down();
-    void scrolling_up();
-
-    bool push(sf::RenderWindow &, sf::Vector2f);
     void draw(sf::RenderWindow &window);
-
-    int number_of_blocks() const;
-    void block_movement(sf::RectangleShape &);
 };
 
 struct map_creation_menu {
@@ -86,8 +87,8 @@ struct mod_menu {
 };
 
 int get_id(std::vector<sf::RectangleShape> &, sf::Vector2f);
-bool check_color(sf::Text);
-float return_acceleration(sf::Text);
+bool check_color(const sf::Text&);
+float return_acceleration(const sf::Text&);
 void change_speed(const std::string&, float);
 
 }  // namespace Menu
