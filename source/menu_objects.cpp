@@ -38,7 +38,8 @@ void Menu::Button::press(sf::RenderWindow &window,
                 gameSession.set_game_status(BL::Game_status::ACTION);
             } break;
             case BACK_TO_MENU: {
-                menu(window, gameSession);
+                main_menu mainMenu;
+                mainMenu.run(window);
             } break;
             case OPEN_LIST_OF_MODS: {
                 mod_menu modMenu;
@@ -63,7 +64,7 @@ void Menu::Button::draw(sf::RenderWindow &window) {
             name_of_button = "Exit";
             break;
         case CHOOSE_THE_MAP:
-                name_of_button = "Choose the map";
+            name_of_button = "Choose the map";
             break;
         case CREATE_NEW_MAP:
             name_of_button = "Create new map";

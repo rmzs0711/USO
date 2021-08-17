@@ -2,6 +2,7 @@
 #include "menu.h"
 
 int main() {
-    Menu::menu(Menu::set_settings(), {});
+    Menu::main_menu mainMenu;
+    mainMenu.run(Menu::set_settings());
     return 0;
 }

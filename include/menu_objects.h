@@ -1,8 +1,10 @@
 #ifndef USO_MENU_OBJECTS_H
 #define USO_MENU_OBJECTS_H
+
 #include "SFML/Graphics.hpp"
 #include "map_objects_management.h"
 #include "windows.h"
+
 namespace Menu {
 enum Event {
     CHOOSE_THE_MAP,
@@ -13,7 +15,12 @@ enum Event {
     CONTINUE,
     BACK_TO_MENU
 };
-enum State { POINTED, QUIET };
+
+enum State {
+    POINTED,
+    QUIET
+};
+
 struct Button {
     sf::CircleShape circle;
     Event event;

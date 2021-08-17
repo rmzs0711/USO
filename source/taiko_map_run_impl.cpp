@@ -30,6 +30,7 @@ void USO::taiko_map::run(sf::RenderWindow &window) {
                     R"(data\img\lucifer.png)");
 
     sf::RectangleShape rect(static_cast<sf::Vector2f>(window.getSize()));
+    std::cout << "RUN: " << window.getSize().x << " " << window.getSize().y << "\n";
     rect.setPosition(0, 0);
     rect.setTexture(&img);
     rect.setFillColor(sf::Color(255, 255, 255, 40));
@@ -83,7 +84,7 @@ void USO::taiko_map::run(sf::RenderWindow &window) {
                         past_time + clock.getElapsedTime())) {
                     field.get_field_objects().back()->draw(window, font);
                     field.get_field_objects().pop_back();
-                    game_session.decrease_health(game_session.damage());
+                    game_session.decrease_health(BL::Game_session::damage());
                 }
                 window.display();
 

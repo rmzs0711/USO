@@ -7,6 +7,7 @@
 #include "base_logic.h"
 #include <iostream>
 #include <functional>
+#include "menu_objects.h"
 
 extern std::string new_map_name;
 
@@ -70,12 +71,24 @@ struct map_creation_menu {
     void fix_map_name(std::string &) const;
 };
 
-void draw(sf::RenderWindow &);
-void menu(sf::RenderWindow &, BL::Game_session);
-void constructor_menu(sf::Window &window);
-sf::RenderWindow &set_settings();
 void stop_menu(sf::RenderWindow &, BL::Game_session &);
-void list_of_maps(sf::RenderWindow &);
+
+struct main_menu {
+private:
+    float coef;
+    bool ctrl_pressed{};
+    std::vector<sf::Texture> textures;
+    std::vector<Button> buttons;
+
+public:
+
+    main_menu();
+    void draw(sf::RenderWindow &);
+    void check_event(sf::RenderWindow &, sf::Event);
+    void run(sf::RenderWindow &);
+};
+
+sf::RenderWindow &set_settings();
 
 struct mod_menu {
     sf::Font font;

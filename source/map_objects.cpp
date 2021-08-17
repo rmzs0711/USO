@@ -524,12 +524,14 @@ bool USO::taiko_circle::check_event(const sf::Vector2f &,
                  const sf::Time &current_time) {
     if (is_correct_pressing()) {
         if (is_click_time(current_time, start_time + duration_time)) {
+            catchZone.missed = false;
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
             game_session.increase_health(20);
             return true;
         }
         game_session.decrease_health(BL::Game_session::damage());
+        catchZone.missed = true;
     }
     return false;
 }

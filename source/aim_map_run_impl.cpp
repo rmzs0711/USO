@@ -16,7 +16,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     sf::Clock clock;
     sf::Time past_time;  // костыль для паузы, так как sfml не умеет
     // останавливать часы
-    window.setMouseCursorVisible(false);
     if (map_objects.empty()) {
         return;
     }
