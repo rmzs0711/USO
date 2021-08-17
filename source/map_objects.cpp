@@ -1,7 +1,7 @@
 #include "map_objects.h"
 #include <cmath>
 #include "base_logic.h"
-
+#include <iostream>
 namespace {
 
 float get_time_coefficient(const sf::Time &start,
@@ -487,9 +487,6 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     window.draw(beat_rectangle);
 }
 
-
-
-/// TAIKO !!!!!!!!!!!!!
 USO::taiko_circle::taiko_circle(const sf::Time &start_time_,
                                 const sf::Time &duration_time_,
                                 taiko_catch_zone &catchZone_)
@@ -501,7 +498,6 @@ USO::taiko_circle::taiko_circle(const sf::Time &start_time_,
                  catchZone(catchZone_) {
     circle.setRadius(catchZone_.basket.getRadius() * 0.75f);
     circle.setFillColor(sf::Color(255, 0, 0));
-    circle.setOutlineColor(sf::Color(0, 0, 0));
 }
 
 bool USO::taiko_circle::is_correct_pressing() const {
@@ -559,6 +555,9 @@ std::shared_ptr<USO::Map_object> USO::taiko_circle::clone() {
 USO::taiko_catch_zone::taiko_catch_zone() {
     basket.setRadius(100);
     basket.setPosition(10, (float)sf::VideoMode::getFullscreenModes().begin()->height / 2);
+    basket.setFillColor(sf::Color::Transparent);
+    basket.setOutlineThickness(20);
+    basket.setOutlineColor(sf::Color::Blue);
 
     roadway.setSize(sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width, 2 * basket.getRadius()));
     roadway.setPosition(basket.getPosition());
