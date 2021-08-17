@@ -1,20 +1,20 @@
 Aim
-New_map(1)
-data/maps/New_map(1).txt
+New_map(2)
+data/maps/New_map(2).txt
 data\music\drum_go_dum.ogg
 drum_go_dum
 data\img\5.png
 data/fonts/aller.ttf
 data/sounds/click.ogg
 Aim_circle
--700000
+398009
 700000
-832
-692
+713
+715
 65 300
 Aim_circle
-225292
+1203792
 700000
-908
-692
+1268
+502
 65 300

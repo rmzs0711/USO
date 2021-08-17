@@ -1,0 +1,32 @@
+Aim
+New_map(8)
+data/maps/New_map(8).txt
+data\music\helltaker_rem.ogg
+helltaker_rem
+data\img\gradient.png
+data/fonts/aller.ttf
+data/sounds/click.ogg
+Aim_slider
+2404767
+700000
+1136
+327
+65 300
+672 849
+1396825
+Aim_slider
+1725864
+700000
+149
+155
+65 300
+906 683
+1845896
+Aim_slider
+745734
+700000
+847
+564
+65 300
+1700 57
+1984598

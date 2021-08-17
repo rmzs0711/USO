@@ -106,6 +106,40 @@ USO::Conveyor_map::Conveyor_map(const std::string &filename) {
     }
 }
 
+void USO::taiko_map::generate_catch_zone() {
+    catchZone = std::make_shared<USO::taiko_catch_zone>();
+}
+
+USO::taiko_map::taiko_map(const std::string &filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "File not found\n";
+        return;
+    }
+    generate_catch_zone();
+    file >> mode;
+    file >> map_name;
+    file >> map_address;
+    file >> music_address;
+    file >> music_name;
+    file >> image_address;
+    file >> font_address;
+    file >> sound_address;
+
+    while (!file.eof()) {
+        sf::Int64 time;
+        if (!(file >> time)) {
+            break;
+        }
+        sf::Time start_time = sf::microseconds(time);
+        file >> time;
+        sf::Time duration_time = sf::microseconds(time);
+        map_objects.push_back(
+            std::make_shared<USO::taiko_circle>(
+                USO::taiko_circle(start_time,duration_time, *catchZone)));
+    }
+}
+
 void USO::Map::prelude(sf::Music &music,
                        sf::SoundBuffer &sound_buffer,
                        sf::Texture &image,
@@ -114,8 +148,4 @@ void USO::Map::prelude(sf::Music &music,
     check_file_load(sound_buffer.loadFromFile(sound_address), sound_address);
     check_file_load(image.loadFromFile(image_address), image_address);
     check_file_load(font.loadFromFile(font_address), font_address);
-}
-
-void USO::taiko_map::generate_catch_zone() {
-    std::shared_ptr<taiko_catch_zone> catchZone;
 }

@@ -42,8 +42,8 @@ void BL::Game_session::increase_score(unsigned long long score_point,
     score += (score_point * combo_bonus) / 25;
 }
 
-[[nodiscard]] int BL::Game_session::damage() const {
-    return static_cast<int>(0 * MAX_HEALTH);
+[[nodiscard]] int BL::Game_session::damage() {
+    return static_cast<int>(MAX_HEALTH / 10);
 }
 
 void BL::Game_session::nullify_score() {

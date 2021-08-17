@@ -59,9 +59,6 @@ public:
                  sf::Texture &,
                  sf::Font &) const;
 
-    std::string get_map_name();
-    std::string get_music_name();
-
     virtual void run(sf::RenderWindow &) = 0;
     virtual void constructor_run(sf::RenderWindow &){};
 
@@ -161,11 +158,13 @@ public:
         std::move(font_address_),
         std::move(sound_address_),
         std::move(map_objects_)) {
+        generate_catch_zone();
     }
+
+    explicit taiko_map(const std::string &);
 
     void generate_catch_zone();
     void run(sf::RenderWindow &) override;
 };
-
 }  // namespace USO
 #endif  // USO_MAPS_H

@@ -1,7 +1,6 @@
 #include "map_objects.h"
 #include <cmath>
 #include "base_logic.h"
-#include <iostream>
 
 namespace {
 
@@ -93,7 +92,7 @@ bool USO::Aim_circle::check_event(const sf::Vector2f &mouse_pos,
             return true;
         } else {
             is_valid = false;
-            game_session.decrease_health(game_session.damage());
+            game_session.decrease_health(BL::Game_session::damage());
         }
     }
     return false;
@@ -418,7 +417,7 @@ bool USO::Conveyor_note::check_event(const sf::Vector2f &mouse_pos,
             game_session.increase_health(20);
             return true;
         } else {
-            game_session.decrease_health(game_session.damage());
+            game_session.decrease_health(BL::Game_session::damage());
         }
     }
     return false;
@@ -487,45 +486,37 @@ void USO::Conveyor_line::draw(sf::RenderWindow &window) const {
     beat_rectangle.setOutlineThickness(1);
     window.draw(beat_rectangle);
 }
+
+
+
 /// TAIKO !!!!!!!!!!!!!
 USO::taiko_circle::taiko_circle(const sf::Time &start_time_,
                                 const sf::Time &duration_time_,
-                                float x,
-                                float y,
-                                float diam_,
-                                const sf::Time &move_time_)
+                                taiko_catch_zone &catchZone_)
     : Map_object(start_time_,
                  duration_time_,
-                 x,
-                 y,
-                 move_time_),
-                 diam(diam_) {}
+                 catchZone_.roadway.getSize().x,
+                 catchZone_.roadway.getPosition().y + catchZone_.basket.getRadius() * 0.25f,
+                 sf::Time()),
+                 catchZone(catchZone_) {
+    circle.setRadius(catchZone_.basket.getRadius() * 0.75f);
+    circle.setFillColor(sf::Color(255, 0, 0));
+    circle.setOutlineColor(sf::Color(0, 0, 0));
+}
 
-bool USO::taiko_circle::is_basket_correct_pressing(
-    sf::Vector2f cur_circle_pos) const {
-    if (cur_circle_pos.x + diam <=
-            get_basket_pos().x + get_basket_diam()
-        && cur_circle_pos.x >= get_pos().x) {
+bool USO::taiko_circle::is_correct_pressing() const {
+    if (circle.getPosition().x + get_diameter() <=
+            catchZone.basket.getPosition().x + catchZone.get_diameter()
+        && circle.getPosition().x >= catchZone.basket.getPosition().x) {
         return true;
     }
     return false;
 }
 
-sf::Vector2f USO::taiko_circle::get_basket_pos() const {
-    return catchZone.basket.getPosition();
-}
-
-std::size_t USO::taiko_circle::get_basket_diam() const {
-    return 2 * catchZone.basket.getRadius();
-}
 bool USO::taiko_circle::change_state(const sf::Time &current_time) {
     if (current_time <= start_time + duration_time) {
-        ///////////////////  ЗДЕСЬ ТОЧНО ЧТО-ТО НЕ ТАК !!!
-        /*pos.x = catchZone.roadway.getSize().x -
-            (catchZone.roadway.getSize().x - get_basket_diam())
-                * get_time_coefficient(start_time, duration_time, current_time);*/
         float width = catchZone.roadway.getSize().x;
-        pos.x = width - (width + get_basket_diam())
+        pos.x = width - (width + catchZone.get_diameter())
                             * get_time_coefficient(start_time, duration_time, current_time);
         return true;
     }
@@ -535,32 +526,44 @@ bool USO::taiko_circle::change_state(const sf::Time &current_time) {
 bool USO::taiko_circle::check_event(const sf::Vector2f &,
                  BL::Game_session &game_session,
                  const sf::Time &current_time) {
-    if (is_basket_correct_pressing(pos)) {
+    if (is_correct_pressing()) {
         if (is_click_time(current_time, start_time + duration_time)) {
             game_session.increase_combo(1);
             game_session.increase_score(100, game_session.get_combo());
             game_session.increase_health(20);
             return true;
         }
-        game_session.decrease_health(game_session.damage());
+        game_session.decrease_health(BL::Game_session::damage());
     }
     return false;
 }
 
 void USO::taiko_circle::draw(sf::RenderWindow &window, const sf::Font &font) {
-    sf::CircleShape circle(diam / 2);
     circle.setPosition(pos);
     circle.setFillColor(sf::Color(255, 0, 0));
     circle.setOutlineColor(sf::Color(0, 0, 0));
     window.draw(circle);
 }
 
+float USO::taiko_circle::get_diameter() const {
+    return 2 * circle.getRadius();
+}
+
+sf::Vector2f *USO::taiko_circle::get_end_pos_ptr() {
+    return &pos;
+}
+std::shared_ptr<USO::Map_object> USO::taiko_circle::clone() {
+    return std::make_shared<taiko_circle>(taiko_circle(*this));
+}
+
 USO::taiko_catch_zone::taiko_catch_zone() {
     basket.setRadius(100);
     basket.setPosition(10, (float)sf::VideoMode::getFullscreenModes().begin()->height / 2);
 
-    roadway.setSize(sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width, 50));
+    roadway.setSize(sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width, 2 * basket.getRadius()));
     roadway.setPosition(basket.getPosition());
+    roadway.setOutlineThickness(5);
+    roadway.setOutlineColor(sf::Color::Blue);
 }
 
 void USO::taiko_catch_zone::draw(sf::RenderWindow &window) {
@@ -572,8 +575,11 @@ void USO::taiko_catch_zone::draw(sf::RenderWindow &window) {
             roadway.setFillColor(sf::Color(255, 0, 0, 50));
         }
     } else {
-        roadway.setFillColor(sf::Color(0, 0, 0, 255));
+        roadway.setFillColor(sf::Color::Transparent);
     }
-    roadway.setOutlineColor(sf::Color(0, 0, 0));
     window.draw(roadway);
+}
+
+float USO::taiko_catch_zone::get_diameter() const {
+    return 2 * basket.getRadius();
 }

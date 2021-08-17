@@ -89,7 +89,7 @@ void Menu::Button::draw(sf::RenderWindow &window) {
     text.setCharacterSize(40);
     text.setStyle(sf::Text::Bold);
     text.setString(name_of_button);
-    text.setPosition(circle.getPosition().x + circle.getRadius() - name_of_button.size() * 10,
+    text.setPosition(circle.getPosition().x + circle.getRadius() - (float)name_of_button.size() * 10,
                      circle.getPosition().y + circle.getRadius() - 40);
     text.setFillColor(sf::Color::Black);
     window.draw(text);

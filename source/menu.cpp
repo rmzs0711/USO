@@ -191,7 +191,7 @@ bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
     transparent_lvl = 0;
 
-    BLOCK_SIZE = {400, 100};
+    BLOCK_SIZE = {500, 150};
     track_speed = 4.f;
     scrolling_speed = BLOCK_SIZE.y / 6.f;
     gap = BLOCK_SIZE.y / 4.f;
@@ -285,7 +285,7 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
                 USO::Conveyor_map test(R"(data\maps\)" +
                                        map_name + ".txt");
                 test.run(window);
-            } else {
+            } else if (mod == "Aim") {
 
                 change_speed(R"(data\maps\)" + map_name +
                              ".txt", 1.f / acceleration_factor);
@@ -296,6 +296,10 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
 
                 change_speed(R"(data\maps\)" + map_name +
                              ".txt", acceleration_factor);
+            } else if (mod == "Taiko") {
+                USO::taiko_map test(R"(data\maps\)" + map_name +
+                                    ".txt");
+                test.run(window);
             }
             return false;
         }

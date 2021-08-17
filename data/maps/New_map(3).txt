@@ -1,0 +1,16 @@
+Aim
+New_map(3)
+data/maps/New_map(3).txt
+data\music\helltaker_rem.ogg
+helltaker_rem
+data\img\gradient.png
+data/fonts/aller.ttf
+data/sounds/click.ogg
+Aim_slider
+605243
+700000
+200
+807
+65 300
+1562 166
+3010598

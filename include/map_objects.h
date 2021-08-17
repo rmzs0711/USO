@@ -170,32 +170,33 @@ struct taiko_catch_zone {
     bool missed = false;
     sf::CircleShape basket;
     sf::RectangleShape roadway;
-    void draw(sf::RenderWindow &window);
+
+    void draw(sf::RenderWindow &);
     taiko_catch_zone();
+    float get_diameter() const;
 };
 
 struct taiko_circle : Map_object {
 private:
-    taiko_catch_zone catchZone;
-    float diam;
+    taiko_catch_zone &catchZone;
+    sf::CircleShape circle;
 
 public:
-    taiko_circle(taiko_circle &) = default;
 
-    taiko_circle(const sf::Time &start_time_,
-                 const sf::Time &duration_time_,
-                 float x,
-                 float y,
-                 float diam,
-                 const sf::Time &move_time_ = sf::seconds(0));
-    bool is_basket_correct_pressing(sf::Vector2f) const;
-    bool change_state(const sf::Time &current_time) override;
+    [[nodiscard]] sf::Vector2f *get_end_pos_ptr() override;
+    std::shared_ptr<Map_object> clone() override;
+
+    explicit taiko_circle(const sf::Time &, const sf::Time &,
+                          taiko_catch_zone &);
+
+    bool is_correct_pressing() const;
+    bool change_state(const sf::Time &) override;
     bool check_event(const sf::Vector2f &,
-                     BL::Game_session &game_session,
-                     const sf::Time &current_time) override;
-    void draw(sf::RenderWindow &window, const sf::Font &font) override;
-    [[nodiscard]] sf::Vector2f get_basket_pos() const;
-    [[nodiscard]] std::size_t get_basket_diam() const;
+                     BL::Game_session &,
+                     const sf::Time &) override;
+    void draw(sf::RenderWindow &, const sf::Font &) override;
+
+    float get_diameter() const;
 };
 
 }  // namespace USO

@@ -42,7 +42,7 @@ public:
     void decrease_health(int);
     void set_health(int);
     [[nodiscard]] int get_health() const;
-    [[nodiscard]] int damage() const;
+    [[nodiscard]] static int damage() ;
     void set_game_status(BL::Game_status);
     Game_status get_game_status();
     void table_of_scores(sf::RenderWindow &window, sf::Font &font) const;

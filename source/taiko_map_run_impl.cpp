@@ -121,7 +121,6 @@ void USO::taiko_map::run(sf::RenderWindow &window) {
                 switch (event.type) {
                     case sf::Event::KeyPressed: {
                         if (event.key.code == sf::Keyboard::Escape) {
-                            // остановить время на паузу
                             return;
                         }
                         if (!dragged_key[event.key.code]) {
