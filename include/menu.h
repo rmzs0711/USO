@@ -25,6 +25,22 @@ enum MOD {
 
 const int NUMBER_OF_MODS = 1;
 
+struct main_menu {
+private:
+    float coef;
+    bool ctrl_pressed{};
+    std::vector<Button> buttons;
+
+public:
+
+    main_menu();
+    void draw(sf::RenderWindow &);
+    void check_event(sf::RenderWindow &, sf::Event);
+    void run(sf::RenderWindow &);
+    void check_scale(const sf::RenderWindow &);
+    [[nodiscard]] std::vector<Button>& get_buttons();
+};
+
 struct scrolling_menu {
 private:
     float track_speed{};
@@ -45,11 +61,11 @@ private:
 
     int number_of_blocks() const;
     void block_movement();
-
+    void hide_protruding_blocks(sf::RenderWindow &) const;
 public:
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
-    void draw(sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window, Menu::main_menu &);
 };
 
 struct map_creation_menu {
@@ -72,21 +88,6 @@ struct map_creation_menu {
 };
 
 void stop_menu(sf::RenderWindow &, BL::Game_session &);
-
-struct main_menu {
-private:
-    float coef;
-    bool ctrl_pressed{};
-    std::vector<sf::Texture> textures;
-    std::vector<Button> buttons;
-
-public:
-
-    main_menu();
-    void draw(sf::RenderWindow &);
-    void check_event(sf::RenderWindow &, sf::Event);
-    void run(sf::RenderWindow &);
-};
 
 sf::RenderWindow &set_settings();
 

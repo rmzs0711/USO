@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <random>
+#include <functional>
 
 std::string new_map_name;
 
@@ -43,14 +44,13 @@ sf::RenderWindow &Menu::set_settings() {
                                    sf::Style::Fullscreen, setting);
     WINDOW_SIZE = sf::Vector2f(window.getSize());
     window.setMouseCursorVisible(true);
-    window.display();
     return window;
 }
 
 Menu::main_menu::main_menu() {
     coef = 0.05f;
     ctrl_pressed = false;
-    textures.resize(4);
+    static std::vector<sf::Texture> textures(4);
     textures[0].loadFromFile(R"(data\img\5.png)");
     textures[1].loadFromFile(R"(data\img\6.png)");
     textures[2].loadFromFile(R"(data\img\7.png)");
@@ -65,14 +65,13 @@ Menu::main_menu::main_menu() {
 }
 
 void Menu::main_menu::draw(sf::RenderWindow &window) {
-    static sf::CircleShape mouse(5.f);
     for (auto &button : buttons) {
-        button.guidance(sf::Vector2f(sf::Mouse::getPosition()));
         button.draw(window);
-        mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-        mouse.setFillColor(color_for_mouse);
-        window.draw(mouse);
     }
+    static sf::CircleShape mouse(5.f);
+    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+    mouse.setFillColor(color_for_mouse);
+    window.draw(mouse);
 }
 
 void Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event) {
@@ -99,45 +98,46 @@ void Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event) {
         case sf::Event::MouseButtonPressed: {
             if (event.mouseButton.button == sf::Mouse::Left) {
                 for (auto &button : buttons) {
-                    button.press(
-                        window,
-                        {static_cast<float>(event.mouseButton.x),
-                         static_cast<float>(event.mouseButton.y)},
-                        gameSession);
+                    button.press(window,
+                                 sf::Vector2f(sf::Mouse::getPosition()),
+                                 gameSession);
                 }
             }
         } break;
         case sf::Event::Closed: {
             window.close();
-            return;
-        }
+        } break;
         case sf::Event::MouseWheelScrolled: {
             if (ctrl_pressed) {
+
                 sf::Vector2f center = {float(window.getSize().x) / 2, float(window.getSize().y) / 2};
-                sf::Vector2f tmp = WINDOW_POSITION;
+                sf::Vector2f prev_win_pos = WINDOW_POSITION;
+                float const_coef = coef;
                 if (event.mouseWheelScroll.delta < 0) {
-                    WINDOW_SIZE -= sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
-                    WINDOW_POSITION = sf::Vector2f(center.x - WINDOW_SIZE.x / 2, center.y - WINDOW_SIZE.y / 2);
-
-                    for (auto &button : buttons) {
-                        float radius = button.circle.getRadius();
-                        button.circle.setRadius(radius - radius * coef);
-                        sf::Vector2f pos = button.circle.getPosition() - tmp;
-                        pos -= sf::Vector2f(pos.x * coef, pos.y * coef);
-                        button.circle.setPosition(pos + WINDOW_POSITION);
+                    if (WINDOW_SIZE.x < float(window.getSize().x) / 2.f) {
+                        break;
                     }
+                    coef *= -1;
                 } else if (event.mouseWheelScroll.delta > 0) {
-                    WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
-                    WINDOW_POSITION = sf::Vector2f(center.x - WINDOW_SIZE.x / 2, center.y - WINDOW_SIZE.y / 2);
 
-                    for (auto &button : buttons) {
-                        float radius = button.circle.getRadius();
-                        button.circle.setRadius(radius + radius * coef);
-                        sf::Vector2f pos = button.circle.getPosition() - tmp;
-                        pos += sf::Vector2f(pos.x * coef, pos.y * coef);
-                        button.circle.setPosition(pos + WINDOW_POSITION);
+                    float eps = 5;
+                    if (window.getSize().x - WINDOW_SIZE.x < eps) {
+                        break;
                     }
                 }
+                WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
+
+                if (WINDOW_SIZE.x > window.getSize().x) {
+                    coef =  1.f - WINDOW_SIZE.x / window.getSize().x;
+                    WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
+                }
+
+                WINDOW_POSITION = sf::Vector2f(center.x - WINDOW_SIZE.x / 2, center.y - WINDOW_SIZE.y / 2);
+                for (auto &button : buttons) {
+                    button.changeSize(coef, WINDOW_SIZE.x);
+                    button.changePosition(coef, WINDOW_POSITION, prev_win_pos);
+                }
+                coef = const_coef;
             }
         } break;
         default: {
@@ -146,12 +146,26 @@ void Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event) {
 
 }
 
+void Menu::main_menu::check_scale(const sf::RenderWindow &window) {
+    if (buttons[1].circle.getPosition() != WINDOW_POSITION) {
+        float tmp_coef = WINDOW_SIZE.x / window.getSize().x - 1.f;
+        for (auto &button : buttons) {
+            button.changeSize(tmp_coef, WINDOW_SIZE.x);
+            button.changePosition(tmp_coef, WINDOW_POSITION);
+        }
+    }
+}
+
 void Menu::main_menu::run(sf::RenderWindow &window) {
     sf::Event event{};
+    check_scale(window);
     while (window.isOpen()) {
         window.clear();
         if (window.pollEvent(event)) {
             main_menu::check_event(window, event);
+        }
+        for (auto &button : buttons) {
+            button.guidance(sf::Vector2f(sf::Mouse::getPosition()));
         }
         background_draw(window);
         main_menu::draw(window);
@@ -159,71 +173,9 @@ void Menu::main_menu::run(sf::RenderWindow &window) {
     }
 }
 
-void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
-    transparent_lvl = 0;
-    std::vector<Menu::Button> buttons;
-    std::vector<sf::Texture> textures(3);
-    textures[0].loadFromFile(R"(data\img\1.png)");
-    textures[1].loadFromFile(R"(data\img\2.png)");
-    textures[2].loadFromFile(R"(data\img\3.png)");
-    buttons.emplace_back(400, 400, 150, Menu::RETRY, textures[0]);
-    buttons.emplace_back(0, 0, 200, Menu::BACK_TO_MENU, textures[1]);
-    if (gameSession.get_game_status() == BL::Game_status::PAUSE) {
-        buttons.emplace_back(900, 400, 130, Menu::CONTINUE, textures[2]);
-    }
-
-    sf::CircleShape mouse(5.f);
-    while (window.isOpen() &&
-           (gameSession.get_game_status() == BL::Game_status::PAUSE ||
-            gameSession.get_game_status() == BL::Game_status::DEFEAT ||
-            gameSession.get_game_status() == BL::Game_status::VICTORY)) {
-
-        sf::Event event{};
-        background_draw(window);
-        if (window.pollEvent(event)) {
-            switch (event.type) {
-                case sf::Event::KeyPressed: {
-                    if (event.key.code == sf::Keyboard::Escape) {
-                        Menu::main_menu mainMenu;
-                        mainMenu.run(window);
-                        return;
-                    }
-                } break;
-                case sf::Event::MouseButtonPressed: {
-                    if (event.mouseButton.button == sf::Mouse::Left) {
-                        for (auto &button : buttons) {
-                            button.press(window,
-                                         (sf::Vector2f)sf::Mouse::getPosition(),
-                                         gameSession);
-                        }
-                    }
-                } break;
-                case sf::Event::Closed: {
-                    window.close();
-                    return;
-                }
-                case sf::Event::MouseMoved: {
-                    for (auto &button : buttons) {
-                        button.guidance(
-                            {static_cast<float>(event.mouseMove.x),
-                             static_cast<float>(event.mouseButton.y)});
-                    }
-                } break;
-                default: {
-                } break;
-            }
-        }
-        for (auto &button : buttons) {
-            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
-            button.draw(window);
-            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-            mouse.setFillColor(color_for_mouse);
-            window.draw(mouse);
-        }
-        window.display();
-    }
+[[nodiscard]] std::vector<Menu::Button> &Menu::main_menu::get_buttons() {
+    return buttons;
 }
-
 
 bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
     if (pos.x <= mouse.x && pos.x + sz.x >= mouse.x &&
@@ -236,8 +188,8 @@ bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
     transparent_lvl = 0;
 
-    BLOCK_SIZE = {500, 150};
-    track_speed = 4.f;
+    BLOCK_SIZE = {WINDOW_SIZE.x / 4, WINDOW_SIZE.y / 6};
+    track_speed = BLOCK_SIZE.x / 100.f;
     scrolling_speed = BLOCK_SIZE.y / 6.f;
     gap = BLOCK_SIZE.y / 4.f;
     char_size = BLOCK_SIZE.y / 4.f;
@@ -266,55 +218,6 @@ Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move
         map_names[i].setCharacterSize(char_size);
         map_names[i].setStyle(sf::Text::Bold);
         map_names[i].setFont(font);
-    }
-}
-
-Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std::move(filename_)) {
-    for (int i = 0; i < 5; i++) {
-        blocks_of_map_data.emplace_back(sf::Vector2f(600, 100));
-        blocks_of_map_data[i].setPosition(0, (float)i * 100);
-        blocks_of_map_data[i].setOutlineThickness(5);
-        blocks_of_map_data[i].setOutlineColor(sf::Color(0, 0, 0));
-    }
-    font.loadFromFile(R"(data\fonts\GistLight.otf)");
-    text.setFont(font);
-    text.setCharacterSize(40);
-    text.setFillColor(sf::Color(34, 46, 137));
-    text.setStyle(sf::Text::Bold);
-    text.setFillColor(text_color);
-    text.setScale(0.7, 0.7);
-
-    random_map_block.setSize(sf::Vector2f(600, 100));
-    random_map_block.setPosition(600, 0);
-    random_map_block.setOutlineThickness(5);
-    random_map_block.setOutlineColor(sf::Color(0, 0, 0));
-
-    create_block.setSize(sf::Vector2f(600, 100));
-    create_block.setPosition(0, 500);
-    create_block.setOutlineThickness(5);
-    create_block.setOutlineColor(sf::Color(0, 0, 0));
-    list_of_data.resize(5);
-
-    std::string address;
-    std::vector<std::string> addresses_of_images, addresses_of_music;
-    std::ifstream file1("data/images.txt"), file2("data/music.txt");
-    while (std::getline(file1, address)) {
-        addresses_of_images.emplace_back(address);
-    }
-    while (std::getline(file2, address)) {
-        addresses_of_music.emplace_back(address);
-    }
-
-    std::uniform_int_distribution<int> rand(1, 1e4);
-
-    list_of_default_data.resize(10);
-    for (int  i = 0; i < 10; i++) {
-        list_of_default_data[i].resize(5);
-        list_of_default_data[i][0] = rand(e1) % 2 == 0 ? "Aim" : "Conveyor";
-        list_of_default_data[i][1] = "Anonymous";
-        list_of_default_data[i][2] = "New_map";
-        list_of_default_data[i][3] = addresses_of_music[rand(e1) % addresses_of_music.size()];
-        list_of_default_data[i][4] = addresses_of_images[rand(e1) % addresses_of_images.size()];
     }
 }
 
@@ -352,19 +255,7 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
     return true;
 }
 
-void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
-    sf::CircleShape mouse(5.f);
-    std::vector<Menu::Button> buttons;
-    std::vector<sf::Texture> textures(4);
-    textures[0].loadFromFile(R"(data\img\5.png)");
-    textures[1].loadFromFile(R"(data\img\6.png)");
-    textures[2].loadFromFile(R"(data\img\7.png)");
-    textures[3].loadFromFile(R"(data\img\1.png)");
-    buttons.emplace_back(400, 400, 200, Menu::CHOOSE_THE_MAP, textures[0]);
-    buttons.emplace_back(0, 0, 100, Menu::EXIT, textures[1]);
-    buttons.emplace_back(700, 50, 100, Menu::OPEN_LIST_OF_MODS, textures[2]);
-    buttons.emplace_back(900, 400, 200, Menu::CREATE_NEW_MAP, textures[3]);
-
+void Menu::scrolling_menu::draw(sf::RenderWindow &window, Menu::main_menu &mainMenu) {
     int counter = 0;
     int size = blocks_of_map_names.size();
     sf::RectangleShape *first_block = &blocks_of_map_names.front();
@@ -449,19 +340,12 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
             }
         }
         background_draw(window);
-        for (auto &button : buttons) {
-            button.draw(window);
-        }
         block_movement();
         for (int i = 0; i < blocks_of_map_names.size(); i++) {
-
             window.draw(blocks_of_map_names[i]);
             window.draw(map_names[i]);
-
-            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-            mouse.setFillColor(color_for_mouse);
-            window.draw(mouse);
         }
+        hide_protruding_blocks(window);
         window.display();
     }
 }
@@ -469,39 +353,35 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
 void Menu::scrolling_menu::block_movement() {
     for (int i = 0; i < blocks_of_map_names.size(); i++) {
         sf::RectangleShape &rect = blocks_of_map_names[i];
-        if (check_pressing((sf::Vector2f)sf::Mouse::getPosition(),
-                           rect.getPosition(), rect.getSize())) {
+
+        std::function<void(float)> move = [&](float var) {
+          rect.setSize(rect.getSize() + sf::Vector2f(var, 0));
+          map_names[i].setPosition(map_names[i].getPosition() +
+                                   sf::Vector2f(var, 0));
+          for (int j = 0; j < blocks_of_map_names.size(); j++) {
+              sf::RectangleShape &block = blocks_of_map_names[j];
+              std::function<sf::Vector2f(sf::Vector2f, sf::Vector2f)> op;
+              if (block.getPosition().y < rect.getPosition().y) {
+                  op = minus;
+              } else if (block.getPosition().y > rect.getPosition().y) {
+                  op = plus;
+              } else {
+                  continue;
+              }
+              block.setPosition(op(block.getPosition(),
+                                sf::Vector2f(0, var / 6)));
+              map_names[j].setPosition(op(map_names[j].getPosition(),
+                                       sf::Vector2f(0, var / 6)));
+          }
+        };
+        sf::Vector2f pos = (sf::Vector2f)sf::Mouse::getPosition();
+        if (check_pressing(pos, WINDOW_POSITION, WINDOW_SIZE)
+            && check_pressing(pos, rect.getPosition(), rect.getSize())) {
             if (rect.getSize().x <= BLOCK_SIZE.x * 1.2) {
-                rect.setSize(rect.getSize() + sf::Vector2f(track_speed, 0));
-                map_names[i].setPosition(map_names[i].getPosition() +
-                                         sf::Vector2f(track_speed, 0));
-                for (int j = 0; j < blocks_of_map_names.size(); j++) {
-                    sf::RectangleShape &block = blocks_of_map_names[j];
-                    if (block.getPosition().y > rect.getPosition().y) {
-                        block.setPosition(plus(block.getPosition(), {0, track_speed / 2}));
-                        map_names[j].setPosition(plus(map_names[j].getPosition(), {0, track_speed / 2}));
-                    } else if (block.getPosition().y < rect.getPosition().y) {
-                        block.setPosition(minus(block.getPosition(), {0, track_speed / 2}));
-                        map_names[j].setPosition(minus(map_names[j].getPosition(), {0, track_speed / 2}));
-                    }
-                }
+                move(track_speed);
             }
-        } else {
-            if (rect.getSize().x >= BLOCK_SIZE.x) {
-                rect.setSize(rect.getSize() - sf::Vector2f(track_speed, 0));
-                map_names[i].setPosition(map_names[i].getPosition() -
-                                         sf::Vector2f(track_speed, 0));
-                for (int j = 0; j < blocks_of_map_names.size(); j++) {
-                    sf::RectangleShape &block = blocks_of_map_names[j];
-                    if (block.getPosition().y > rect.getPosition().y) {
-                        block.setPosition(minus(block.getPosition(), {0, track_speed / 2}));
-                        map_names[j].setPosition(minus(map_names[j].getPosition(), {0, track_speed / 2}));
-                    } else if (block.getPosition().y < rect.getPosition().y) {
-                        block.setPosition(plus(block.getPosition(), {0, track_speed / 2}));
-                        map_names[j].setPosition(plus(map_names[j].getPosition(), {0, track_speed / 2}));
-                    }
-                }
-            }
+        } else if (rect.getSize().x >= BLOCK_SIZE.x) {
+                move(-track_speed);
         }
     }
 }
@@ -529,6 +409,130 @@ sf::Vector2f Menu::scrolling_menu::plus(sf::Vector2f a, sf::Vector2f b) {
 
 sf::Vector2f Menu::scrolling_menu::minus(sf::Vector2f a, sf::Vector2f b) {
     return a - b;
+}
+void Menu::scrolling_menu::hide_protruding_blocks(sf::RenderWindow &window) const {
+    sf::RectangleShape block1(sf::Vector2f(BLOCK_SIZE.x + BLOCK_SIZE.x / 4,
+                                                  WINDOW_POSITION.y + window.getPosition().y));
+    sf::RectangleShape block2(block1.getSize());
+    block1.setPosition(WINDOW_POSITION.x, window.getPosition().y);
+    block2.setPosition(WINDOW_POSITION + sf::Vector2f(0, WINDOW_SIZE.y));
+    block1.setFillColor(sf::Color::Black);
+    block2.setFillColor(sf::Color::Black);
+    window.draw(block1);
+    window.draw(block2);
+}
+
+void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
+    transparent_lvl = 0;
+    std::vector<Menu::Button> buttons;
+    std::vector<sf::Texture> textures(3);
+    textures[0].loadFromFile(R"(data\img\1.png)");
+    textures[1].loadFromFile(R"(data\img\2.png)");
+    textures[2].loadFromFile(R"(data\img\3.png)");
+    buttons.emplace_back(400, 400, 150, Menu::RETRY, textures[0]);
+    buttons.emplace_back(0, 0, 200, Menu::BACK_TO_MENU, textures[1]);
+    if (gameSession.get_game_status() == BL::Game_status::PAUSE) {
+        buttons.emplace_back(900, 400, 130, Menu::CONTINUE, textures[2]);
+    }
+
+    float coef = 1.f - WINDOW_SIZE.x / (float)window.getSize().x;
+    for (auto &button : buttons) {
+        button.changePosition(-coef, WINDOW_POSITION);
+        button.changeSize(-coef, WINDOW_SIZE.x);
+    }
+
+    sf::CircleShape mouse(5.f);
+    while (window.isOpen() &&
+           (gameSession.get_game_status() == BL::Game_status::PAUSE ||
+            gameSession.get_game_status() == BL::Game_status::DEFEAT ||
+            gameSession.get_game_status() == BL::Game_status::VICTORY)) {
+        window.clear();
+        sf::Event event{};
+        background_draw(window);
+        if (window.pollEvent(event)) {
+            switch (event.type) {
+                case sf::Event::KeyPressed: {
+                    if (event.key.code == sf::Keyboard::Escape) {
+                        static Menu::main_menu mainMenu;
+                        mainMenu.run(window);
+                        return;
+                    }
+                } break;
+                case sf::Event::MouseButtonPressed: {
+                    if (event.mouseButton.button == sf::Mouse::Left) {
+                        for (auto &button : buttons) {
+                            button.press(window,
+                                         (sf::Vector2f)sf::Mouse::getPosition(),
+                                         gameSession);
+                        }
+                    }
+                } break;
+                case sf::Event::Closed: {
+                    window.close();
+                    return;
+                }
+                default: {
+                } break;
+            }
+        }
+        for (auto &button : buttons) {
+            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
+            button.draw(window);
+            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+            mouse.setFillColor(color_for_mouse);
+            window.draw(mouse);
+        }
+        window.display();
+    }
+}
+
+Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std::move(filename_)) {
+    for (int i = 0; i < 5; i++) {
+        blocks_of_map_data.emplace_back(sf::Vector2f(600, 100));
+        blocks_of_map_data[i].setPosition(0, (float)i * 100);
+        blocks_of_map_data[i].setOutlineThickness(5);
+        blocks_of_map_data[i].setOutlineColor(sf::Color(0, 0, 0));
+    }
+    font.loadFromFile(R"(data\fonts\GistLight.otf)");
+    text.setFont(font);
+    text.setCharacterSize(40);
+    text.setFillColor(sf::Color(34, 46, 137));
+    text.setStyle(sf::Text::Bold);
+    text.setFillColor(text_color);
+    text.setScale(0.7, 0.7);
+
+    random_map_block.setSize(sf::Vector2f(600, 100));
+    random_map_block.setPosition(600, 0);
+    random_map_block.setOutlineThickness(5);
+    random_map_block.setOutlineColor(sf::Color(0, 0, 0));
+
+    create_block.setSize(sf::Vector2f(600, 100));
+    create_block.setPosition(0, 500);
+    create_block.setOutlineThickness(5);
+    create_block.setOutlineColor(sf::Color(0, 0, 0));
+    list_of_data.resize(5);
+
+    std::string address;
+    std::vector<std::string> addresses_of_images, addresses_of_music;
+    std::ifstream file1("data/images.txt"), file2("data/music.txt");
+    while (std::getline(file1, address)) {
+        addresses_of_images.emplace_back(address);
+    }
+    while (std::getline(file2, address)) {
+        addresses_of_music.emplace_back(address);
+    }
+
+    std::uniform_int_distribution<int> rand(1, 1e4);
+
+    list_of_default_data.resize(10);
+    for (int  i = 0; i < 10; i++) {
+        list_of_default_data[i].resize(5);
+        list_of_default_data[i][0] = rand(e1) % 2 == 0 ? "Aim" : "Conveyor";
+        list_of_default_data[i][1] = "Anonymous";
+        list_of_default_data[i][2] = "New_map";
+        list_of_default_data[i][3] = addresses_of_music[rand(e1) % addresses_of_music.size()];
+        list_of_default_data[i][4] = addresses_of_images[rand(e1) % addresses_of_images.size()];
+    }
 }
 
 void Menu::map_creation_menu::fix_map_name(std::string &cur_map_name) const {

@@ -5,7 +5,7 @@ bool Menu::Button::is_circle_correct_click(const sf::Vector2f &mouse) {
     auto pos = circle.getPosition();
     auto radius = circle.getRadius();
     return (mouse.x - pos.x - radius) * (mouse.x - pos.x - radius) +
-               (mouse.y - pos.y - radius) * (mouse.y - pos.y - radius) <=
+           (mouse.y - pos.y - radius) * (mouse.y - pos.y - radius) <=
            radius * radius;
 }
 
@@ -18,6 +18,7 @@ void Menu::Button::guidance(const sf::Vector2f &mouse) {
 void Menu::Button::press(sf::RenderWindow &window,
                          const sf::Vector2f &mouse,
                          BL::Game_session &gameSession) {
+    static main_menu mainMenu;
     if (is_circle_correct_click(mouse)) {
         switch (event) {
             case EXIT: {
@@ -28,7 +29,7 @@ void Menu::Button::press(sf::RenderWindow &window,
             } break;
             case CHOOSE_THE_MAP: {
                 Menu::scrolling_menu scrollingMenu(R"(data\maps\saved_maps.txt)");
-                scrollingMenu.draw(window);
+                scrollingMenu.draw(window, mainMenu);
             } break;
             case CREATE_NEW_MAP: {
                 Menu::map_creation_menu mapCreationMenu(R"(data\maps\saved_maps.txt)");
@@ -38,7 +39,6 @@ void Menu::Button::press(sf::RenderWindow &window,
                 gameSession.set_game_status(BL::Game_status::ACTION);
             } break;
             case BACK_TO_MENU: {
-                main_menu mainMenu;
                 mainMenu.run(window);
             } break;
             case OPEN_LIST_OF_MODS: {
@@ -83,15 +83,24 @@ void Menu::Button::draw(sf::RenderWindow &window) {
         } break;
     }
 
-    sf::Text text;
     sf::Font font;
     font.loadFromFile(R"(data\fonts\aller.ttf)");
     text.setFont(font);
-    text.setCharacterSize(40);
     text.setStyle(sf::Text::Bold);
     text.setString(name_of_button);
-    text.setPosition(circle.getPosition().x + circle.getRadius() - (float)name_of_button.size() * 10,
-                     circle.getPosition().y + circle.getRadius() - 40);
+    text.setPosition(circle.getPosition().x + circle.getRadius() - float(name_of_button.size() * text.getCharacterSize()) / 4,
+                     circle.getPosition().y + circle.getRadius() - float(text.getCharacterSize()) / 2);
     text.setFillColor(sf::Color::Black);
     window.draw(text);
+}
+
+void Menu::Button::changeSize(float coef, float win_size_x) {
+    auto radius = circle.getRadius();
+    circle.setRadius(radius + radius * coef);
+    text.setCharacterSize(int(win_size_x / 60.f));
+}
+void Menu::Button::changePosition(float coef, sf::Vector2f WINDOW_POSITION, sf::Vector2f tmp) {
+    sf::Vector2f pos = circle.getPosition() - tmp;
+    pos += sf::Vector2f(pos.x * coef, pos.y * coef);
+    circle.setPosition(pos + WINDOW_POSITION);
 }
