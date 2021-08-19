@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <random>
 #include <functional>
+#include "menu.h"
 
 std::string new_map_name;
 
@@ -15,8 +16,8 @@ namespace {
 const sf::Color color_for_mouse = sf::Color(241, 200, 14);
 const sf::Color input_color = sf::Color(150, 160, 145);
 const sf::Color text_color = sf::Color(2, 2, 2);
-sf::Vector2f WINDOW_SIZE;
-sf::Vector2f WINDOW_POSITION = {0, 0};
+static sf::Vector2f WINDOW_SIZE;
+static sf::Vector2f WINDOW_POSITION = {0, 0};
 
 float acceleration_factor = 1;
 int transparent_lvl = 0;
@@ -48,6 +49,9 @@ sf::RenderWindow &Menu::set_settings() {
 }
 
 Menu::main_menu::main_menu() {
+    prev_win_pos = {0, 0};
+    prev_win_size = sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width,
+                                 sf::VideoMode::getFullscreenModes().begin()->height);
     coef = 0.05f;
     ctrl_pressed = false;
     static std::vector<sf::Texture> textures(4);
@@ -56,125 +60,84 @@ Menu::main_menu::main_menu() {
     textures[2].loadFromFile(R"(data\img\7.png)");
     textures[3].loadFromFile(R"(data\img\1.png)");
 
-    buttons.emplace_back(400, 400, 200, Menu::CHOOSE_THE_MAP, textures[0]);
     buttons.emplace_back(0, 0, 100, Menu::EXIT, textures[1]);
+    buttons.emplace_back(400, 400, 200, Menu::CHOOSE_THE_MAP, textures[0]);
     buttons.emplace_back(700, 50, 100, Menu::OPEN_LIST_OF_MODS,
                          textures[2]);
     buttons.emplace_back(900, 400, 200, Menu::CREATE_NEW_MAP,
                          textures[3]);
 }
 
-void Menu::main_menu::draw(sf::RenderWindow &window) {
-    for (auto &button : buttons) {
-        button.draw(window);
-    }
-    static sf::CircleShape mouse(5.f);
-    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-    mouse.setFillColor(color_for_mouse);
-    window.draw(mouse);
-}
-
-void Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event) {
-    BL::Game_session gameSession;
-    gameSession.set_game_status(BL::Game_status::ACTION);
-
+void Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
+    menu::check_event(window, event, gameSession);
     switch (event.type) {
         case sf::Event::KeyPressed: {
             if (event.key.code == sf::Keyboard::Escape) {
                 window.close();
                 return;
             }
-            if (event.key.code == sf::Keyboard::LControl
-                || event.key.code == sf::Keyboard::RControl) {
-                ctrl_pressed = true;
-            }
+        }
+        default: {
         } break;
-        case sf::Event::KeyReleased: {
-            if (event.key.code == sf::Keyboard::LControl
-                || event.key.code == sf::Keyboard::RControl) {
-                ctrl_pressed = false;
-            }
-        } break;
-        case sf::Event::MouseButtonPressed: {
-            if (event.mouseButton.button == sf::Mouse::Left) {
-                for (auto &button : buttons) {
-                    button.press(window,
-                                 sf::Vector2f(sf::Mouse::getPosition()),
-                                 gameSession);
-                }
-            }
-        } break;
-        case sf::Event::Closed: {
-            window.close();
-        } break;
-        case sf::Event::MouseWheelScrolled: {
-            if (ctrl_pressed) {
+    }
+}
 
-                sf::Vector2f center = {float(window.getSize().x) / 2, float(window.getSize().y) / 2};
-                sf::Vector2f prev_win_pos = WINDOW_POSITION;
-                float const_coef = coef;
-                if (event.mouseWheelScroll.delta < 0) {
-                    if (WINDOW_SIZE.x < float(window.getSize().x) / 2.f) {
-                        break;
-                    }
-                    coef *= -1;
-                } else if (event.mouseWheelScroll.delta > 0) {
+void Menu::main_menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
+    sf::Event event{};
+    check_scale();
+    while (window.isOpen()) {
+        if (window.pollEvent(event)) {
+            check_event(window, event, gameSession);
+        }
+        menu::run(window, gameSession);
+    }
+}
 
-                    float eps = 5;
-                    if (window.getSize().x - WINDOW_SIZE.x < eps) {
-                        break;
-                    }
-                }
-                WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
+Menu::stop_menu::stop_menu(BL::Game_status gameStatus) {
+    prev_win_pos = {0, 0};
+    prev_win_size = sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width,
+                                 sf::VideoMode::getFullscreenModes().begin()->height);
+    coef = 0.05f;
+    ctrl_pressed = false;
+    static std::vector<sf::Texture> textures(3);
+    textures[0].loadFromFile(R"(data\img\1.png)");
+    textures[1].loadFromFile(R"(data\img\2.png)");
+    textures[2].loadFromFile(R"(data\img\3.png)");
 
-                if (WINDOW_SIZE.x > window.getSize().x) {
-                    coef =  1.f - WINDOW_SIZE.x / window.getSize().x;
-                    WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
-                }
+    buttons.emplace_back(400, 400, 150, Menu::RETRY, textures[0]);
+    buttons.emplace_back(0, 0, 200, Menu::BACK_TO_MENU, textures[1]);
+    if (gameStatus == BL::Game_status::PAUSE) {
+        buttons.emplace_back(900, 400, 130, Menu::CONTINUE, textures[2]);
+    }
+}
 
-                WINDOW_POSITION = sf::Vector2f(center.x - WINDOW_SIZE.x / 2, center.y - WINDOW_SIZE.y / 2);
-                for (auto &button : buttons) {
-                    button.changeSize(coef, WINDOW_SIZE.x);
-                    button.changePosition(coef, WINDOW_POSITION, prev_win_pos);
-                }
-                coef = const_coef;
+void Menu::stop_menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
+    menu::check_event(window, event, gameSession);
+    switch (event.type) {
+        case sf::Event::KeyPressed: {
+            if (event.key.code == sf::Keyboard::Escape) {
+                Menu::main_menu mainMenu;
+                mainMenu.run(window,gameSession);
+                return;
             }
         } break;
         default: {
         } break;
     }
-
 }
 
-void Menu::main_menu::check_scale(const sf::RenderWindow &window) {
-    if (buttons[1].circle.getPosition() != WINDOW_POSITION) {
-        float tmp_coef = WINDOW_SIZE.x / window.getSize().x - 1.f;
-        for (auto &button : buttons) {
-            button.changeSize(tmp_coef, WINDOW_SIZE.x);
-            button.changePosition(tmp_coef, WINDOW_POSITION);
-        }
-    }
-}
-
-void Menu::main_menu::run(sf::RenderWindow &window) {
+void Menu::stop_menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
     sf::Event event{};
-    check_scale(window);
-    while (window.isOpen()) {
-        window.clear();
+    check_scale();
+    while (window.isOpen() &&
+           (gameSession.get_game_status() == BL::Game_status::PAUSE ||
+            gameSession.get_game_status() == BL::Game_status::DEFEAT ||
+            gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         if (window.pollEvent(event)) {
-            main_menu::check_event(window, event);
+            check_event(window, event, gameSession);
         }
-        for (auto &button : buttons) {
-            button.guidance(sf::Vector2f(sf::Mouse::getPosition()));
-        }
-        background_draw(window);
-        main_menu::draw(window);
-        window.display();
+        menu::run(window, gameSession);
     }
-}
-
-[[nodiscard]] std::vector<Menu::Button> &Menu::main_menu::get_buttons() {
-    return buttons;
 }
 
 bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
@@ -388,6 +351,7 @@ void Menu::scrolling_menu::block_movement() {
 
 int Menu::scrolling_menu::number_of_blocks() const {
     int extra_blocks = 2;
+    std::cout << std::min((int)(WINDOW_SIZE.y / (BLOCK_SIZE.y + gap)) + extra_blocks, (int)list_of_maps.size());
     return std::min((int)(WINDOW_SIZE.y / (BLOCK_SIZE.y + gap)) + extra_blocks, (int)list_of_maps.size());
 }
 
@@ -420,70 +384,6 @@ void Menu::scrolling_menu::hide_protruding_blocks(sf::RenderWindow &window) cons
     block2.setFillColor(sf::Color::Black);
     window.draw(block1);
     window.draw(block2);
-}
-
-void Menu::stop_menu(sf::RenderWindow &window, BL::Game_session &gameSession) {
-    transparent_lvl = 0;
-    std::vector<Menu::Button> buttons;
-    std::vector<sf::Texture> textures(3);
-    textures[0].loadFromFile(R"(data\img\1.png)");
-    textures[1].loadFromFile(R"(data\img\2.png)");
-    textures[2].loadFromFile(R"(data\img\3.png)");
-    buttons.emplace_back(400, 400, 150, Menu::RETRY, textures[0]);
-    buttons.emplace_back(0, 0, 200, Menu::BACK_TO_MENU, textures[1]);
-    if (gameSession.get_game_status() == BL::Game_status::PAUSE) {
-        buttons.emplace_back(900, 400, 130, Menu::CONTINUE, textures[2]);
-    }
-
-    float coef = 1.f - WINDOW_SIZE.x / (float)window.getSize().x;
-    for (auto &button : buttons) {
-        button.changePosition(-coef, WINDOW_POSITION);
-        button.changeSize(-coef, WINDOW_SIZE.x);
-    }
-
-    sf::CircleShape mouse(5.f);
-    while (window.isOpen() &&
-           (gameSession.get_game_status() == BL::Game_status::PAUSE ||
-            gameSession.get_game_status() == BL::Game_status::DEFEAT ||
-            gameSession.get_game_status() == BL::Game_status::VICTORY)) {
-        window.clear();
-        sf::Event event{};
-        background_draw(window);
-        if (window.pollEvent(event)) {
-            switch (event.type) {
-                case sf::Event::KeyPressed: {
-                    if (event.key.code == sf::Keyboard::Escape) {
-                        static Menu::main_menu mainMenu;
-                        mainMenu.run(window);
-                        return;
-                    }
-                } break;
-                case sf::Event::MouseButtonPressed: {
-                    if (event.mouseButton.button == sf::Mouse::Left) {
-                        for (auto &button : buttons) {
-                            button.press(window,
-                                         (sf::Vector2f)sf::Mouse::getPosition(),
-                                         gameSession);
-                        }
-                    }
-                } break;
-                case sf::Event::Closed: {
-                    window.close();
-                    return;
-                }
-                default: {
-                } break;
-            }
-        }
-        for (auto &button : buttons) {
-            button.guidance((sf::Vector2f)sf::Mouse::getPosition());
-            button.draw(window);
-            mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-            mouse.setFillColor(color_for_mouse);
-            window.draw(mouse);
-        }
-        window.display();
-    }
 }
 
 Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std::move(filename_)) {
@@ -939,3 +839,96 @@ void Menu::change_speed(const std::string &file_name, float coef) {
         }
     }
 }
+
+void Menu::menu::draw(sf::RenderWindow &window) {
+    for (auto &button : buttons) {
+        button.draw(window);
+    }
+    static sf::CircleShape mouse(5.f);
+    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
+    mouse.setFillColor(color_for_mouse);
+    window.draw(mouse);
+}
+
+void Menu::menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
+    switch (event.type) {
+        case sf::Event::KeyPressed: {
+            if (event.key.code == sf::Keyboard::LControl
+                || event.key.code == sf::Keyboard::RControl) {
+                ctrl_pressed = true;
+            }
+        } break;
+        case sf::Event::KeyReleased: {
+            if (event.key.code == sf::Keyboard::LControl
+                || event.key.code == sf::Keyboard::RControl) {
+                ctrl_pressed = false;
+            }
+        } break;
+        case sf::Event::MouseButtonPressed: {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                for (auto &button : buttons) {
+                    button.press(window,
+                                 sf::Vector2f(sf::Mouse::getPosition()),
+                                 gameSession);
+                }
+            }
+        } break;
+        case sf::Event::MouseWheelScrolled: {
+            if (ctrl_pressed) {
+                static sf::Vector2f center = {float(window.getSize().x) / 2, float(window.getSize().y) / 2};
+                float const_coef = coef;
+                if (event.mouseWheelScroll.delta < 0) {
+                    if (WINDOW_SIZE.x < float(window.getSize().x) / 2.f) {
+                        break;
+                    }
+                    coef *= -1;
+                } else if (event.mouseWheelScroll.delta > 0) {
+                    float delta = window.getSize().x - WINDOW_SIZE.x;
+                    float eps = 1;
+                    if (delta <= coef * window.getSize().x) {
+                        coef = 1.f - WINDOW_SIZE.x / window.getSize().x;
+                    }
+                    if (std::abs(delta) <= eps) {
+                        coef = const_coef;
+                        break;
+                    }
+                }
+                prev_win_pos = WINDOW_POSITION;
+                prev_win_size = WINDOW_SIZE;
+                WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef, WINDOW_SIZE.y * coef);
+                WINDOW_POSITION = sf::Vector2f(center.x - WINDOW_SIZE.x / 2, center.y - WINDOW_SIZE.y / 2);
+                for (auto &button : buttons) {
+                    button.changeSize(coef, WINDOW_SIZE.x);
+                    button.changePosition(coef, WINDOW_POSITION, prev_win_pos);
+                }
+                coef = const_coef;
+            }
+        } break;
+        default: {
+        } break;
+    }
+}
+
+void Menu::menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
+    window.clear();
+    for (auto &button : buttons) {
+        button.guidance(sf::Vector2f(sf::Mouse::getPosition()));
+    }
+    background_draw(window);
+    draw(window);
+    window.display();
+}
+
+void Menu::menu::check_scale() {    /// TODO
+    if (prev_win_size != WINDOW_SIZE) {
+        float tmp_coef = WINDOW_SIZE.x / prev_win_size.x - 1.f;
+        std::cout << prev_win_size.x << " " << WINDOW_SIZE.x << "\n";
+        for (auto &button : buttons) {
+            button.changeSize(tmp_coef, WINDOW_SIZE.x);
+            button.changePosition(tmp_coef, WINDOW_POSITION, prev_win_pos);
+        }
+        prev_win_size = WINDOW_SIZE;
+        prev_win_pos = WINDOW_POSITION;
+    }
+}
+

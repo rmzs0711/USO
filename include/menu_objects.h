@@ -29,7 +29,7 @@ struct Button {
 
     Button(float x, float y, float r, Event event_, sf::Texture &img)
         : event(event_) {
-        text.setCharacterSize(int(float(sf::VideoMode::getFullscreenModes().begin()->width) / 60.f)),
+        text.setCharacterSize(int(float(sf::VideoMode::getFullscreenModes().begin()->width) / 50.f)),
         circle.setTexture(&img);
         circle.setRadius(r);
         circle.setPosition(x, y);

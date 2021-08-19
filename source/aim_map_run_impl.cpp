@@ -6,6 +6,7 @@
 #include "map_objects_management.h"
 #include "maps.h"
 #include "menu.h"
+#include "main.h"
 
 namespace {}  // namespace
 
@@ -204,13 +205,14 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 }
                 break;
             }
-
             case BL::Game_status::PAUSE: {
                 music.pause();
                 past_time += clock.getElapsedTime();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
-                Menu::stop_menu(window, game_session);
+//                Menu::stop_menu stopMenu(game_session);        //// TODO
+//                stopMenu.run(window,game_session);
+                //menuObject.stopMenuPause.run(window, game_session);
                 clock.restart();
                 if (game_session.get_game_status() ==
                     BL::Game_status::NEED_TO_RETRY) {
@@ -263,7 +265,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             mouse.setPosition(
                                 (sf::Vector2f)sf::Mouse::getPosition());
                             window.draw(mouse);
-                            Menu::stop_menu(window, game_session);
+                            Menu::stop_menu stopMenu(BL::Game_status::VICTORY);
+                            stopMenu.run(window, game_session);
                             if (game_session.get_game_status() ==
                                 BL::Game_status::NEED_TO_RETRY) {
                                 break;
@@ -283,7 +286,8 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 field.get_field_objects().clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
-                Menu::stop_menu(window, game_session);
+                Menu::stop_menu stopMenu(BL::Game_status::DEFEAT);
+                stopMenu.run(window, game_session);
                 if (game_session.get_game_status() ==
                     BL::Game_status::NEED_TO_RETRY) {
                     break;

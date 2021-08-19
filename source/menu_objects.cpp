@@ -39,7 +39,7 @@ void Menu::Button::press(sf::RenderWindow &window,
                 gameSession.set_game_status(BL::Game_status::ACTION);
             } break;
             case BACK_TO_MENU: {
-                mainMenu.run(window);
+                mainMenu.run(window, gameSession);
             } break;
             case OPEN_LIST_OF_MODS: {
                 mod_menu modMenu;
@@ -97,7 +97,7 @@ void Menu::Button::draw(sf::RenderWindow &window) {
 void Menu::Button::changeSize(float coef, float win_size_x) {
     auto radius = circle.getRadius();
     circle.setRadius(radius + radius * coef);
-    text.setCharacterSize(int(win_size_x / 60.f));
+    text.setCharacterSize(int(win_size_x / 50.f));
 }
 void Menu::Button::changePosition(float coef, sf::Vector2f WINDOW_POSITION, sf::Vector2f tmp) {
     sf::Vector2f pos = circle.getPosition() - tmp;

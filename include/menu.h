@@ -1,5 +1,6 @@
 #ifndef USO_MENU_H
 #define USO_MENU_H
+
 #include <cstddef>
 #include <deque>
 #include <string>
@@ -25,20 +26,35 @@ enum MOD {
 
 const int NUMBER_OF_MODS = 1;
 
-struct main_menu {
-private:
-    float coef;
-    bool ctrl_pressed{};
-    std::vector<Button> buttons;
+struct menu {
+protected:
 
+    sf::Vector2f prev_win_size;
+    sf::Vector2f prev_win_pos;
+    bool ctrl_pressed;
+    float coef;
+    std::vector<Button> buttons;
+    void check_scale();
 public:
 
-    main_menu();
     void draw(sf::RenderWindow &);
-    void check_event(sf::RenderWindow &, sf::Event);
-    void run(sf::RenderWindow &);
-    void check_scale(const sf::RenderWindow &);
-    [[nodiscard]] std::vector<Button>& get_buttons();
+    virtual void check_event(sf::RenderWindow &, sf::Event, BL::Game_session &);
+    virtual void run(sf::RenderWindow &, BL::Game_session &);
+    virtual ~menu() = default;
+};
+
+struct main_menu final : menu {
+public:
+    explicit main_menu();
+    void check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
+    void run(sf::RenderWindow &, BL::Game_session &) override;
+};
+
+struct stop_menu final : menu {
+
+    explicit stop_menu(BL::Game_status);
+    void check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
+    void run(sf::RenderWindow &, BL::Game_session &) override;
 };
 
 struct scrolling_menu {
@@ -86,8 +102,6 @@ struct map_creation_menu {
     void draw_blocks_of_data(sf::RenderWindow &, sf::CircleShape &);
     void fix_map_name(std::string &) const;
 };
-
-void stop_menu(sf::RenderWindow &, BL::Game_session &);
 
 sf::RenderWindow &set_settings();
 
