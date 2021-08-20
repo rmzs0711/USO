@@ -25,6 +25,7 @@ bool Menu::Button::press(sf::RenderWindow &window,
                 return true;
             } break;
             case RETRY: {
+                menuObject.game.nullify();
                 menuObject.action = Action::OPEN_GAME_MAP;
                 return true;
             } break;
@@ -37,13 +38,15 @@ bool Menu::Button::press(sf::RenderWindow &window,
                 return true;
             } break;
             case CONTINUE: {
-                gameSession.set_game_status(BL::Game_status::ACTION);
+                menuObject.action = OPEN_GAME_MAP;
                 return true;
             } break;
+            case OPEN_CONSTR:
             case BACK_TO_MENU: {
+                menuObject.game.nullify();
                 menuObject.action = Action::OPEN_MAIN_MENU;
                 return true;
-            } break;
+            }
             case OPEN_LIST_OF_MODS: {
 //                mod_menu modMenu;
 //                modMenu.draw(window);   /// TODO
@@ -86,6 +89,9 @@ void Menu::Button::draw(sf::RenderWindow &window) {
         case OPEN_LIST_OF_MODS: {
             name_of_button  = "Mods";
         } break;
+        case OPEN_CONSTR: {
+            name_of_button = "Open constructor";
+        }
     }
 
     sf::Font font;

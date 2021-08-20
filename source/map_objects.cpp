@@ -1,7 +1,6 @@
 #include "map_objects.h"
 #include <cmath>
 #include "base_logic.h"
-#include <iostream>
 
 namespace {
 

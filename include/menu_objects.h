@@ -3,11 +3,7 @@
 
 #include "SFML/Graphics.hpp"
 #include "windows.h"
-
 #include "map_objects_management.h"
-//#include "main.h"
-//#include "loading_menu.h"
-//#include "menu.h"
 
 namespace Menu {
 enum Event {
@@ -17,7 +13,8 @@ enum Event {
     EXIT,
     RETRY,
     CONTINUE,
-    BACK_TO_MENU
+    BACK_TO_MENU,
+    OPEN_CONSTR
 };
 
 enum State {

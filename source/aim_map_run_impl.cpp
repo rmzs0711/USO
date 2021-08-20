@@ -24,6 +24,7 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
         map_objects.begin();  // итератор на следующий по времени объект
 
     sf::Music music;
+
     sf::SoundBuffer sound_buf;
     sf::Texture image;
     sf::Font font;
@@ -70,26 +71,21 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
     // lambda zone ends
 
     clock.restart();
-    sf::CircleShape mouse(5.f);
-    mouse.setFillColor(sf::Color(241, 200, 14));
+
+    music.setPosition(menuObject.game.music_pos);
     music.play();
 
     while (true) {
         window.draw(rect);
         game_session.table_of_scores(window, font);
-        mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-        window.draw(mouse);
 
-        if (game_session.get_health() == 0 &&
-            game_session.get_game_status() != BL::Game_status::NEED_TO_RETRY) {
+        if (game_session.get_health() == 0) {
             game_session.set_game_status(BL::Game_status::DEFEAT);
-        }
-        if (map_objects.empty() ||
-            map_objects.back()->get_start_time() +
-                        map_objects.back()->get_duration_time() <
-                    past_time + clock.getElapsedTime() - sf::seconds(0.5) &&
-                game_session.get_game_status() !=
-                    BL::Game_status::NEED_TO_RETRY) {
+        } else if (map_objects.empty() ||
+            map_objects.back()->get_start_time()
+                           + map_objects.back()->get_duration_time()
+                           + map_objects.back()->get_move_time() <
+                    past_time + clock.getElapsedTime() - sf::seconds(0.5)) {
             game_session.set_game_status(BL::Game_status::VICTORY);
         }
 
@@ -114,7 +110,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         *(field.get_field_objects().back());
                     if (typeid(back_object) == typeid(USO::Aim_circle)) {
                         field.draw(font);
-                        window.draw(mouse);
                         window.display();
                         game_session.decrease_health(game_session.damage());
                     }
@@ -122,7 +117,6 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 }
 
                 field.draw(font);
-                window.draw(mouse);
                 window.display();
 
                 if (!window.pollEvent(event) && !drag) {
@@ -206,31 +200,12 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 break;
             }
             case BL::Game_status::PAUSE: {
-                music.pause();
                 past_time += clock.getElapsedTime();
-                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-                window.draw(mouse);
-//                Menu::stop_menu stopMenu(game_session);        //// TODO
-//                stopMenu.run(window,game_session);
-                //menuObject.stopMenuPause.run(window, game_session);
-                game_session.set_game_status(BL::Game_status::PAUSE);
                 menuObject.action = Action::OPEN_STOP_MENU_PAUSE;
                 menuObject.game.past_time = past_time;
                 menuObject.game.music_pos = music.getPosition();
+                music.stop();
                 return;
-                //clock.restart();
-//                if (game_session.get_game_status() ==
-//                    BL::Game_status::NEED_TO_RETRY) {
-//                    music.stop();
-//                    past_time -= past_time;
-//                    break;
-//                }
-//                if (game_session.get_game_status() == BL::Game_status::ACTION) {
-//                    music.play();
-//                    music.getPosition();
-//                } else {
-//                    return;
-//                }
             } break;
             case BL::Game_status::VICTORY: {
                 static sf::Text victory_text;
@@ -268,28 +243,18 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                         if (event.key.code == sf::Keyboard::Escape) {
                             music.stop();
                             field.get_field_objects().clear();
-                            mouse.setPosition(
-                                (sf::Vector2f)sf::Mouse::getPosition());
-                            window.draw(mouse);
-
-                            game_session.set_game_status(BL::Game_status::VICTORY);
                             menuObject.action = Action::OPEN_STOP_MENU;
                             return;
                         }
                     }
                     window.draw(rect);
                     game_session.table_of_scores(window, font);
-                    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-                    window.draw(mouse);
                     window.display();
                 }
             } break;
             case BL::Game_status::DEFEAT: {
                 music.stop();
                 field.get_field_objects().clear();
-                mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-                window.draw(mouse);
-                game_session.set_game_status(BL::Game_status::DEFEAT);
                 menuObject.action = Action::OPEN_STOP_MENU;
                 return;
             }

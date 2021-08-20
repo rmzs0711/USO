@@ -24,7 +24,6 @@ enum MOD {
 };
 
 const int NUMBER_OF_MODS = 1;
-//sf::RenderWindow &set_settings();
 
 struct menu {
 protected:
@@ -90,14 +89,17 @@ public:
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
     void run(sf::RenderWindow &);
-    int get() {
-        return BLOCK_SIZE.x;
-    }
 };
 
 struct map_creation_menu {
+private:
+    sf::Vector2f BLOCK_SIZE;
+    float gap{};
+    std::size_t char_size;
+    sf::Text named_block;
+
     std::string filename;
-    sf::Text text;
+    std::vector<sf::Text> text;
     sf::Font font;
     std::vector<sf::RectangleShape> blocks_of_map_data;
     std::vector<std::string> list_of_data;
@@ -105,13 +107,19 @@ struct map_creation_menu {
     sf::RectangleShape random_map_block;
     sf::RectangleShape create_block;
 
-
-    explicit map_creation_menu(std::string);
+    bool check_event(sf::RenderWindow &, sf::Event);
     void draw(sf::RenderWindow &);
+
     int get_id(sf::Vector2f) const;
-    CG create_or_generate(sf::RenderWindow &, sf::Vector2f);
-    void draw_blocks_of_data(sf::RenderWindow &, sf::CircleShape &);
+    CG create_or_generate(sf::Vector2f);
     void fix_map_name(std::string &) const;
+    void rebuild();
+
+    bool selection_menu(sf::RenderWindow &);
+
+public:
+    void run(sf::RenderWindow &);
+    explicit map_creation_menu(std::string);
 };
 
 struct mod_menu {
@@ -124,7 +132,6 @@ struct mod_menu {
     static int get_id(std::vector<sf::RectangleShape> &, sf::Vector2f);
     static bool check_color(const sf::Text&);
     static float return_acceleration(const sf::Text&);
-
 };
 
 void change_speed(const std::string&, float);

@@ -36,7 +36,6 @@ protected:
     }
 
 public:
-    // TODO setters, getters
     Map(std::string mode_,
         std::string map_name_,
         std::string map_address_,

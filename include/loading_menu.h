@@ -11,6 +11,7 @@ struct Game {
     sf::Vector3f music_pos;
 
     void play(sf::RenderWindow &) const;
+    void nullify();
 };
 
 enum Action {
@@ -26,7 +27,6 @@ enum Action {
 };
 
 struct menu_control {
-    float coef;
     Action action;
     sf::RenderWindow window;
     sf::Vector2f WINDOW_SIZE;

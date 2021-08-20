@@ -14,7 +14,6 @@ menu_control::menu_control() try :
       scrollingMenu(R"(data\maps\saved_maps.txt)"),
       mapCreationMenu(R"(data\maps\saved_maps.txt)") {
     action = Action::OPEN_MAIN_MENU;
-    coef = 0;
     } catch (...) {
         std::cerr << "Broken menu controller constructor";
     }
@@ -38,10 +37,11 @@ void menu_control::run() {
                 scrollingMenu.run(window);
             } break;
             case Action::OPEN_CREATION_MENU: {
-                mapCreationMenu.draw(window);
+                mapCreationMenu.run(window);
             } break;
             case Action::OPEN_MOD_MENU: {
-                // run(window, gameSession);   //  todo
+                // TODO
+                continue;
             } break;
             case Action::NOTHING: {
                 continue;
@@ -75,4 +75,9 @@ void Game::play(sf::RenderWindow &window) const {
         USO::taiko_map test(R"(data\maps\)" + map_name + ".txt");
         test.run(window);
     }
+}
+
+void Game::nullify() {
+    past_time = sf::Time();
+    music_pos = {0, 0, 0};
 }

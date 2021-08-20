@@ -11,7 +11,7 @@ const int MIN_GAME_COMPLEXITY = 1;
 }  // namespace
 
 namespace BL {
-enum class Game_status { ACTION, PAUSE, VICTORY, DEFEAT, NEED_TO_RETRY };
+enum class Game_status { ACTION, PAUSE, VICTORY, DEFEAT };
 
 struct Game_session {
 private:
