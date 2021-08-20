@@ -1,0 +1,32 @@
+Aim
+My_map_hahahahh
+data/maps/My_map_hahahahh.txt
+data\music\stronger.ogg
+stronger
+data\img\6.png
+data/fonts/aller.ttf
+data/sounds/click.ogg
+Aim_circle
+-152561
+700000
+501
+648
+65 300
+Aim_circle
+587336
+700000
+1126
+459
+65 300
+Aim_circle
+1317911
+700000
+448
+390
+65 300
+Aim_circle
+1730419
+700000
+1464
+739
+65 300

@@ -5,6 +5,7 @@
 #include "base_logic.h"
 #include "map_objects_management.h"
 #include "maps.h"
+#include "main.h"
 
 namespace {}  // namespace
 
@@ -123,6 +124,7 @@ void USO::taiko_map::run(sf::RenderWindow &window) {
                 switch (event.type) {
                     case sf::Event::KeyPressed: {
                         if (event.key.code == sf::Keyboard::Escape) {
+                            menuObject.action = Action::OPEN_MAIN_MENU;
                             return;
                         }
                         if (!dragged_key[event.key.code]) {

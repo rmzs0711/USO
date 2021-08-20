@@ -1,0 +1,26 @@
+Aim
+New_map(3)
+data/maps/New_map(3).txt
+data\music\stronger.ogg
+stronger
+data\img\6.png
+data/fonts/aller.ttf
+data/sounds/click.ogg
+Aim_circle
+-371858
+700000
+544
+642
+65 300
+Aim_circle
+963964
+700000
+1283
+518
+65 300
+Aim_circle
+1793877
+700000
+389
+457
+65 300

@@ -1,0 +1,44 @@
+Aim
+New_map(5)
+data/maps/New_map(5).txt
+data\music\gold_rush.ogg
+gold_rush
+data\img\7.png
+data/fonts/aller.ttf
+data/sounds/click.ogg
+Aim_circle
+6249
+700000
+320
+562
+65 300
+Aim_circle
+648811
+700000
+1026
+202
+65 300
+Aim_circle
+1173735
+700000
+1568
+707
+65 300
+Aim_circle
+1772998
+700000
+647
+821
+65 300
+Aim_circle
+2265292
+700000
+644
+256
+65 300
+Aim_circle
+2758549
+700000
+1474
+350
+65 300
