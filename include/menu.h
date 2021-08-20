@@ -1,16 +1,12 @@
 #ifndef USO_MENU_H
 #define USO_MENU_H
 
-//#include <cstddef>
-//#include <deque>
-//#include <string>
-//#include "SFML/Graphics.hpp"
-#include "base_logic.h"
-//#include <iostream>
-//#include <functional>
-
-#include "loading_menu.h"
-//#include "main.h"
+#include <cstddef>
+#include <deque>
+#include <string>
+#include <iostream>
+#include <functional>
+#include "SFML/Graphics.hpp"
 #include "menu_objects.h"
 
 extern std::string new_map_name;
@@ -20,7 +16,7 @@ namespace Menu {
 enum CG {
     CREATE,
     RANDOM_GENERATE,
-    NOTHING
+    SCREEN
 };
 
 enum MOD {
@@ -28,7 +24,7 @@ enum MOD {
 };
 
 const int NUMBER_OF_MODS = 1;
-sf::RenderWindow &set_settings();
+//sf::RenderWindow &set_settings();
 
 struct menu {
 protected:
@@ -42,7 +38,7 @@ protected:
 public:
 
     void draw(sf::RenderWindow &);
-    virtual Action check_event(sf::RenderWindow &, sf::Event, BL::Game_session &);
+    virtual bool check_event(sf::RenderWindow &, sf::Event, BL::Game_session &);
     virtual void run(sf::RenderWindow &, BL::Game_session &);
     virtual ~menu() = default;
 };
@@ -50,14 +46,14 @@ public:
 struct main_menu final : menu {
 public:
     explicit main_menu();
-    Action check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
+    bool check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
     void run(sf::RenderWindow &, BL::Game_session &) override;
 };
 
 struct stop_menu final : menu {
 
     explicit stop_menu(BL::Game_status);
-    Action check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
+    bool check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
     void run(sf::RenderWindow &, BL::Game_session &) override;
 };
 
@@ -86,14 +82,17 @@ private:
 
     int number_of_blocks() const;
     void blocks_movement();
-    void hide_protruding_blocks(sf::RenderWindow &) const;
+    void hide_protruding_blocks(sf::RenderWindow &) ;
     void draw(sf::RenderWindow &window);
     void rebuild();
-    Action check_event(sf::RenderWindow &, sf::Event);
+    bool check_event(sf::RenderWindow &, sf::Event);
 public:
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
     void run(sf::RenderWindow &);
+    int get() {
+        return BLOCK_SIZE.x;
+    }
 };
 
 struct map_creation_menu {

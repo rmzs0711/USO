@@ -2,31 +2,31 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <random>
 #include <functional>
+
+#include "menu.h"
 #include "main.h"
+#include "menu_objects.h"
+#include "base_logic.h"
 #include "maps.h"
 
 std::string new_map_name;
 
 namespace {
 
-static std::random_device r;
-static std::default_random_engine e1(r());
 const sf::Color color_for_mouse(241, 200, 14);
 const sf::Color input_color(150, 160, 145);
 const sf::Color text_color(2, 2, 2);
-sf::Vector2f WINDOW_SIZE = {1920, 1080};
-sf::Vector2f WINDOW_POSITION = {0, 0};
+
 float acceleration_factor = 1;
 int transparent_lvl = 0;
 
 void background_draw(sf::RenderWindow &window) {
     static sf::Texture img;
     img.loadFromFile(R"(data\img\back.png)");
-    sf::RectangleShape rect(static_cast<sf::Vector2f>(WINDOW_SIZE));
+    sf::RectangleShape rect(static_cast<sf::Vector2f>(menuObject.WINDOW_SIZE));
     rect.setTexture(&img);
-    rect.setPosition(WINDOW_POSITION);
+    rect.setPosition(menuObject.WINDOW_POSITION);
     rect.setFillColor(sf::Color(
         255, 255, 255, transparent_lvl > 255 ? 255 : transparent_lvl++));
     window.draw(rect);
@@ -46,8 +46,8 @@ void background_draw(sf::RenderWindow &window) {
 Menu::main_menu::main_menu() {
 
     prev_win_pos = {0, 0};
-    prev_win_size = sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width,
-                                 sf::VideoMode::getFullscreenModes().begin()->height);
+    prev_win_size = sf::Vector2f((float)sf::VideoMode::getFullscreenModes().begin()->width,
+                                 (float)sf::VideoMode::getFullscreenModes().begin()->height);
     coef = 0.05f;
     ctrl_pressed = false;
     static std::vector<sf::Texture> textures(4);
@@ -64,19 +64,21 @@ Menu::main_menu::main_menu() {
                          textures[3]);
 }
 
-Action Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
-    if (menu::check_event(window, event, gameSession) != Action::NOTHING) {
-        return menuObject.action;
+bool Menu::main_menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
+    if (menu::check_event(window, event, gameSession)) {
+        return true;
     }
     switch (event.type) {
         case sf::Event::KeyPressed: {
             if (event.key.code == sf::Keyboard::Escape) {
-                return menuObject.action = Action::CLOSE_THE_WINDOW;
+                menuObject.action = Action::CLOSE_THE_WINDOW;
+                return true;
             }
         }
         default: {
         } break;
     }
+    return false;
 }
 
 void Menu::main_menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
@@ -84,7 +86,7 @@ void Menu::main_menu::run(sf::RenderWindow &window, BL::Game_session &gameSessio
     check_scale();
     while (window.isOpen()) {
         if (window.pollEvent(event)) {
-            if (check_event(window, event, gameSession) != Action::NOTHING) {
+            if (check_event(window, event, gameSession)) {
                 return;
             }
         }
@@ -94,8 +96,8 @@ void Menu::main_menu::run(sf::RenderWindow &window, BL::Game_session &gameSessio
 
 Menu::stop_menu::stop_menu(BL::Game_status gameStatus) {
     prev_win_pos = {0, 0};
-    prev_win_size = sf::Vector2f(sf::VideoMode::getFullscreenModes().begin()->width,
-                                 sf::VideoMode::getFullscreenModes().begin()->height);
+    prev_win_size = sf::Vector2f((float)sf::VideoMode::getFullscreenModes().begin()->width,
+                                 (float)sf::VideoMode::getFullscreenModes().begin()->height);
     coef = 0.05f;
     ctrl_pressed = false;
     static std::vector<sf::Texture> textures(3);
@@ -110,17 +112,21 @@ Menu::stop_menu::stop_menu(BL::Game_status gameStatus) {
     }
 }
 
-Action Menu::stop_menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
-    menu::check_event(window, event, gameSession);
+bool Menu::stop_menu::check_event(sf::RenderWindow &window, sf::Event event, BL::Game_session &gameSession) {
+    if (menu::check_event(window, event, gameSession)) {
+        return true;
+    }
     switch (event.type) {
         case sf::Event::KeyPressed: {
             if (event.key.code == sf::Keyboard::Escape) {
-                return menuObject.action = Action::OPEN_MAIN_MENU;
+                menuObject.action = Action::OPEN_MAIN_MENU;
+                return true;
             }
         } break;
         default: {
         } break;
     }
+    return false;
 }
 
 void Menu::stop_menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
@@ -131,7 +137,7 @@ void Menu::stop_menu::run(sf::RenderWindow &window, BL::Game_session &gameSessio
             gameSession.get_game_status() == BL::Game_status::DEFEAT ||
             gameSession.get_game_status() == BL::Game_status::VICTORY)) {
         if (window.pollEvent(event)) {
-            if (check_event(window, event, gameSession) != Action::NOTHING) {
+            if (check_event(window, event, gameSession)) {
                 return;
             }
         }
@@ -150,11 +156,11 @@ bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
     transparent_lvl = 0;
 
-    BLOCK_SIZE = {WINDOW_SIZE.x / 4, WINDOW_SIZE.y / 6};
+    BLOCK_SIZE = {menuObject.WINDOW_SIZE.x / 4,menuObject.WINDOW_SIZE.y / 6};
     track_speed = BLOCK_SIZE.x / 100.f;
     scrolling_speed = BLOCK_SIZE.y / 6.f;
     gap = BLOCK_SIZE.y / 4.f;
-    char_size = BLOCK_SIZE.y / 4.f;
+    char_size = int(BLOCK_SIZE.y / 4.f);
 
     std::ifstream file(filename);
     std::string map_name;
@@ -162,7 +168,7 @@ Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move
         list_of_maps.emplace_back(map_name);
     }
 
-    float start_y_pos = WINDOW_POSITION.y;
+    float start_y_pos = menuObject.WINDOW_POSITION.y;
     int new_size = number_of_blocks();
 
     blocks_of_map_names.resize(new_size, sf::RectangleShape({BLOCK_SIZE}));
@@ -170,14 +176,9 @@ Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move
 
     font.loadFromFile(R"(data\fonts\GistLight.otf)");
     for (int i = 0; i < new_size; i++) {
-        blocks_of_map_names[i].setPosition(WINDOW_POSITION.x + 5, start_y_pos + (BLOCK_SIZE.y + gap) * (float)i);
         blocks_of_map_names[i].setFillColor(sf::Color(255, 114, 219, 200));
         blocks_of_map_names[i].setOutlineThickness(5);
         blocks_of_map_names[i].setOutlineColor(sf::Color(248, 137, 90   , 159));
-        map_names[i].setString(list_of_maps[i]);
-        map_names[i].setPosition(blocks_of_map_names[i].getPosition() + sf::Vector2f(5, 5));
-        map_names[i].setFillColor(text_color);
-        map_names[i].setCharacterSize(char_size);
         map_names[i].setStyle(sf::Text::Bold);
         map_names[i].setFont(font);
     }
@@ -191,7 +192,8 @@ bool Menu::scrolling_menu::push(sf::RenderWindow &window, sf::Vector2f mouse) {
     for (int i = 0; i < blocks_of_map_names.size(); i++) {
         if (check_pressing(mouse, blocks_of_map_names[i].getPosition(),
                            blocks_of_map_names[i].getSize())) {
-            menuObject.curStateOfTheGame.map_name = map_names[i].getString();
+            menuObject.game.map_name = map_names[i].getString();
+
 //            std::string map_name = map_names[i].getString();
 //            std::ifstream file(R"(data\maps\)" + map_name + ".txt");
 //            std::string mod;
@@ -250,7 +252,7 @@ void Menu::scrolling_menu::blocks_movement() {
           }
         };
         sf::Vector2f pos = (sf::Vector2f)sf::Mouse::getPosition();
-        if (check_pressing(pos, WINDOW_POSITION, WINDOW_SIZE)
+        if (check_pressing(pos, menuObject.WINDOW_POSITION, menuObject.WINDOW_SIZE)
             && check_pressing(pos, rect.getPosition(), rect.getSize())) {
             if (rect.getSize().x <= BLOCK_SIZE.x * 1.2) {
                 move(track_speed);
@@ -263,7 +265,7 @@ void Menu::scrolling_menu::blocks_movement() {
 
 int Menu::scrolling_menu::number_of_blocks() const {
     int extra_blocks = 2;
-    return std::min((int)(WINDOW_SIZE.y / (BLOCK_SIZE.y + gap)) + extra_blocks, (int)list_of_maps.size());
+    return std::min((int)(menuObject.WINDOW_SIZE.y / (BLOCK_SIZE.y + gap)) + extra_blocks, (int)list_of_maps.size());
 }
 
 void Menu::scrolling_menu::scrolling(const std::function<sf::Vector2f(sf::Vector2f, sf::Vector2f)>& op) {
@@ -286,12 +288,12 @@ sf::Vector2f Menu::scrolling_menu::plus(sf::Vector2f a, sf::Vector2f b) {
 sf::Vector2f Menu::scrolling_menu::minus(sf::Vector2f a, sf::Vector2f b) {
     return a - b;
 }
-void Menu::scrolling_menu::hide_protruding_blocks(sf::RenderWindow &window) const {
+void Menu::scrolling_menu::hide_protruding_blocks(sf::RenderWindow &window) {
     sf::RectangleShape block1(sf::Vector2f(BLOCK_SIZE.x + BLOCK_SIZE.x / 4,
-                                           WINDOW_POSITION.y + window.getPosition().y));
+                                           menuObject.WINDOW_POSITION.y + (float)window.getPosition().y));
     sf::RectangleShape block2(block1.getSize());
-    block1.setPosition(WINDOW_POSITION.x, window.getPosition().y);
-    block2.setPosition(WINDOW_POSITION + sf::Vector2f(0, WINDOW_SIZE.y));
+    block1.setPosition(menuObject.WINDOW_POSITION.x, (float)window.getPosition().y);
+    block2.setPosition(menuObject.WINDOW_POSITION + sf::Vector2f(0, menuObject.WINDOW_SIZE.y));
     block1.setFillColor(sf::Color::Black);
     block2.setFillColor(sf::Color::Black);
     window.draw(block1);
@@ -303,7 +305,7 @@ void Menu::scrolling_menu::run(sf::RenderWindow &window) {
     sf::Event event{};
     while (window.isOpen()) {
         if (window.pollEvent(event)) {
-            if (check_event(window, event) != Action::NOTHING) {
+            if (check_event(window, event)) {
                 return;
             }
         }
@@ -311,22 +313,24 @@ void Menu::scrolling_menu::run(sf::RenderWindow &window) {
     }
 }
 
-Action Menu::scrolling_menu::check_event(sf::RenderWindow &window, sf::Event event) {
+bool Menu::scrolling_menu::check_event(sf::RenderWindow &window, sf::Event event) {
     std::size_t size = blocks_of_map_names.size();
     switch (event.type) {
         case sf::Event::MouseButtonPressed: {
             if (event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f pos = (sf::Vector2f)sf::Mouse::getPosition();
-                if (check_pressing(pos, WINDOW_POSITION,
-                                   WINDOW_SIZE)) {
-                    if (push(window, pos)) return menuObject.action = Action::OPEN_GAME_MAP;
-                    else return menuObject.action = Action::OPEN_MAIN_MENU;
+                if (check_pressing(pos, menuObject.WINDOW_POSITION,menuObject.WINDOW_SIZE)) {
+                    if (push(window, pos)) {
+                        menuObject.action = Action::OPEN_GAME_MAP;
+                        return true;
+                    }
                 }
             }
         } break;
         case sf::Event::KeyPressed: {
             if (event.key.code == sf::Keyboard::Escape) {
-                return menuObject.action = Action::OPEN_MAIN_MENU;
+                menuObject.action = Action::OPEN_MAIN_MENU;
+                return true;
             }
         } break;
         case sf::Event::MouseWheelScrolled: {
@@ -335,18 +339,18 @@ Action Menu::scrolling_menu::check_event(sf::RenderWindow &window, sf::Event eve
                     scrolling(minus);
                     break;
                 }
-                if (WINDOW_POSITION.y + WINDOW_SIZE.y >= last_block->getPosition().y +
+                if (menuObject.WINDOW_POSITION.y + menuObject.WINDOW_SIZE.y >= last_block->getPosition().y +
                                                                                BLOCK_SIZE.y -
                                                                                scrolling_speed) {
                     first_block->setPosition(sf::Vector2f(
-                        WINDOW_POSITION.x + 5,
+                        menuObject.WINDOW_POSITION.x + 5,
                         last_block->getPosition().y + BLOCK_SIZE.y + gap));
                     last_block = first_block;                                    //  нижний блок
                     first_block =
                         &blocks_of_map_names[(delta + 1 + size) % size];       //  верхний блок
 
                     first_map_name->setPosition(sf::Vector2f(
-                        WINDOW_POSITION.x + 5,
+                        menuObject.WINDOW_POSITION.x + 5,
                         last_map_name->getPosition().y + BLOCK_SIZE.y + gap));
                     first_map_name->setString(list_of_maps[size + delta]);
 
@@ -361,18 +365,18 @@ Action Menu::scrolling_menu::check_event(sf::RenderWindow &window, sf::Event eve
                     scrolling(plus);
                     break;
                 }
-                if (WINDOW_POSITION.y <=
+                if (menuObject.WINDOW_POSITION.y <=
                     first_block->getPosition().y +
                     scrolling_speed) {
                     last_block->setPosition(sf::Vector2f(
-                        WINDOW_POSITION.x + 5,
+                        menuObject.WINDOW_POSITION.x + 5,
                         first_block->getPosition().y - BLOCK_SIZE.y - gap));
                     first_block = last_block;                                      //  верхний блок
                     last_block =
                         &blocks_of_map_names[(--delta - 1 + size) % size]; //  нижний блок
 
                     last_map_name->setPosition(sf::Vector2f(
-                        WINDOW_POSITION.x + 5,
+                        menuObject.WINDOW_POSITION.x + 5,
                         first_map_name->getPosition().y - BLOCK_SIZE.y - gap));
                     last_map_name->setString(list_of_maps[delta]);
                     first_map_name = last_map_name;                           //  нижний блок
@@ -384,9 +388,11 @@ Action Menu::scrolling_menu::check_event(sf::RenderWindow &window, sf::Event eve
             }
         } break;
         default: {
-            return menuObject.action = Action::NOTHING;
+            menuObject.action = Action::NOTHING;
+            return false;
         } break;
     }
+    return false;
 }
 
 void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
@@ -402,26 +408,27 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
 }
 
 void Menu::scrolling_menu::rebuild() {
-    BLOCK_SIZE = {WINDOW_SIZE.x / 4, WINDOW_SIZE.y / 6};
+    delta = 0;
+    BLOCK_SIZE = {menuObject.WINDOW_SIZE.x / 4, menuObject.WINDOW_SIZE.y / 6};
     track_speed = BLOCK_SIZE.x / 100.f;
     scrolling_speed = BLOCK_SIZE.y / 6.f;
     gap = BLOCK_SIZE.y / 4.f;
-    char_size = BLOCK_SIZE.y / 4.f;
+    char_size = int(BLOCK_SIZE.y / 4.f);
 
-    float start_y_pos = WINDOW_POSITION.y;
+    float start_y_pos = menuObject.WINDOW_POSITION.y;
     int new_size = number_of_blocks();
-    blocks_of_map_names.assign(new_size, sf::RectangleShape({BLOCK_SIZE}));
-    map_names.resize(new_size);
-
+    blocks_of_map_names[0].setSize(BLOCK_SIZE);
+    blocks_of_map_names.assign(new_size, blocks_of_map_names[0]);
+    map_names[0].setCharacterSize(char_size);
+    map_names.assign(new_size, map_names[0]);
+    std::cout << list_of_maps[0];
     for (int i = 0; i < blocks_of_map_names.size(); i++) {
-        blocks_of_map_names[i].setPosition(WINDOW_POSITION.x + 5,
+        blocks_of_map_names[i].setPosition(
+            menuObject.WINDOW_POSITION.x + 5,
                                            start_y_pos + (BLOCK_SIZE.y + gap) * (float)i);
-        blocks_of_map_names[i].setFillColor(sf::Color(255, 114, 219, 200));
-        blocks_of_map_names[i].setOutlineThickness(5);
-        blocks_of_map_names[i].setOutlineColor(sf::Color(248, 137, 90   , 159));
         map_names[i].setString(list_of_maps[i]);
         map_names[i].setPosition(blocks_of_map_names[i].getPosition() + sf::Vector2f(5, 5));
-        map_names[i].setCharacterSize(char_size);
+        map_names[i].setFillColor(text_color);
     }
     first_block = &blocks_of_map_names.front();
     last_block = &blocks_of_map_names.back();
@@ -430,6 +437,7 @@ void Menu::scrolling_menu::rebuild() {
 }
 
 Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std::move(filename_)) {
+
     for (int i = 0; i < 5; i++) {
         blocks_of_map_data.emplace_back(sf::Vector2f(600, 100));
         blocks_of_map_data[i].setPosition(0, (float)i * 100);
@@ -465,16 +473,18 @@ Menu::map_creation_menu::map_creation_menu(std::string filename_) : filename(std
         addresses_of_music.emplace_back(address);
     }
 
-    std::uniform_int_distribution<int> rand(1, 1e4);
+    //std::uniform_int_distribution<int> rand(1, 1e4);
 
     list_of_default_data.resize(10);
+
     for (int  i = 0; i < 10; i++) {
         list_of_default_data[i].resize(5);
-        list_of_default_data[i][0] = rand(e1) % 2 == 0 ? "Aim" : "Conveyor";
+        list_of_default_data[i][0] = rand() % 2 == 0 ? "Aim" : "Conveyor";
         list_of_default_data[i][1] = "Anonymous";
         list_of_default_data[i][2] = "New_map";
-        list_of_default_data[i][3] = addresses_of_music[rand(e1) % addresses_of_music.size()];
-        list_of_default_data[i][4] = addresses_of_images[rand(e1) % addresses_of_images.size()];
+        list_of_default_data[i][3] = addresses_of_music[rand() % addresses_of_music.size()];
+        list_of_default_data[i][4] = addresses_of_images[rand() % addresses_of_images.size()];
+
     }
 }
 
@@ -630,8 +640,8 @@ void Menu::map_creation_menu::draw(sf::RenderWindow &window) {
                             }
                         } else if (create_or_generate(window,
                                                       (sf::Vector2f)sf::Mouse::getPosition()) == RANDOM_GENERATE) {
-                            std::uniform_int_distribution<int> rand(1, 1e4);
-                            list_of_data = list_of_default_data[rand(e1) % 10];
+                            //std::uniform_int_distribution<int> rand(1, 1e4);
+                            list_of_data = list_of_default_data[rand() % 10];
                             break;
                         } else {
                             break;
@@ -689,7 +699,7 @@ Menu::CG Menu::map_creation_menu::create_or_generate(sf::RenderWindow &window, s
                               random_map_block.getSize())) {
         return RANDOM_GENERATE;
     }
-    return NOTHING;
+    return SCREEN;
 }
 void Menu::map_creation_menu::draw_blocks_of_data(sf::RenderWindow &window,
                                                   sf::CircleShape &mouse) {
@@ -753,11 +763,11 @@ Menu::mod_menu::mod_menu() {
     }
 
     for (int i = 0; i < NUMBER_OF_MODS; i++) {
-        mod_blocks[i].setPosition(sf::Vector2f(900, 70 * (i + 1)));
+        mod_blocks[i].setPosition(sf::Vector2f(900, float(70 * (i + 1))));
         mod_blocks[i].setSize(sf::Vector2f(400, 70));
         mod_blocks[i].setFillColor(sf::Color(255, 255, 255));
         mod_blocks[i].setOutlineColor(sf::Color(0, 0, 0));
-        list_of_mods[i].setPosition(sf::Vector2f(905, (i + 1) * 70));
+        list_of_mods[i].setPosition(sf::Vector2f(905, (float)(i + 1) * 70));
         list_of_mods[i].setFillColor(sf::Color(0, 0, 0));
     }
 }
@@ -902,7 +912,7 @@ void Menu::menu::draw(sf::RenderWindow &window) {
     window.draw(mouse);
 }
 
-Action Menu::menu::check_event(sf::RenderWindow &window, sf::Event event,
+bool Menu::menu::check_event(sf::RenderWindow &window, sf::Event event,
                              BL::Game_session &gameSession) {
     switch (event.type) {
         case sf::Event::KeyPressed: {
@@ -922,8 +932,8 @@ Action Menu::menu::check_event(sf::RenderWindow &window, sf::Event event,
                 for (auto &button : buttons) {
                     if (button.press(window,
                                  sf::Vector2f(sf::Mouse::getPosition()),
-                                 gameSession) != Action::NOTHING) { /////////// CHANGE!!!!!!!!!
-                        return menuObject.action;
+                                 gameSession)) {
+                        return true;
                     }
                 }
             }
@@ -934,38 +944,39 @@ Action Menu::menu::check_event(sf::RenderWindow &window, sf::Event event,
                                               float(window.getSize().y) / 2};
                 float const_coef = coef;
                 if (event.mouseWheelScroll.delta < 0) {
-                    if (WINDOW_SIZE.x < float(window.getSize().x) / 2.f) {
+                    if (menuObject.WINDOW_SIZE.x < float(window.getSize().x) / 2.f) {
                         break;
                     }
                     coef *= -1;
                 } else if (event.mouseWheelScroll.delta > 0) {
-                    float delta = window.getSize().x - WINDOW_SIZE.x;
+                    float delta = (float)window.getSize().x - menuObject.WINDOW_SIZE.x;
                     float eps = 1;
-                    if (delta <= coef * window.getSize().x) {
-                        coef = 1.f - WINDOW_SIZE.x / window.getSize().x;
+                    if (delta <= coef * (float)window.getSize().x) {
+                        coef = 1.f - menuObject.WINDOW_SIZE.x / (float)window.getSize().x;
                     }
                     if (std::abs(delta) <= eps) {
                         coef = const_coef;
                         break;
                     }
                 }
-                prev_win_pos = WINDOW_POSITION;
-                prev_win_size = WINDOW_SIZE;
-                WINDOW_SIZE += sf::Vector2f(WINDOW_SIZE.x * coef,
-                                 WINDOW_SIZE.y * coef);
-                WINDOW_POSITION = sf::Vector2f(center.x - WINDOW_SIZE.x / 2,
-                                                          center.y - WINDOW_SIZE.y / 2);
+                prev_win_pos = menuObject.WINDOW_POSITION;
+                prev_win_size = menuObject.WINDOW_SIZE;
+                menuObject.WINDOW_SIZE += sf::Vector2f(menuObject.WINDOW_SIZE.x * coef, menuObject.WINDOW_SIZE.y * coef);
+                menuObject.WINDOW_POSITION = sf::Vector2f(center.x - menuObject.WINDOW_SIZE.x / 2,
+                                                          center.y - menuObject.WINDOW_SIZE.y / 2);
                 for (auto &button : buttons) {
-                    button.changeSize(coef, WINDOW_SIZE.x);
-                    button.changePosition(coef, WINDOW_POSITION, prev_win_pos);
+                    button.changeSize(coef, menuObject.WINDOW_SIZE.x);
+                    button.changePosition(coef, menuObject.WINDOW_POSITION, prev_win_pos);
                 }
                 coef = const_coef;
             }
         } break;
         default: {
-            return menuObject.action = Action::NOTHING;
+            menuObject.action = Action::NOTHING;
+            return false;
         } break;
     }
+    return false;
 }
 
 void Menu::menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
@@ -979,14 +990,13 @@ void Menu::menu::run(sf::RenderWindow &window, BL::Game_session &gameSession) {
 }
 
 void Menu::menu::check_scale() {
-    if (prev_win_size != WINDOW_SIZE) {
-        float tmp_coef = WINDOW_SIZE.x / prev_win_size.x - 1.f;
+    if (prev_win_size != menuObject.WINDOW_SIZE) {
+        float tmp_coef = menuObject.WINDOW_SIZE.x / prev_win_size.x - 1.f;
         for (auto &button : buttons) {
-            button.changeSize(tmp_coef, WINDOW_SIZE.x);
-            button.changePosition(tmp_coef, WINDOW_POSITION, prev_win_pos);
+            button.changeSize(tmp_coef, menuObject.WINDOW_SIZE.x);
+            button.changePosition(tmp_coef, menuObject.WINDOW_POSITION, prev_win_pos);
         }
-        prev_win_size = WINDOW_SIZE;
-        prev_win_pos = WINDOW_POSITION;
+        prev_win_size = menuObject.WINDOW_SIZE;
+        prev_win_pos = menuObject.WINDOW_POSITION;
     }
 }
-

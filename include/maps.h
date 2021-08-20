@@ -5,11 +5,12 @@
 #include <memory>
 #include <string>
 #include <list>
-//#include <utility>
-//#include "SFML/Audio.hpp"
-//#include "SFML/Graphics.hpp"
+#include <utility>
+#include "SFML/Audio.hpp"
+#include "SFML/Graphics.hpp"
+
 #include "map_objects.h"
-//#include "base_logic.h"
+#include "base_logic.h"
 
 namespace USO {
 

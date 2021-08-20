@@ -7,7 +7,7 @@
 #include "base_logic.h"
 #include "map_objects.h"
 #include "maps.h"
-#include <menu.h>
+#include "menu.h"
 
 namespace {
 bool need_to_add = false;

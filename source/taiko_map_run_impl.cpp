@@ -9,6 +9,7 @@
 namespace {}  // namespace
 
 void USO::taiko_map::run(sf::RenderWindow &window) {
+    window.clear();
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;

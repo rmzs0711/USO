@@ -1,12 +1,13 @@
-//#pragma once
 #ifndef USO_MENU_OBJECTS_H
 #define USO_MENU_OBJECTS_H
 
 #include "SFML/Graphics.hpp"
-//#include "map_objects_management.h"
-//#include "windows.h"
-//
-#include "loading_menu.h"
+#include "windows.h"
+
+#include "map_objects_management.h"
+//#include "main.h"
+//#include "loading_menu.h"
+//#include "menu.h"
 
 namespace Menu {
 enum Event {
@@ -45,7 +46,7 @@ struct Button {
 
     bool is_circle_correct_click(const sf::Vector2f &mouse);
 
-    Action press(sf::RenderWindow &window,
+    bool press(sf::RenderWindow &window,
                const sf::Vector2f &mouse,
                BL::Game_session &);
     void guidance(const sf::Vector2f &mouse);

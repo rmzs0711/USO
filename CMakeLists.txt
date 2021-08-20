@@ -4,8 +4,49 @@ project(USO)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(USO source/main.cpp include/base_logic.h source/base_logic.cpp include/map_objects_management.h source/map_objects_management.cpp include/maps.h source/taiko_map_run_impl.cpp source/aim_map_run_impl.cpp include/map_objects.h source/map_objects.cpp source/maps.cpp source/menu_objects.cpp include/menu_objects.h source/menu.cpp include/menu.h source/map_constructor_impl.cpp source/conveyor_map_run_impl.cpp include/loading_menu.h source/loading_menu.cpp include/main.h)
-add_executable(constructor source/constr.cpp include/base_logic.h source/base_logic.cpp include/map_objects_management.h source/map_objects_management.cpp include/maps.h source/taiko_map_run_impl.cpp source/aim_map_run_impl.cpp include/map_objects.h source/map_objects.cpp source/maps.cpp source/menu_objects.cpp include/menu_objects.h source/menu.cpp include/menu.h source/map_constructor_impl.cpp source/conveyor_map_run_impl.cpp source/taiko_map_run_impl.cpp include/loading_menu.h source/loading_menu.cpp include/main.h)
+add_executable(USO
+        include/base_logic.h
+        source/base_logic.cpp
+        source/menu.cpp
+        include/menu.h
+        include/main.h
+        source/main.cpp
+        source/menu_objects.cpp
+        include/menu_objects.h
+        include/map_objects_management.h
+        source/map_objects_management.cpp
+        include/maps.h
+        source/taiko_map_run_impl.cpp
+        source/aim_map_run_impl.cpp
+        include/map_objects.h
+        source/map_objects.cpp
+        source/maps.cpp
+        source/map_constructor_impl.cpp
+        source/conveyor_map_run_impl.cpp
+        source/loading_menu.cpp
+        include/loading_menu.h)
+
+add_executable(constructor
+        include/base_logic.h
+        source/base_logic.cpp
+        source/menu.cpp
+        include/menu.h
+        include/main.h
+        source/main.cpp
+        source/menu_objects.cpp
+        include/menu_objects.h
+        include/map_objects_management.h
+        source/map_objects_management.cpp
+        include/maps.h
+        source/taiko_map_run_impl.cpp
+        source/aim_map_run_impl.cpp
+        include/map_objects.h
+        source/map_objects.cpp
+        source/maps.cpp
+        source/map_constructor_impl.cpp
+        source/conveyor_map_run_impl.cpp
+        source/loading_menu.cpp
+        include/loading_menu.h)
 
 set(SFML_DIR "include/SFML-2.5.1/lib/cmake/SFML")
 

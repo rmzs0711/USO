@@ -1,8 +1,10 @@
 #ifndef USO_MAP_OBJECTS_H
 #define USO_MAP_OBJECTS_H
 
+#include <cmath>
 #include <memory>
 #include "SFML/Graphics.hpp"
+#include "SFML/System/Time.hpp"
 #include "base_logic.h"
 
 namespace USO {

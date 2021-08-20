@@ -11,12 +11,11 @@
 namespace {}  // namespace
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
-
     window.clear();
     BL::Game_session game_session;
     USO::Field field(window, {});
     sf::Clock clock;
-    sf::Time past_time;  // костыль для паузы, так как sfml не умеет
+    sf::Time past_time = menuObject.game.past_time;  // костыль для паузы, так как sfml не умеет
     // останавливать часы
     if (map_objects.empty()) {
         return;
@@ -214,9 +213,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 //                Menu::stop_menu stopMenu(game_session);        //// TODO
 //                stopMenu.run(window,game_session);
                 //menuObject.stopMenuPause.run(window, game_session);
+                game_session.set_game_status(BL::Game_status::PAUSE);
                 menuObject.action = Action::OPEN_STOP_MENU_PAUSE;
-                menuObject.curStateOfTheGame.past_time = past_time;
-                menuObject.curStateOfTheGame.music_pos = music.getPosition();
+                menuObject.game.past_time = past_time;
+                menuObject.game.music_pos = music.getPosition();
                 return;
                 //clock.restart();
 //                if (game_session.get_game_status() ==
@@ -271,13 +271,9 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             mouse.setPosition(
                                 (sf::Vector2f)sf::Mouse::getPosition());
                             window.draw(mouse);
-//                            Menu::stop_menu stopMenu(BL::Game_status::VICTORY);
-//                            stopMenu.run(window, game_session);
+
+                            game_session.set_game_status(BL::Game_status::VICTORY);
                             menuObject.action = Action::OPEN_STOP_MENU;
-//                            if (game_session.get_game_status() ==
-//                                BL::Game_status::NEED_TO_RETRY) {
-//                                break;
-//                            }
                             return;
                         }
                     }
@@ -293,26 +289,10 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 field.get_field_objects().clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
-//                Menu::stop_menu stopMenu(BL::Game_status::DEFEAT);
-//                stopMenu.run(window, game_session);
-                menuObject.action = OPEN_STOP_MENU;
-//                if (game_session.get_game_status() ==
-//                    BL::Game_status::NEED_TO_RETRY) {
-//                    break;
-//                }
+                game_session.set_game_status(BL::Game_status::DEFEAT);
+                menuObject.action = Action::OPEN_STOP_MENU;
                 return;
             }
-            case BL::Game_status::NEED_TO_RETRY: {
-                game_session.set_health(MAX_HEALTH);
-                game_session.set_combo(1);
-                game_session.nullify_score();
-                music.stop();
-                field.get_field_objects().clear();
-                game_session.set_game_status(BL::Game_status::ACTION);
-                current_object_it = map_objects.begin();
-                music.play();
-                clock.restart();
-            } break;
             default: {
                 continue;
             }

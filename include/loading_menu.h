@@ -5,11 +5,12 @@
 #include "SFML/Graphics.hpp"
 #include "menu.h"
 
-struct cur_state_of_the_game {
+struct Game {
     std::string map_name{};
-    std::string mod{};
     sf::Time past_time{};
     sf::Vector3f music_pos;
+
+    void play(sf::RenderWindow &) const;
 };
 
 enum Action {
@@ -25,11 +26,12 @@ enum Action {
 };
 
 struct menu_control {
+    float coef;
     Action action;
     sf::RenderWindow window;
     sf::Vector2f WINDOW_SIZE;
     sf::Vector2f WINDOW_POSITION;
-    cur_state_of_the_game curStateOfTheGame;
+    Game game;
 
     Menu::stop_menu stopMenuPause;
     Menu::stop_menu stopMenuVictory;

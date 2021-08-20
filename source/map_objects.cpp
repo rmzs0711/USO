@@ -2,6 +2,7 @@
 #include <cmath>
 #include "base_logic.h"
 #include <iostream>
+
 namespace {
 
 float get_time_coefficient(const sf::Time &start,
