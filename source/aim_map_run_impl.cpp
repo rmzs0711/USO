@@ -11,6 +11,7 @@
 namespace {}  // namespace
 
 void USO::Aim_map::run(sf::RenderWindow &window) {
+
     window.clear();
     BL::Game_session game_session;
     USO::Field field(window, {});
@@ -213,18 +214,23 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
 //                Menu::stop_menu stopMenu(game_session);        //// TODO
 //                stopMenu.run(window,game_session);
                 //menuObject.stopMenuPause.run(window, game_session);
-                clock.restart();
-                if (game_session.get_game_status() ==
-                    BL::Game_status::NEED_TO_RETRY) {
-                    music.stop();
-                    past_time -= past_time;
-                    break;
-                }
-                if (game_session.get_game_status() == BL::Game_status::ACTION) {
-                    music.play();
-                } else {
-                    return;
-                }
+                menuObject.action = Action::OPEN_STOP_MENU_PAUSE;
+                menuObject.curStateOfTheGame.past_time = past_time;
+                menuObject.curStateOfTheGame.music_pos = music.getPosition();
+                return;
+                //clock.restart();
+//                if (game_session.get_game_status() ==
+//                    BL::Game_status::NEED_TO_RETRY) {
+//                    music.stop();
+//                    past_time -= past_time;
+//                    break;
+//                }
+//                if (game_session.get_game_status() == BL::Game_status::ACTION) {
+//                    music.play();
+//                    music.getPosition();
+//                } else {
+//                    return;
+//                }
             } break;
             case BL::Game_status::VICTORY: {
                 static sf::Text victory_text;
@@ -265,12 +271,13 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                             mouse.setPosition(
                                 (sf::Vector2f)sf::Mouse::getPosition());
                             window.draw(mouse);
-                            Menu::stop_menu stopMenu(BL::Game_status::VICTORY);
-                            stopMenu.run(window, game_session);
-                            if (game_session.get_game_status() ==
-                                BL::Game_status::NEED_TO_RETRY) {
-                                break;
-                            }
+//                            Menu::stop_menu stopMenu(BL::Game_status::VICTORY);
+//                            stopMenu.run(window, game_session);
+                            menuObject.action = Action::OPEN_STOP_MENU;
+//                            if (game_session.get_game_status() ==
+//                                BL::Game_status::NEED_TO_RETRY) {
+//                                break;
+//                            }
                             return;
                         }
                     }
@@ -286,12 +293,13 @@ void USO::Aim_map::run(sf::RenderWindow &window) {
                 field.get_field_objects().clear();
                 mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
                 window.draw(mouse);
-                Menu::stop_menu stopMenu(BL::Game_status::DEFEAT);
-                stopMenu.run(window, game_session);
-                if (game_session.get_game_status() ==
-                    BL::Game_status::NEED_TO_RETRY) {
-                    break;
-                }
+//                Menu::stop_menu stopMenu(BL::Game_status::DEFEAT);
+//                stopMenu.run(window, game_session);
+                menuObject.action = OPEN_STOP_MENU;
+//                if (game_session.get_game_status() ==
+//                    BL::Game_status::NEED_TO_RETRY) {
+//                    break;
+//                }
                 return;
             }
             case BL::Game_status::NEED_TO_RETRY: {

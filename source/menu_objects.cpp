@@ -1,6 +1,5 @@
 #include "menu_objects.h"
-#include "menu.h"
-
+#include "main.h"
 bool Menu::Button::is_circle_correct_click(const sf::Vector2f &mouse) {
     auto pos = circle.getPosition();
     auto radius = circle.getRadius();
@@ -15,37 +14,43 @@ void Menu::Button::guidance(const sf::Vector2f &mouse) {
     }
 }
 
-void Menu::Button::press(sf::RenderWindow &window,
+Action Menu::Button::press(sf::RenderWindow &window,
                          const sf::Vector2f &mouse,
                          BL::Game_session &gameSession) {
-    static main_menu mainMenu;
     if (is_circle_correct_click(mouse)) {
         switch (event) {
             case EXIT: {
-                window.close();
+                return menuObject.action = Action::CLOSE_THE_WINDOW;
             } break;
             case RETRY: {
-                gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
+                //gameSession.set_game_status(BL::Game_status::NEED_TO_RETRY);
+                return menuObject.action = Action::OPEN_GAME_MAP;
             } break;
             case CHOOSE_THE_MAP: {
-                Menu::scrolling_menu scrollingMenu(R"(data\maps\saved_maps.txt)");
-                scrollingMenu.draw(window, mainMenu);
+//                Menu::scrolling_menu scrollingMenu(R"(data\maps\saved_maps.txt)");
+//                scrollingMenu.run(window);
+                return menuObject.action = Action::OPEN_SCROLLING_MENU;
             } break;
             case CREATE_NEW_MAP: {
-                Menu::map_creation_menu mapCreationMenu(R"(data\maps\saved_maps.txt)");
-                mapCreationMenu.draw(window);
+//                Menu::map_creation_menu mapCreationMenu(R"(data\maps\saved_maps.txt)");
+//                mapCreationMenu.draw(window);
+                return menuObject.action = Action::OPEN_CREATION_MENU;
             } break;
             case CONTINUE: {
                 gameSession.set_game_status(BL::Game_status::ACTION);
+                return Action::NOTHING;
             } break;
             case BACK_TO_MENU: {
-                mainMenu.run(window, gameSession);
+//                mainMenu.run(window, gameSession);
+                return menuObject.action = Action::OPEN_MAIN_MENU;
             } break;
             case OPEN_LIST_OF_MODS: {
-                mod_menu modMenu;
-                modMenu.draw(window);
+//                mod_menu modMenu;
+//                modMenu.draw(window);   /// TODO
             } break;
         }
+    } else {
+        return menuObject.action = Action::NOTHING;
     }
 }
 

@@ -1,20 +1,47 @@
-//
-// Created by bon52 on 19.08.2021.
-//
+#include <iostream>
 #include "loading_menu.h"
-#include "menu.h"
-#include "base_logic.h"
-#include <exception>
 
-menu_object::menu_object(int) try :
-      WINDOW_SIZE(1920, 1080), WINDOW_POSITION(0, 0),
-      window(sf::VideoMode(1920, 1080), "USO!", sf::Style::Fullscreen),
-      scrollingMenu(R"(data\maps\saved_maps.txt)"), mainMenu(), stopMenuPause(BL::Game_status::PAUSE),
-      stopMenuVictory(BL::Game_status::VICTORY), mapCreationMenu(R"(data\maps\saved_maps.txt)") {
+menu_control::menu_control() try :
+      window(sf::VideoMode(1920, 1080),
+             "USO!", sf::Style::Fullscreen),
+      WINDOW_SIZE(window.getSize()), WINDOW_POSITION(window.getPosition()),
+      stopMenuPause(BL::Game_status::PAUSE),
+      stopMenuVictory(BL::Game_status::VICTORY),
+      mainMenu(),
+      scrollingMenu(R"(data\maps\saved_maps.txt)"),
+      mapCreationMenu(R"(data\maps\saved_maps.txt)") {
+    action = Action::OPEN_MAIN_MENU;
     } catch (...) {
         std::cerr << "Broken menu controller constructor";
     }
 
-void menu_object::run() {
-
+void menu_control::run() {
+    BL::Game_session gameSession;
+    while (window.isOpen()) {
+        switch (action) {
+            case Action::OPEN_MAIN_MENU: {
+                mainMenu.run(window, gameSession);
+            } break;
+            case Action::OPEN_STOP_MENU: {
+                stopMenuVictory.run(window, gameSession);
+            } break;
+            case Action::OPEN_SCROLLING_MENU: {
+                scrollingMenu.run(window);
+            } break;
+            case Action::OPEN_CREATION_MENU: {
+                //mapCreationMenu.draw(window);
+            } break;
+            case Action::OPEN_MOD_MENU: {
+                // run(window, gameSession);   //  todo
+            } break;
+            case Action::NOTHING: {
+                continue;
+            } break;
+            case Action::CLOSE_THE_WINDOW: {
+                window.close();
+                return;
+            } break;
+        }
+    }
+    //mainMenu.run(window, gameSession);
 }

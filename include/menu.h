@@ -1,13 +1,16 @@
 #ifndef USO_MENU_H
 #define USO_MENU_H
 
-#include <cstddef>
-#include <deque>
-#include <string>
-#include "SFML/Graphics.hpp"
+//#include <cstddef>
+//#include <deque>
+//#include <string>
+//#include "SFML/Graphics.hpp"
 #include "base_logic.h"
-#include <iostream>
-#include <functional>
+//#include <iostream>
+//#include <functional>
+
+#include "loading_menu.h"
+//#include "main.h"
 #include "menu_objects.h"
 
 extern std::string new_map_name;
@@ -25,6 +28,7 @@ enum MOD {
 };
 
 const int NUMBER_OF_MODS = 1;
+sf::RenderWindow &set_settings();
 
 struct menu {
 protected:
@@ -38,7 +42,7 @@ protected:
 public:
 
     void draw(sf::RenderWindow &);
-    virtual void check_event(sf::RenderWindow &, sf::Event, BL::Game_session &);
+    virtual Action check_event(sf::RenderWindow &, sf::Event, BL::Game_session &);
     virtual void run(sf::RenderWindow &, BL::Game_session &);
     virtual ~menu() = default;
 };
@@ -46,19 +50,20 @@ public:
 struct main_menu final : menu {
 public:
     explicit main_menu();
-    void check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
+    Action check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
     void run(sf::RenderWindow &, BL::Game_session &) override;
 };
 
 struct stop_menu final : menu {
 
     explicit stop_menu(BL::Game_status);
-    void check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
+    Action check_event(sf::RenderWindow &, sf::Event, BL::Game_session &) override;
     void run(sf::RenderWindow &, BL::Game_session &) override;
 };
 
 struct scrolling_menu {
 private:
+    int delta{};
     float track_speed{};
     float scrolling_speed{};
     float gap{};
@@ -69,6 +74,10 @@ private:
     sf::Font font;
     std::vector<std::string> list_of_maps;
     std::vector<sf::RectangleShape> blocks_of_map_names;
+    sf::RectangleShape *first_block{};
+    sf::RectangleShape *last_block{};
+    sf::Text *first_map_name{};
+    sf::Text *last_map_name{};
 
     static sf::Vector2f plus(sf::Vector2f, sf::Vector2f);
     static sf::Vector2f minus(sf::Vector2f, sf::Vector2f);
@@ -76,12 +85,15 @@ private:
     bool push(sf::RenderWindow &, sf::Vector2f);
 
     int number_of_blocks() const;
-    void block_movement();
+    void blocks_movement();
     void hide_protruding_blocks(sf::RenderWindow &) const;
+    void draw(sf::RenderWindow &window);
+    void rebuild();
+    Action check_event(sf::RenderWindow &, sf::Event);
 public:
     scrolling_menu() = default;
     explicit scrolling_menu(std::string);
-    void draw(sf::RenderWindow &window, Menu::main_menu &);
+    void run(sf::RenderWindow &);
 };
 
 struct map_creation_menu {
@@ -103,8 +115,6 @@ struct map_creation_menu {
     void fix_map_name(std::string &) const;
 };
 
-sf::RenderWindow &set_settings();
-
 struct mod_menu {
     sf::Font font;
     std::vector<sf::RectangleShape> mod_blocks;
@@ -112,11 +122,12 @@ struct mod_menu {
 
     mod_menu();
     void draw(sf::RenderWindow &);
+    static int get_id(std::vector<sf::RectangleShape> &, sf::Vector2f);
+    static bool check_color(const sf::Text&);
+    static float return_acceleration(const sf::Text&);
+
 };
 
-int get_id(std::vector<sf::RectangleShape> &, sf::Vector2f);
-bool check_color(const sf::Text&);
-float return_acceleration(const sf::Text&);
 void change_speed(const std::string&, float);
 
 }  // namespace Menu
