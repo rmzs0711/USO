@@ -12,7 +12,8 @@ menu_control::menu_control() try :
       stopMenuVictory(BL::Game_status::VICTORY),
       mainMenu(),
       scrollingMenu(R"(data\maps\saved_maps.txt)"),
-      mapCreationMenu(R"(data\maps\saved_maps.txt)") {
+      mapCreationMenu(R"(data\maps\saved_maps.txt)"),
+      modMenu() {
     action = Action::OPEN_MAIN_MENU;
     } catch (...) {
         std::cerr << "Broken menu controller constructor";
@@ -40,7 +41,8 @@ void menu_control::run() {
                 mapCreationMenu.run(window);
             } break;
             case Action::OPEN_MOD_MENU: {
-                // TODO
+                modMenu.run(window);
+                game.acceleration_factor = modMenu.acceleration_factor;
                 continue;
             } break;
             case Action::NOTHING: {
@@ -65,12 +67,12 @@ void Game::play(sf::RenderWindow &window) const {
         USO::Conveyor_map test(R"(data\maps\)" + map_name + ".txt");
         test.run(window);
     } else if (mod == "Aim") {
-//        change_speed(R"(data\maps\)" + map_name +
-//        ".txt", 1.f / acceleration_factor);
+        Menu::change_speed(R"(data\maps\)" + map_name +
+        ".txt", 1.f / acceleration_factor);
         USO::Aim_map test(R"(data\maps\)" + map_name + ".txt");
         test.run(window);
-//        change_speed(R"(data\maps\)" + map_name +
-//        ".txt", acceleration_factor);
+        Menu::change_speed(R"(data\maps\)" + map_name +
+        ".txt", acceleration_factor);
     } else if (mod == "Taiko") {
         USO::taiko_map test(R"(data\maps\)" + map_name + ".txt");
         test.run(window);

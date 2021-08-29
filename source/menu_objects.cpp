@@ -1,6 +1,7 @@
 #include "menu_objects.h"
 #include "menu.h"
 #include "main.h"
+
 bool Menu::Button::is_circle_correct_click(const sf::Vector2f &mouse) {
     auto pos = circle.getPosition();
     auto radius = circle.getRadius();
@@ -48,8 +49,8 @@ bool Menu::Button::press(sf::RenderWindow &window,
                 return true;
             }
             case OPEN_LIST_OF_MODS: {
-//                mod_menu modMenu;
-//                modMenu.draw(window);   /// TODO
+                menuObject.action = Action::OPEN_MOD_MENU;
+                return true;
             } break;
         }
     }

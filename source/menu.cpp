@@ -18,7 +18,6 @@ const sf::Color color_for_mouse(241, 200, 14);
 const sf::Color input_color(150, 160, 145);
 const sf::Color text_color(2, 2, 2);
 
-float acceleration_factor = 1;
 int transparent_lvl = 0;
 
 void background_draw(sf::RenderWindow &window) {
@@ -144,10 +143,8 @@ bool check_pressing(sf::Vector2f mouse, sf::Vector2f pos, sf::Vector2f sz) {
 }
 
 Menu::scrolling_menu::scrolling_menu(std::string filename_) : filename(std::move(filename_)) {
-    transparent_lvl = 0;
-
     BLOCK_SIZE = {menuObject.WINDOW_SIZE.x / 4,menuObject.WINDOW_SIZE.y / 6};
-    track_speed = BLOCK_SIZE.x / 100.f;
+    track_speed = BLOCK_SIZE.x / 30.f;
     scrolling_speed = BLOCK_SIZE.y / 6.f;
     gap = BLOCK_SIZE.y / 4.f;
     char_size = int(BLOCK_SIZE.y / 4.f);
@@ -368,7 +365,7 @@ void Menu::scrolling_menu::draw(sf::RenderWindow &window) {
 void Menu::scrolling_menu::rebuild() {
     delta = 0;
     BLOCK_SIZE = {menuObject.WINDOW_SIZE.x / 4, menuObject.WINDOW_SIZE.y / 6};
-    track_speed = BLOCK_SIZE.x / 100.f;
+    track_speed = BLOCK_SIZE.x / 30.f;
     scrolling_speed = BLOCK_SIZE.y / 6.f;
     gap = BLOCK_SIZE.y / 4.f;
     char_size = int(BLOCK_SIZE.y / 4.f);
@@ -397,7 +394,7 @@ void Menu::scrolling_menu::rebuild() {
         blocks_of_map_names[i].setPosition(menuObject.WINDOW_POSITION.x + 5,
                                            start_y_pos + (BLOCK_SIZE.y + gap) * (float)i);
         map_names[i].setString(list_of_maps[i]);
-        map_names[i].setPosition(blocks_of_map_names[i].getPosition() + sf::Vector2f(5, 5));
+        map_names[i].setPosition(blocks_of_map_names[i].getPosition() + sf::Vector2f(char_size, 5));
         map_names[i].setFillColor(text_color);
         map_names[i].setCharacterSize(char_size);
     }
@@ -675,24 +672,35 @@ Menu::CG Menu::map_creation_menu::create_or_generate(sf::Vector2f mouse) {
 }
 
 Menu::mod_menu::mod_menu() {
+    acceleration_factor = 1.f;
+    BLOCK_SIZE = {menuObject.WINDOW_SIZE.x / 4, menuObject.WINDOW_SIZE.y / 8};
+    gap = BLOCK_SIZE.y / 4;
+    char_size = (int)BLOCK_SIZE.x / 15;
     mod_blocks.resize(NUMBER_OF_MODS);
-
-    std::ifstream file(R"(C:\Users\bon52\project\USO\data\mods)");
-    std::string mod_name;
-
+    list_of_data.resize(NUMBER_OF_MODS);
     font.loadFromFile(R"(data\fonts\aller.ttf)");
 
-    while (std::getline(file, mod_name)) {
-        list_of_mods.emplace_back(sf::Text(mod_name, font, 40));
+    for (int i = 0; i < NUMBER_OF_MODS; i++) {
+        mod_blocks[i].setFillColor(sf::Color(26, 166, 26));
+        mod_blocks[i].setOutlineThickness(7);
+        mod_blocks[i].setOutlineColor(sf::Color(83, 230, 205, 147));
+        list_of_data[i].setFillColor(text_color);
+        list_of_data[i].setFont(font);
     }
+}
+
+void Menu::mod_menu::rebuild() {
+    BLOCK_SIZE = {menuObject.WINDOW_SIZE.x / 4, menuObject.WINDOW_SIZE.y / 8};
+    gap = BLOCK_SIZE.y / 4;
+    char_size = (int)BLOCK_SIZE.x / 15;
+    float start_y_pos = menuObject.WINDOW_POSITION.y + gap;
 
     for (int i = 0; i < NUMBER_OF_MODS; i++) {
-        mod_blocks[i].setPosition(sf::Vector2f(900, float(70 * (i + 1))));
-        mod_blocks[i].setSize(sf::Vector2f(400, 70));
-        mod_blocks[i].setFillColor(sf::Color(255, 255, 255));
-        mod_blocks[i].setOutlineColor(sf::Color(0, 0, 0));
-        list_of_mods[i].setPosition(sf::Vector2f(905, (float)(i + 1) * 70));
-        list_of_mods[i].setFillColor(sf::Color(0, 0, 0));
+        mod_blocks[i].setPosition(menuObject.WINDOW_POSITION.x + 5,
+                                  start_y_pos + (BLOCK_SIZE.y + gap) * (float)i);
+        mod_blocks[i].setSize(BLOCK_SIZE);
+        list_of_data[i].setPosition(mod_blocks[i].getPosition() + sf::Vector2f((float)char_size, 5));
+        list_of_data[i].setCharacterSize(char_size);
     }
 }
 
@@ -711,77 +719,86 @@ float Menu::mod_menu::return_acceleration(const sf::Text& text) {
     return num;
 }
 
-void Menu::mod_menu::draw(sf::RenderWindow &window) {
-    int index = -1;
-
+void Menu::mod_menu::run(sf::RenderWindow &window) {
+    rebuild();
+    sf::Event event{};
     while (window.isOpen()) {
-        window.clear();
-        sf::Event event{};
         if (window.pollEvent(event)) {
-            switch (event.type) {
-                case sf::Event::KeyReleased: {
-                    if (event.key.code == sf::Keyboard::Escape) {
-                        return;
-                    }
-                    if (event.key.code == sf::Keyboard::BackSpace) {
-                        if (index != -1) {
-                            std::size_t size =
-                                list_of_mods[index].getString().getSize();
-                            if (size == 0) {
-                                list_of_mods[index].setString(
-                                    "enter the number");
-                                list_of_mods[index].setFillColor(input_color);
-                            } else {
-                                list_of_mods[index].setString(
-                                    list_of_mods[index].getString().substring(
-                                        0, size - 1));
-                            }
-                        }
-                    }
-                    if (event.key.code == sf::Keyboard::Enter) {
-                        if (index == Menu::ACCELERATION) {
-                            acceleration_factor =
-                                return_acceleration(list_of_mods[index]);
-                        }
-                        index = -1;
-                    }
-                } break;
-                case sf::Event::MouseButtonReleased: {
-                    index = get_id(mod_blocks, (sf::Vector2f)sf::Mouse::getPosition());
-                    if (index == Menu::ACCELERATION) {
-                        list_of_mods[index].setString("enter the number");
-                        list_of_mods[index].setFillColor(input_color);
-                    }
-                } break;
-                case sf::Event::MouseButtonPressed: {
-                    index = get_id(mod_blocks, (sf::Vector2f)sf::Mouse::getPosition());
-                    if (index == -1) {
-                        return;
-                    }
-                } break;
-                case sf::Event::TextEntered: {
-                    if (index != -1) {
-                        if ((event.text.unicode >= 48 && event.text.unicode <= 57)
-                            || event.text.unicode == 46) {
-                            if (check_color(list_of_mods[index])) {
-                                list_of_mods[index].setString("");
-                                list_of_mods[index].setFillColor(text_color);
-                            }
-                            list_of_mods[index].setString(
-                                list_of_mods[index].getString() +
-                                (char)event.text.unicode);
-                        }
-                    }
-                } break;
-                default: {
-                } break;
+            if (check_event(window, event)) {
+                return;
             }
         }
-        for (int i = 0; i < NUMBER_OF_MODS; i++) {
-            window.draw(mod_blocks[i]);
-            window.draw(list_of_mods[i]);
-        }
+        draw(window);
         window.display();
+    }
+}
+
+bool Menu::mod_menu::check_event(sf::RenderWindow &window, sf::Event event) {
+    static int index = -1;
+    switch (event.type) {
+        case sf::Event::KeyReleased: {
+            if (event.key.code == sf::Keyboard::Escape) {
+                menuObject.action = Action::OPEN_MAIN_MENU;
+                return true;
+            }
+            if (event.key.code == sf::Keyboard::BackSpace) {
+                if (index != -1) {
+                    std::size_t size =
+                        list_of_data[index].getString().getSize() - 1;
+                    if (size == 0) {
+                        list_of_data[index].setString(
+                            "enter the number");
+                        list_of_data[index].setFillColor(input_color);
+                    } else {
+                        list_of_data[index].setString(
+                            list_of_data[index].getString().substring(
+                                0, size));
+                    }
+                }
+            }
+            if (event.key.code == sf::Keyboard::Enter) {
+                if (index == Menu::ACCELERATION && !list_of_data[index].getString().isEmpty()) {
+                    acceleration_factor =
+                        return_acceleration(list_of_data[index]);
+                }
+                index = -1;
+            }
+        } break;
+        case sf::Event::MouseButtonReleased: {
+            index = get_id(mod_blocks, (sf::Vector2f)sf::Mouse::getPosition());
+            if (index == Menu::ACCELERATION && list_of_data[index].getString().isEmpty()) {
+                list_of_data[index].setString("enter the number");
+                list_of_data[index].setFillColor(input_color);
+            }
+        } break;
+        case sf::Event::TextEntered: {
+            if (index != -1) {
+                if ((event.text.unicode >= 48 && event.text.unicode <= 57)
+                || event.text.unicode == 46) {
+                    if (check_color(list_of_data[index])) {
+                        list_of_data[index].setString("");
+                        list_of_data[index].setFillColor(text_color);
+                    }
+                    list_of_data[index].setString(
+                        list_of_data[index].getString() +
+                        (char)event.text.unicode);
+                }
+            }
+        } break;
+        default: {
+        } break;
+    }
+    menuObject.action = Action::NOTHING;
+    return false;
+}
+
+void Menu::mod_menu::draw(sf::RenderWindow &window) {
+    window.clear();
+    background_draw(window);
+    menuObject.mainMenu.draw(window);
+    for (int i = 0; i < NUMBER_OF_MODS; i++) {
+        window.draw(mod_blocks[i]);
+        window.draw(list_of_data[i]);
     }
 }
 
@@ -826,10 +843,6 @@ void Menu::menu::draw(sf::RenderWindow &window) {
     for (auto &button : buttons) {
         button.draw(window);
     }
-    static sf::CircleShape mouse(5.f);
-    mouse.setPosition((sf::Vector2f)sf::Mouse::getPosition());
-    mouse.setFillColor(color_for_mouse);
-    window.draw(mouse);
 }
 
 bool Menu::menu::check_event(sf::RenderWindow &window, sf::Event event,

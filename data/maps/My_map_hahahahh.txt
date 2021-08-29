@@ -7,7 +7,7 @@ data\img\6.png
 data/fonts/aller.ttf
 data/sounds/click.ogg
 Aim_circle
--152561
+-152560
 700000
 501
 648
@@ -19,13 +19,13 @@ Aim_circle
 459
 65 300
 Aim_circle
-1317911
+1317910
 700000
 448
 390
 65 300
 Aim_circle
-1730419
+1730418
 700000
 1464
 739

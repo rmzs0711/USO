@@ -123,12 +123,23 @@ public:
 };
 
 struct mod_menu {
+    sf::Vector2f BLOCK_SIZE;
+    int char_size;
+    float gap;
+    float acceleration_factor;
+
     sf::Font font;
     std::vector<sf::RectangleShape> mod_blocks;
-    std::vector<sf::Text> list_of_mods;
+    std::vector<sf::Text> list_of_data;
+
 
     mod_menu();
+
     void draw(sf::RenderWindow &);
+    void run(sf::RenderWindow &);
+    bool check_event(sf::RenderWindow &, sf::Event);
+
+    void rebuild();
     static int get_id(std::vector<sf::RectangleShape> &, sf::Vector2f);
     static bool check_color(const sf::Text&);
     static float return_acceleration(const sf::Text&);

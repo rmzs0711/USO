@@ -8,7 +8,8 @@
 struct Game {
     std::string map_name{};
     sf::Time past_time{};
-    sf::Vector3f music_pos;
+    sf::Vector3f music_pos{};
+    float acceleration_factor = 1.f;
 
     void play(sf::RenderWindow &) const;
     void nullify();
@@ -38,6 +39,7 @@ struct menu_control {
     Menu::main_menu mainMenu;
     Menu::scrolling_menu scrollingMenu;
     Menu::map_creation_menu mapCreationMenu;
+    Menu::mod_menu modMenu;
 
     void run();
     explicit menu_control();
